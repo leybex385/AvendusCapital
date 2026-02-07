@@ -1404,6 +1404,23 @@
                         </td>
                     </tr>
                 `).join('');
+
+                if (d && document.getElementById('depList')) {
+                    document.getElementById('depList').innerHTML = d.map(x => `
+                        <tr>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9;">#${x.id}</td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.users?.mobile || 'Unknown'}</td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9;">₹${parseFloat(x.amount).toFixed(2)}</td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><span style="padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.7rem; background:#fef3c7; color:#92400e;">${x.status}</span></td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${new Date(x.created_at).toLocaleString()}</td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9;">
+                                <div class="btn-edit-wrap">
+                                    <i data-lucide="edit" size="16" style="cursor:pointer"></i>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
             }
 
             if (ks) allSubmissions = ks;
@@ -1493,9 +1510,8 @@
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${new Date(x.created_at).toLocaleString()}</td>
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">-</td>
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9;">
-                                <div class="btn-edit-wrap" style="display:flex; gap:8px;">
-                                    <i data-lucide="edit-3" size="16" style="cursor:pointer" onclick="openKycEdit('${x.id}')"></i>
-                                    <i data-lucide="file-text" size="16" style="cursor:pointer" onclick="openKycEdit('${x.id}')"></i>
+                                <div class="btn-edit-wrap">
+                                    <i data-lucide="edit" size="16" style="cursor:pointer" onclick="openKycEdit('${x.id}')"></i>
                                 </div>
                             </td>
                         </tr>
