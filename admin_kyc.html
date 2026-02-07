@@ -16,8 +16,9 @@
     <style>
         body {
             background-color: #0f172a;
-            /* Dark Navy for Admin */
             color: #f8fafc;
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
         }
 
         .admin-sidebar {
@@ -32,13 +33,7 @@
         .admin-main {
             margin-left: 280px;
             padding: 2.5rem;
-        }
-
-        .admin-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2.5rem;
+            min-height: 100vh;
         }
 
         .admin-card {
@@ -47,77 +42,112 @@
             border-radius: 16px;
             padding: 2rem;
             border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 2rem;
         }
 
-        /* Table Styles */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #94a3b8;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: 0.2s;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: #3b82f6;
+            color: white;
+        }
+
         .admin-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 1.5rem;
+            margin-top: 1rem;
         }
 
         .admin-table th {
             text-align: left;
             padding: 1rem;
             color: #94a3b8;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .admin-table td {
-            padding: 1.25rem 1rem;
+            padding: 1rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
 
         .status-pill {
-            padding: 4px 12px;
+            padding: 4px 10px;
             border-radius: 20px;
             font-size: 0.75rem;
             font-weight: 700;
+            border: 1px solid transparent;
         }
 
-        .pill-pending {
+        .pill-Pending {
             background: #f59e0b20;
             color: #f59e0b;
-            border: 1px solid #f59e0b40;
+            border-color: #f59e0b40;
         }
 
-        .pill-approved {
+        .pill-Approved {
             background: #10b98120;
             color: #10b981;
-            border: 1px solid #10b98140;
+            border-color: #10b98140;
         }
 
-        .pill-rejected {
+        .pill-Rejected {
             background: #ef444420;
             color: #ef4444;
-            border: 1px solid #ef444440;
+            border-color: #ef444440;
         }
 
         .btn-action {
             padding: 6px 12px;
             border-radius: 6px;
             border: none;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: 0.2s;
+            white-space: nowrap;
         }
 
-        .btn-review {
+        .btn-blue {
             background: #3b82f6;
             color: white;
         }
 
-        .btn-review:hover {
-            background: #2563eb;
+        .btn-green {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-red {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-action:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
         }
 
         /* Modal */
-        .admin-modal {
+        .modal {
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.8);
@@ -125,190 +155,272 @@
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            padding: 20px;
         }
 
         .modal-content {
             background: #1e293b;
-            width: 900px;
-            max-height: 90vh;
+            width: 100%;
+            max-width: 600px;
             border-radius: 20px;
-            padding: 2.5rem;
-            overflow-y: auto;
+            padding: 2rem;
+            border: 1px solid #334155;
         }
 
-        .doc-preview {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin: 2rem 0;
+        .form-group {
+            margin-bottom: 1.25rem;
         }
 
-        .doc-item {
-            background: #0f172a;
-            border-radius: 12px;
-            padding: 1rem;
-            text-align: center;
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #94a3b8;
+            font-size: 0.85rem;
         }
 
-        .doc-img {
+        .form-input {
             width: 100%;
-            height: 200px;
-            background: #1e293b;
-            border-radius: 8px;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #475569;
-        }
-
-        .admin-note-area {
-            width: 100%;
+            padding: 0.8rem;
             background: #0f172a;
             border: 1px solid #334155;
-            border-radius: 10px;
-            padding: 1rem;
+            border-radius: 8px;
             color: white;
-            margin-bottom: 1.5rem;
-            resize: none;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: #3b82f6;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
         }
     </style>
 </head>
 
 <body>
+    <div class="loading-overlay" id="loader"><i data-lucide="loader-2" class="animate-spin" size="48"></i></div>
+
     <aside class="admin-sidebar">
-        <h2 style="color: #3b82f6; margin-bottom: 3rem;">Admin Terminal</h2>
-        <nav style="display: flex; flex-direction: column; gap: 1rem;">
-            <a href="#" class="nav-item active"><i data-lucide="shield-check"></i> KYC Review</a>
-            <a href="#" class="nav-item"><i data-lucide="users"></i> User List</a>
-            <a href="#" class="nav-item"><i data-lucide="wallet"></i> Deposit Requests</a>
+        <div
+            style="font-size: 1.5rem; font-weight: 800; color: #3b82f6; margin-bottom: 2rem; display: flex; align-items: center; gap: 10px;">
+            <i data-lucide="shield-check"></i> Admin
+        </div>
+        <nav>
+            <div class="nav-item active" id="navKyc" onclick="switchTab('kyc')"><i data-lucide="file-check"></i> KYC
+                Review</div>
+            <div class="nav-item" id="navUsers" onclick="switchTab('users')"><i data-lucide="users"></i> User Management
+            </div>
         </nav>
     </aside>
 
     <main class="admin-main">
         <header class="admin-header">
-            <div>
-                <h1 style="font-size: 1.75rem; font-weight: 800;">KYC Management</h1>
-                <p style="color: #94a3b8;">Review and approve user identity verifications.</p>
-            </div>
-            <div style="background: #1e293b; padding: 0.5rem 1rem; border-radius: 10px; border: 1px solid #334155;">
-                Admin: 鸿磊 (Hong Lei)
-            </div>
+            <h1 id="tabTitle">KYC Review</h1>
+            <p id="tabDesc" style="color: #94a3b8;">Handle pending verification requests.</p>
         </header>
 
-        <section class="admin-card">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
-                <h3 style="color: #94a3b8;">Pending Requests</h3>
-                <div class="search-container">
-                    <input type="text" class="search-input" placeholder="Search mobile or name..."
-                        style="background: #0f172a; border-color: #334155; color: white;">
-                </div>
-            </div>
+        <!-- KYC Tab -->
+        <div id="tabKyc" class="tab-content">
+            <section class="admin-card">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Mobile</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="kycList"></tbody>
+                </table>
+            </section>
+        </div>
 
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>User Info</th>
-                        <th>Full Name</th>
-                        <th>Document</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="kycTableBody">
-                    <!-- Data will be injected -->
-                </tbody>
-            </table>
-        </section>
+        <!-- Users Tab -->
+        <div id="tabUsers" class="tab-content" style="display: none;">
+            <section class="admin-card">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Balance</th>
+                            <th>Invested</th>
+                            <th>KYC</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userList"></tbody>
+                </table>
+            </section>
+        </div>
     </main>
 
-    <!-- Review Modal -->
-    <div id="reviewModal" class="admin-modal">
+    <!-- Edit User Modal -->
+    <div class="modal" id="editModal">
         <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                <h2>Review Documents</h2>
-                <button onclick="closeReview()"
-                    style="background: none; border: none; color: white; cursor: pointer;"><i
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+                <h2 id="editTitle">Edit User</h2>
+                <button onclick="closeModal()" style="background:none; border:none; color:white; cursor:pointer;"><i
                         data-lucide="x"></i></button>
             </div>
-            <div class="doc-preview">
-                <div class="doc-item">
-                    <span>ID FRONT</span>
-                    <div class="doc-img"><i data-lucide="file-text" size="40"></i></div>
+            <input type="hidden" id="editUserId">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="editUsername" class="form-input">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Balance ($)</label>
+                    <input type="number" id="editBalance" class="form-input" step="0.01">
                 </div>
-                <div class="doc-item">
-                    <span>ID BACK</span>
-                    <div class="doc-img"><i data-lucide="file-text" size="40"></i></div>
-                </div>
-                <div class="doc-item" style="grid-column: span 2;">
-                    <span>SELFIE WITH ID</span>
-                    <div class="doc-img" style="height: 300px;"><i data-lucide="user" size="60"></i></div>
+                <div class="form-group">
+                    <label>Invested ($)</label>
+                    <input type="number" id="editInvested" class="form-input" step="0.01">
                 </div>
             </div>
-            <label style="display: block; margin-bottom: 0.5rem; color: #94a3b8;">Admin Note (Visible to User)</label>
-            <textarea class="admin-note-area" id="adminNote" rows="3"
-                placeholder="Reason for rejection or approval note..."></textarea>
-
-            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                <button class="btn-action" style="background: #ef4444; color: white; padding: 1rem 2rem;"
-                    onclick="processKYC('Rejected')">Reject KYC</button>
-                <button class="btn-action" style="background: #10b981; color: white; padding: 1rem 2rem;"
-                    onclick="processKYC('Approved')">Approve KYC</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label>Credit Score</label>
+                    <input type="number" id="editCredit" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>VIP Level</label>
+                    <input type="number" id="editVip" class="form-input">
+                </div>
             </div>
+            <div class="form-group">
+                <label>KYC Status</label>
+                <select id="editKyc" class="form-input">
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </div>
+            <button class="btn-action btn-blue" style="width: 100%; padding: 12px;" onclick="saveUser()">Save
+                Changes</button>
         </div>
     </div>
 
     <script>
         lucide.createIcons();
-        let activeUserId = null;
+        let allUsers = [];
 
-        const mockRequests = [
-            { id: 101, mobile: '918112233445', name: 'Rahul Sharma', doc: 'Aadhar', status: 'Pending' },
-            { id: 102, mobile: '918108038000', name: 'Priya Patel', doc: 'PAN', status: 'Pending' }
-        ];
+        async function fetchAll() {
+            showLoader(true);
+            const client = DB.getClient();
+            if (!client) return alert("Supabase Cloud is not connected.");
 
-        function renderTable() {
-            const body = document.getElementById('kycTableBody');
-            body.innerHTML = mockRequests.map(r => `
+            const { data, error } = await client.from('users').select('*').order('created_at', { ascending: false });
+            if (error) alert(error.message);
+            else allUsers = data;
+
+            renderKYC();
+            renderUsers();
+            showLoader(false);
+        }
+
+        function renderKYC() {
+            const list = allUsers.filter(u => u.kyc === 'Pending');
+            const tbody = document.getElementById('kycList');
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem; color:#64748b;">No pending KYC requests.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = list.map(u => `
                 <tr>
-                    <td>
-                        <div style="font-weight: 700;">${r.mobile}</div>
-                        <div style="font-size: 0.75rem; color: #64748b;">UID: ${r.id}</div>
+                    <td><b>${u.mobile}</b></td>
+                    <td>${u.full_name || 'N/A'}</td>
+                    <td><span class="status-pill pill-Pending">Pending</span></td>
+                    <td style="display: flex; gap: 8px;">
+                        <button class="btn-action btn-green" onclick="quickUpdateKyc(${u.id}, 'Approved')">Approve</button>
+                        <button class="btn-action btn-red" onclick="quickUpdateKyc(${u.id}, 'Rejected')">Reject</button>
                     </td>
-                    <td>${r.name}</td>
-                    <td>${r.doc}</td>
-                    <td><span class="status-pill pill-pending">${r.status}</span></td>
-                    <td><button class="btn-action btn-review" onclick="openReview(${r.id})">Review Docs</button></td>
                 </tr>
             `).join('');
         }
 
-        function openReview(id) {
-            activeUserId = id;
-            document.getElementById('reviewModal').style.display = 'flex';
-            lucide.createIcons();
+        function renderUsers() {
+            const tbody = document.getElementById('userList');
+            tbody.innerHTML = allUsers.map(u => `
+                <tr>
+                    <td>
+                        <div style="font-weight:700;">${u.mobile}</div>
+                        <div style="font-size:0.75rem; color:#64748b;">${u.username}</div>
+                    </td>
+                    <td>$${parseFloat(u.balance).toFixed(2)}</td>
+                    <td>$${parseFloat(u.invested).toFixed(2)}</td>
+                    <td><span class="status-pill pill-${u.kyc}">${u.kyc}</span></td>
+                    <td><button class="btn-action btn-blue" onclick="editUser(${u.id})">Edit User</button></td>
+                </tr>
+            `).join('');
         }
 
-        function closeReview() {
-            document.getElementById('reviewModal').style.display = 'none';
-        }
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
-        async function processKYC(status) {
-            const client = DB.getClient();
-            if (client) {
-                // Update in Supabase
-                const note = document.getElementById('adminNote').value;
-                // Since this is a demo, we'll alert and hide
-                alert(`User ${activeUserId} KYC has been ${status}.`);
+            if (tab === 'kyc') {
+                document.getElementById('tabKyc').style.display = 'block';
+                document.getElementById('navKyc').classList.add('active');
+                document.getElementById('tabTitle').innerText = 'KYC Review';
+                document.getElementById('tabDesc').innerText = 'Handle pending verification requests.';
+            } else {
+                document.getElementById('tabUsers').style.display = 'block';
+                document.getElementById('navUsers').classList.add('active');
+                document.getElementById('tabTitle').innerText = 'User Management';
+                document.getElementById('tabDesc').innerText = 'Edit user balances, scores, and details.';
             }
-            closeReview();
-            // Remove from mock list for demo
-            const idx = mockRequests.findIndex(r => r.id === activeUserId);
-            mockRequests.splice(idx, 1);
-            renderTable();
         }
 
-        renderTable();
+        async function quickUpdateKyc(id, status) {
+            if (!confirm(`Confirm ${status} for this user?`)) return;
+            const client = DB.getClient();
+            await client.from('users').update({ kyc: status }).eq('id', id);
+            fetchAll();
+        }
+
+        function editUser(id) {
+            const u = allUsers.find(x => x.id === id);
+            document.getElementById('editUserId').value = u.id;
+            document.getElementById('editUsername').value = u.username;
+            document.getElementById('editBalance').value = u.balance;
+            document.getElementById('editInvested').value = u.invested;
+            document.getElementById('editCredit').value = u.credit_score || 100;
+            document.getElementById('editVip').value = u.vip || 0;
+            document.getElementById('editKyc').value = u.kyc;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        async function saveUser() {
+            const id = document.getElementById('editUserId').value;
+            const updates = {
+                username: document.getElementById('editUsername').value,
+                balance: parseFloat(document.getElementById('editBalance').value),
+                invested: parseFloat(document.getElementById('editInvested').value),
+                credit_score: parseInt(document.getElementById('editCredit').value),
+                vip: parseInt(document.getElementById('editVip').value),
+                kyc: document.getElementById('editKyc').value
+            };
+
+            showLoader(true);
+            const client = DB.getClient();
+            await client.from('users').update(updates).eq('id', id);
+            closeModal();
+            fetchAll();
+        }
+
+        function closeModal() { document.getElementById('editModal').style.display = 'none'; }
+        function showLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
+
+        // Start
+        window.onload = fetchAll;
     </script>
 </body>
 
