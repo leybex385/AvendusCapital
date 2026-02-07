@@ -792,22 +792,23 @@
                         <div class="kyc-verify-filters">
                             <div class="kyc-filter-item">
                                 <label>Username</label>
-                                <input type="text" class="kyc-filter-input" placeholder="Please enter your username">
+                                <input type="text" id="kf_user" class="kyc-filter-input"
+                                    placeholder="Please enter your username" oninput="filterKyc()">
                             </div>
                             <div class="kyc-filter-item">
                                 <label>Customer's Full Name</label>
-                                <input type="text" class="kyc-filter-input"
-                                    placeholder="Please enter the customer's full name">
+                                <input type="text" id="kf_name" class="kyc-filter-input"
+                                    placeholder="Please enter the customer's full name" oninput="filterKyc()">
                             </div>
                             <div class="kyc-filter-item">
                                 <label>Customer-Verified Mobile Phone Number</label>
-                                <input type="text" class="kyc-filter-input"
-                                    placeholder="Please enter your verified mobile phone number">
+                                <input type="text" id="kf_phone" class="kyc-filter-input"
+                                    placeholder="Please enter your verified mobile phone number" oninput="filterKyc()">
                             </div>
                             <div class="kyc-filter-item">
                                 <label>Salesperson</label>
-                                <input type="text" class="kyc-filter-input"
-                                    placeholder="Please enter the business name">
+                                <input type="text" id="kf_sales" class="kyc-filter-input"
+                                    placeholder="Please enter the business name" oninput="filterKyc()">
                             </div>
                         </div>
                         <button class="kyc-refresh-btn" onclick="init()"><i data-lucide="refresh-cw" size="16"></i>
@@ -815,11 +816,11 @@
                     </div>
 
                     <div class="kyc-status-bar">
-                        <div class="kyc-status-pill active">all</div>
-                        <div class="kyc-status-pill">Approved</div>
-                        <div class="kyc-status-pill">reject</div>
-                        <div class="kyc-status-pill">Pending review</div>
-                        <div class="kyc-status-pill">Not submitted</div>
+                        <div class="kyc-status-pill active" onclick="setStatusFilter('all', this)">all</div>
+                        <div class="kyc-status-pill" onclick="setStatusFilter('Approved', this)">Approved</div>
+                        <div class="kyc-status-pill" onclick="setStatusFilter('Rejected', this)">reject</div>
+                        <div class="kyc-status-pill" onclick="setStatusFilter('Pending', this)">Pending review</div>
+                        <div class="kyc-status-pill" onclick="setStatusFilter('NotSubmitted', this)">Not submitted</div>
                     </div>
 
                     <div class="vsl-table-wrap">
@@ -1324,6 +1325,8 @@
         let openTabs = ['home'];
         let allUsers = [];
         let allMsgs = [];
+        let allSubmissions = [];
+        let kycStatusFilter = 'all';
 
         async function init() {
             showLoader(true);
@@ -1386,12 +1389,93 @@
                     </tr>
                 `).join('');
 
-                // Render KYC
-                document.getElementById('kycList').innerHTML = u.map(x => {
-                    const sub = ks ? ks.find(s => s.user_id === x.id) : null;
-                    const statusClass = x.kyc === 'Approved' ? 'approved' : (x.kyc === 'Rejected' ? 'reject' : 'pending');
-                    const statusText = x.kyc === 'Pending' ? '待审核' : x.kyc;
-                    return `
+                document.getElementById('withList').innerHTML = w.map(x => `
+                    <tr>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">#${x.id}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.users?.mobile || 'Unknown'}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">₹${parseFloat(x.amount).toFixed(2)}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.bank_name}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><span style="padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.7rem; background:#fee2e2; color:#991b1b;">${x.status}</span></td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${new Date(x.created_at).toLocaleString()}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">
+                            <div class="btn-edit-wrap">
+                                <i data-lucide="edit" size="16" style="cursor:pointer"></i>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            if (ks) allSubmissions = ks;
+            renderKycList();
+
+            // Sync Advanced Tables (Handles placeholders if data is null)
+            const syncTable = (id, data, cols) => {
+                const tbody = document.getElementById(id);
+                if (!tbody) return;
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align:center; padding:20px; color:#94a3b8;">No records found.</td></tr>`;
+                    return;
+                }
+            };
+
+            syncTable('loanList', loans, 5);
+            syncTable('rewardList', rewards, 4);
+            syncTable('stockList', stocks, 5);
+            syncTable('bulkList', null, 4);
+            syncTable('ipoList', ipos, 4);
+            syncTable('fundList', funds, 4);
+            syncTable('quantList', quants, 4);
+
+            if (m) {
+                allMsgs = m;
+                renderMessages(m);
+            }
+            lucide.createIcons();
+            showLoader(false);
+        }
+
+
+        function setStatusFilter(s, el) {
+            document.querySelectorAll('.kyc-status-pill').forEach(x => x.classList.remove('active'));
+            el.classList.add('active');
+            kycStatusFilter = s;
+            renderKycList();
+        }
+
+        function filterKyc() {
+            renderKycList();
+        }
+
+        function renderKycList() {
+            const list = document.getElementById('kycList');
+            if (!list) return;
+
+            const fu = document.getElementById('kf_user')?.value.toLowerCase();
+            const fn = document.getElementById('kf_name')?.value.toLowerCase();
+            const fp = document.getElementById('kf_phone')?.value.toLowerCase();
+            const fs = document.getElementById('kf_sales')?.value.toLowerCase();
+
+            let data = allUsers.filter(u => {
+                const sub = allSubmissions.find(s => s.user_id === u.id);
+                // Status Filter
+                if (kycStatusFilter !== 'all') {
+                    if (kycStatusFilter === 'NotSubmitted' && sub) return false;
+                    if (kycStatusFilter !== 'NotSubmitted' && u.kyc !== kycStatusFilter) return false;
+                }
+                // String Search Filters
+                if (fu && !u.mobile.toLowerCase().includes(fu)) return false;
+                if (fn && !(u.username || '').toLowerCase().includes(fn)) return false;
+                if (fp && !u.mobile.toLowerCase().includes(fp)) return false;
+                // salesperson check stubbed as salesperson field not in current user schema
+                return true;
+            });
+
+            list.innerHTML = data.map(x => {
+                const sub = allSubmissions.find(s => s.user_id === x.id);
+                const statusClass = x.kyc === 'Approved' ? 'approved' : (x.kyc === 'Rejected' ? 'reject' : 'pending');
+                const statusText = x.kyc === 'Pending' ? '待审核' : x.kyc;
+                return `
                         <tr>
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.mobile}</td>
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><span class="kyc-badge ${statusClass}">${statusText}</span></td>
@@ -1416,72 +1500,10 @@
                             </td>
                         </tr>
                     `;
-                }).join('');
-            }
-
-            // Render Deposits
-            if (d && document.getElementById('depList')) {
-                document.getElementById('depList').innerHTML = d.map(x => `
-                    <tr>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">#${x.id}</td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.users?.mobile || 'Unknown'}</td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">₹${parseFloat(x.amount).toFixed(2)}</td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><span style="padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.7rem; background:#fef3c7; color:#92400e;">${x.status}</span></td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${new Date(x.created_at).toLocaleString()}</td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">
-                            <div class="btn-edit-wrap">
-                                <i data-lucide="edit" size="16" style="cursor:pointer"></i>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-
-            // Render Withdrawals
-            if (w && document.getElementById('withList')) {
-                document.getElementById('withList').innerHTML = w.map(x => `
-                    <tr>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">#${x.id}</td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.users?.mobile || 'Unknown'}</td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">₹${parseFloat(x.amount).toFixed(2)}</td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.bank_name}</td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><span style="padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.7rem; background:#fee2e2; color:#991b1b;">${x.status}</span></td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${new Date(x.created_at).toLocaleString()}</td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">
-                            <div class="btn-edit-wrap">
-                                <i data-lucide="edit" size="16" style="cursor:pointer"></i>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-
-            // Sync Advanced Tables (Handles placeholders if data is null)
-            const syncTable = (id, data, cols) => {
-                const tbody = document.getElementById(id);
-                if (!tbody) return;
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align:center; padding:20px; color:#94a3b8;">No records found.</td></tr>`;
-                    return;
-                }
-                // (Future-proof: Can add real mapping here when schema expands)
-            };
-
-            syncTable('loanList', loans, 5);
-            syncTable('rewardList', rewards, 4);
-            syncTable('stockList', stocks, 5);
-            syncTable('bulkList', null, 4);
-            syncTable('ipoList', ipos, 4);
-            syncTable('fundList', funds, 4);
-            syncTable('quantList', quants, 4);
-
-            if (m) {
-                allMsgs = m;
-                renderMessages(m);
-            }
+            }).join('');
             lucide.createIcons();
-            showLoader(false);
         }
+
 
         function renderMessages(msgs) {
             const list = document.getElementById('sentMsgs');
