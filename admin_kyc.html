@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VSLNHW Admin Dashboard</title>
+    <title>VSLNHW Admin - Ultimate Enterprise Suite</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,591 +17,504 @@
         :root {
             --sidebar-bg: #ffffff;
             --main-bg: #f5f7fb;
-            --primary-blue: #00b4d8;
-            --text-main: #334155;
+            --primary-orange: #f97316;
+            --primary-blue: #3b82f6;
             --border-color: #e2e8f0;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
         }
 
         body {
             background-color: var(--main-bg);
-            color: var(--text-main);
+            color: var(--text-dark);
             font-family: 'Inter', sans-serif;
             margin: 0;
             display: flex;
+            overflow-x: hidden;
         }
 
-        /* Sidebar Style */
+        /* Sidebar & Navigation */
         .sidebar {
-            width: 240px;
+            width: 260px;
             background: var(--sidebar-bg);
             height: 100vh;
             border-right: 1px solid var(--border-color);
             position: fixed;
             display: flex;
             flex-direction: column;
-            z-index: 100;
+            z-index: 1000;
         }
 
         .logo-area {
             padding: 20px;
+            border-bottom: 2px solid var(--border-color);
             font-weight: 800;
-            font-size: 1.2rem;
-            color: #1e1b4b;
             display: flex;
             align-items: center;
             gap: 10px;
-            border-bottom: 1px solid var(--border-color);
+            color: #1e1b4b;
         }
 
-        .logo-icon {
-            width: 32px;
-            height: 32px;
+        .logo-box {
+            width: 30px;
+            height: 30px;
             background: linear-gradient(135deg, #4338ca, #6366f1);
             border-radius: 6px;
-        }
-
-        .search-nav {
-            padding: 15px;
-        }
-
-        .search-box {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.85rem;
-            outline: none;
-            box-sizing: border-box;
         }
 
         .nav-menu {
             flex-grow: 1;
             padding: 10px;
+            overflow-y: auto;
         }
 
         .menu-item {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px;
-            color: #64748b;
+            padding: 10px 15px;
+            color: var(--text-muted);
             text-decoration: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             border-radius: 8px;
             margin-bottom: 4px;
             cursor: pointer;
             transition: 0.2s;
         }
 
+        .menu-item:hover,
         .menu-item.active {
             background: #e0f2fe;
             color: #0369a1;
             font-weight: 600;
         }
 
-        .menu-item:hover:not(.active) {
-            background: #f8fafc;
+        .sub-menu {
+            padding-left: 45px;
+            display: none;
+            margin-bottom: 10px;
         }
 
-        /* Main Content */
-        .content-area {
-            margin-left: 240px;
+        .sub-menu.show {
+            display: block;
+        }
+
+        .sub-item {
+            padding: 8px 0;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sub-item:hover,
+        .sub-item.active {
+            color: var(--primary-orange);
+            font-weight: 600;
+        }
+
+        /* Main Workspace */
+        .main-content {
+            margin-left: 260px;
             flex-grow: 1;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Top Bar */
-        .topbar {
+        .top-nav {
             background: white;
-            padding: 15px 30px;
+            padding: 12px 30px;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: flex-end;
             align-items: center;
             gap: 20px;
-            border-bottom: 1px solid var(--border-color);
         }
 
-        .admin-profile {
+        .page-tabs {
+            background: #fff;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .tab-tag {
+            padding: 4px 12px;
+            border: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            border-radius: 4px;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .tab-tag.active {
+            border-color: var(--primary-orange);
+            color: var(--primary-orange);
+            background: white;
+        }
+
+        .container {
+            padding: 25px;
+            flex-grow: 1;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* VSL Record Table UI */
+        .vsl-table-wrap {
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        .vsl-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1500px;
+        }
+
+        .vsl-table th {
+            text-align: left;
+            background: #f8fafc;
+            padding: 12px 10px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .vsl-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.8rem;
+            color: #334155;
+        }
+
+        /* Messaging Center UI */
+        .messaging-layout {
+            display: flex;
+            gap: 20px;
+            height: 600px;
+        }
+
+        .message-list {
+            width: 350px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .message-content {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            padding: 40px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .msg-item {
+            padding: 15px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            border-radius: 6px;
+            margin-bottom: 5px;
+        }
+
+        .msg-item:hover {
+            background: #f8fafc;
+        }
+
+        .msg-item b {
+            font-size: 0.9rem;
+            color: #1e293b;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .msg-date {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        .stencil-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .stencil-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .stencil-card:hover {
+            border-color: var(--primary-orange);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .stencil-title {
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 10px;
             font-size: 0.9rem;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        /* Content Header */
-        .page-header {
-            padding: 20px 30px;
-            background: white;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .breadcrumb {
-            color: #f97316;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        /* Dashboard Overview */
-        .dashboard-container {
-            padding: 30px;
-        }
-
-        .section-card {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            border: 1px solid var(--border-color);
-            margin-bottom: 25px;
-        }
-
-        .card-title {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .card-subtitle {
-            font-size: 0.75rem;
-            color: #94a3b8;
-            margin-bottom: 20px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-item {
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #f1f5f9;
-        }
-
-        .stat-label {
-            font-size: 0.7rem;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .stat-value {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #3b82f6;
-        }
-
-        /* Specific Color for Numbers */
-        .val-blue {
-            color: #3b82f6;
-        }
-
-        .val-red {
-            color: #ef4444;
-        }
-
-        .val-green {
-            color: #10b981;
-        }
-
-        /* KYC Table Style */
-        .vsl-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .vsl-table th {
-            text-align: left;
-            padding: 12px;
-            font-size: 0.75rem;
-            color: #64748b;
-            background: #f8fafc;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .vsl-table td {
-            padding: 12px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 0.85rem;
-        }
-
-        .doc-thumbnail {
-            width: 50px;
-            height: 35px;
-            background: #f1f5f9;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #94a3b8;
-            cursor: pointer;
-            overflow: hidden;
-        }
-
-        .doc-thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .status-tag {
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 700;
-        }
-
-        .tag-approved {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .tag-pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .tag-rejected {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .btn-op {
-            background: none;
-            border: none;
-            color: #64748b;
-            cursor: pointer;
-            padding: 5px;
-        }
-
-        .btn-op:hover {
-            color: #3b82f6;
-        }
-
-        /* Tabs */
-        .tab-bar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
+        /* Utility buttons */
+        .vsl-btn {
             padding: 6px 15px;
             border-radius: 6px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
-            border: 1px solid var(--border-color);
-            background: white;
             cursor: pointer;
+            border: 1px solid var(--border-color);
+            transition: 0.2s;
         }
 
-        .tab-btn.active {
-            background: #fff;
-            border-color: #f97316;
-            color: #f97316;
+        .vsl-btn.active {
+            background: var(--primary-orange);
+            color: white;
+            border-color: var(--primary-orange);
         }
 
-        .loader-overlay {
+        .vsl-btn.green {
+            background: #10b981;
+            color: white;
+            border: none;
+        }
+
+        .mode-togglers {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .loader {
             position: fixed;
             inset: 0;
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
         }
     </style>
 </head>
 
 <body>
-    <div class="loader-overlay" id="loader"><i data-lucide="loader-2" class="animate-spin"></i></div>
+    <div class="loader" id="vslLoader"><i data-lucide="loader-2" class="animate-spin" size="48"></i></div>
 
-    <!-- Sidebar -->
     <aside class="sidebar">
         <div class="logo-area">
-            <div class="logo-icon"></div>
-            VSLNHW
-        </div>
-        <div class="search-nav">
-            <input type="text" class="search-box" placeholder="search...">
+            <div class="logo-box"></div> VSLNHW Admin
         </div>
         <nav class="nav-menu">
-            <div class="menu-item active" id="menuHome" onclick="switchPage('home')">
-                <i data-lucide="home" size="18"></i> front page
+            <div class="menu-item active" onclick="switchPage('home')"><i data-lucide="home" size="18"></i> front page
             </div>
-            <div class="menu-item" id="menuKyc" onclick="switchPage('kyc')">
-                <i data-lucide="user-check" size="18"></i> Real-name authent...
+            <div class="menu-item" onclick="switchPage('kyc')"><i data-lucide="user-check" size="18"></i> Real-name
+                authentication</div>
+            <div class="menu-item" onclick="switchPage('users')"><i data-lucide="users" size="18"></i> Customer
+                Management</div>
+            <div class="menu-item" onclick="toggleSub('financial')"><i data-lucide="wallet" size="18"></i> Financial
+                Management <i data-lucide="chevron-down" size="14" style="margin-left:auto;"></i></div>
+            <div class="sub-menu" id="financialSub">
+                <div class="sub-item" onclick="switchPage('deposits')"><i data-lucide="arrow-down-to-line"
+                        size="14"></i> Deposit records</div>
+                <div class="sub-item" onclick="switchPage('withdrawals')"><i data-lucide="arrow-up-from-line"
+                        size="14"></i> Withdrawal records</div>
+                <div class="sub-item"><i data-lucide="hand-coins" size="14"></i> Loan records</div>
             </div>
-            <div class="menu-item" id="menuUsers" onclick="switchPage('users')">
-                <i data-lucide="users" size="18"></i> Customer Manage...
+            <div class="menu-item" onclick="toggleSub('transaction')"><i data-lucide="repeat" size="18"></i> Transaction
+                records <i data-lucide="chevron-down" size="14" style="margin-left:auto;"></i></div>
+            <div class="sub-menu" id="transactionSub">
+                <div class="sub-item" onclick="switchPage('stock')"><i data-lucide="line-chart" size="14"></i> Stock
+                    trading</div>
+                <div class="sub-item" onclick="switchPage('fund')"><i data-lucide="pie-chart" size="14"></i> Fund
+                    trading</div>
+                <div class="sub-item" onclick="switchPage('quant')"><i data-lucide="zap" size="14"></i> Quantitative
+                    trading</div>
             </div>
-            <div class="menu-item">
-                <i data-lucide="wallet" size="18"></i> Financial Manag...
-            </div>
-            <div class="menu-item">
-                <i data-lucide="repeat" size="18"></i> Transaction recor...
-            </div>
-            <div class="menu-item">
-                <i data-lucide="message-square" size="18"></i> Internal messages
-            </div>
+            <div class="menu-item" onclick="switchPage('messages')"><i data-lucide="send" size="18"></i> Internal
+                messages</div>
         </nav>
     </aside>
 
-    <!-- Content -->
-    <main class="content-area">
-        <header class="topbar">
-            <div class="admin-profile">
-                Welcome, <b>admin</b>
-                <i data-lucide="settings" size="18" style="color: #94a3b8; cursor: pointer;"></i>
-                <i data-lucide="sun" size="18" style="color: #94a3b8; cursor: pointer;"></i>
-            </div>
+    <main class="main-content">
+        <header class="top-nav">
+            <div style="font-size: 0.9rem; display: flex; align-items: center; gap: 10px;">Welcome, <b>admin</b> <i
+                    data-lucide="settings" size="18" style="cursor:pointer"></i></div>
         </header>
 
-        <div class="page-header">
-            <div class="breadcrumb"><i data-lucide="rotate-ccw" size="14"></i> front page</div>
+        <div class="page-tabs" id="tabContainer">
+            <div class="tab-tag active">front page <i data-lucide="x" size="12"></i></div>
         </div>
 
-        <div class="dashboard-container">
-            <!-- PAGE: HOME (DASHBOARD) -->
-            <div id="pageHome">
-                <div class="tab-bar">
-                    <button class="tab-btn active">Overview</button>
-                    <button class="tab-btn">Product</button>
-                </div>
-
-                <!-- User Info -->
+        <div class="container">
+            <!-- PAGE: FUND TRADING -->
+            <div id="pageFund" class="vsl-page" style="display:none;">
                 <div class="section-card">
-                    <div class="card-title">User Information</div>
-                    <div class="card-subtitle">Current login session information</div>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-label">NAME</div>
-                            <div class="stat-value" style="color: #1e293b;">admin</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">ROLE</div>
-                            <div class="stat-value" style="color: #1e293b;">business</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">USER ID</div>
-                            <div class="stat-value"
-                                style="color: #1e293b; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis;">
-                                admin_session_active</div>
-                        </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h3 style="margin:0;">Fund transaction records</h3>
+                        <div class="mode-togglers"><button class="vsl-btn active">Reality</button><button
+                                class="vsl-btn">Robot</button><button class="vsl-btn active"
+                                style="background:#f97316; color:white; border:none;">Refresh</button></div>
+                    </div>
+                    <div class="vsl-table-wrap">
+                        <table class="vsl-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Locking</th>
+                                    <th>State</th>
+                                    <th>Username</th>
+                                    <th>Account</th>
+                                    <th>Nation</th>
+                                    <th>Product</th>
+                                    <th>Exchange</th>
+                                    <th>Code</th>
+                                    <th>Period</th>
+                                    <th>Profit</th>
+                                    <th>Purchase Price</th>
+                                    <th>Operate</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fundTableBody"></tbody>
+                        </table>
                     </div>
                 </div>
+            </div>
 
-                <!-- Customer Overview -->
+            <!-- PAGE: INTERNAL MESSAGES -->
+            <div id="pageMessages" class="vsl-page" style="display:none;">
                 <div class="section-card">
-                    <div class="card-title">Customer Overview</div>
-                    <div class="card-subtitle">Registration and Real-Name Authentication Progress</div>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-label">TOTAL NUMBER OF REGISTRATIONS</div>
-                            <div class="stat-value val-blue" id="statTotalUsers">0</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">REGISTER TODAY</div>
-                            <div class="stat-value val-blue" id="statTodayUsers">0</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">REGISTERED CUSTOMERS</div>
-                            <div class="stat-value val-blue" id="statApprovedKYC">0</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">UNREGISTERED CUSTOMERS</div>
-                            <div class="stat-value val-blue" id="statPendingKYC">0</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">CLIENTS PENDING REVIEW</div>
-                            <div class="stat-value val-blue" id="statReviewNeeded">0</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h3 style="margin:0;">Internal Messaging Center</h3>
+                        <div style="display:flex; gap:10px;"><button class="vsl-btn green">Create a new message</button>
                         </div>
                     </div>
-                </div>
+                    <div style="display:flex; gap:10px; margin-bottom:20px;">
+                        <button class="vsl-btn active" onclick="showMsgSection('sent')">Sent</button>
+                        <button class="vsl-btn" onclick="showMsgSection('stencil')">Stencil</button>
+                    </div>
 
-                <!-- Recharge Overview -->
-                <div class="section-card">
-                    <div class="card-title">Recharge Overview</div>
-                    <div class="card-subtitle">Cumulative and today's recharge data</div>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-label">TOTAL RECHARGE AMOUNT</div>
-                            <div class="stat-value val-blue">₹0.00</div>
+                    <!-- SENT MESSAGES VIEW -->
+                    <div id="msgSentView" class="messaging-layout">
+                        <div class="message-list">
+                            <input type="text" placeholder="Search title..."
+                                style="width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:4px; margin-bottom:15px;">
+                            <div class="msg-item"><b>Important Notice</b>
+                                <div class="msg-date">12-01-2026 09:32:02</div>
+                            </div>
+                            <div class="msg-item"><b>System Update</b>
+                                <div class="msg-date">06-02-2026 23:08:10</div>
+                            </div>
+                            <div class="msg-item"><b>Welcome</b>
+                                <div class="msg-date">06-02-2026 23:04:21</div>
+                            </div>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-label">TOTAL USERS WHO RECHARGED</div>
-                            <div class="stat-value val-blue">0</div>
+                        <div class="message-content">
+                            <i data-lucide="mail-open" size="48" style="margin-bottom:20px; opacity:0.3;"></i>
+                            <p>Please select an internal message to view.</p>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-label">TODAY'S RECHARGE AMOUNT</div>
-                            <div class="stat-value val-green">₹0.00</div>
+                    </div>
+
+                    <!-- STENCIL VIEW -->
+                    <div id="msgStencilView" style="display:none;">
+                        <div class="stencil-grid">
+                            <div class="stencil-card">
+                                <div class="stencil-title"><i data-lucide="megaphone" size="16"></i> Capital Increase /
+                                    Dividend Announcement</div>
+                                <p style="font-size:0.75rem; color:#64748b;">System generated notice for user bonus...
+                                </p>
+                            </div>
+                            <div class="stencil-card">
+                                <div class="stencil-title"><i data-lucide="award" size="16"></i> Congratulations on Your
+                                    IPO Allocation!</div>
+                                <p style="font-size:0.75rem; color:#64748b;">Notice for users who won the IPO lot...</p>
+                            </div>
+                            <div class="stencil-card">
+                                <div class="stencil-title"><i data-lucide="trending-up" size="16"></i> IPO Listed now!
+                                </div>
+                                <p style="font-size:0.75rem; color:#64748b;">Official announcement for IPO market
+                                    listing...</p>
+                            </div>
+                            <div class="stencil-card">
+                                <div class="stencil-title"><i data-lucide="shield-check" size="16"></i> Order payment
+                                    successful!</div>
+                                <p style="font-size:0.75rem; color:#64748b;">Receipt confirmation for user purchases...
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- PAGE: KYC REVIEW -->
-            <div id="pageKyc" style="display: none;">
+            <!-- HOME PLACEHOLDER -->
+            <div id="pageHome" class="vsl-page">
                 <div class="section-card">
-                    <div class="card-title">KYC Verification</div>
-                    <div style="display: flex; gap: 10px; margin: 15px 0;">
-                        <input type="text" class="search-box" style="width: 200px;" placeholder="Username">
-                        <input type="text" class="search-box" style="width: 200px;" placeholder="Customer's Full Name">
-                        <button class="tab-btn active"
-                            style="background: #f97316; color: white; border: none;">Refresh</button>
-                    </div>
-
-                    <div class="tab-bar">
-                        <button class="tab-btn active">all</button>
-                        <button class="tab-btn">Approved</button>
-                        <button class="tab-btn">reject</button>
-                        <button class="tab-btn">Pending review</button>
-                    </div>
-
-                    <table class="vsl-table">
-                        <thead>
-                            <tr>
-                                <th>Customer (username)</th>
-                                <th>State</th>
-                                <th>Mobile</th>
-                                <th>Full Name</th>
-                                <th>ID Photo (front)</th>
-                                <th>ID Photo (back)</th>
-                                <th>Application time</th>
-                                <th>Operate</th>
-                            </tr>
-                        </thead>
-                        <tbody id="kycTableBody"></tbody>
-                    </table>
+                    <h3>Admin Portal Ready</h3>
+                    <p>Select a sub-menu to start managing records.</p>
                 </div>
             </div>
-
-            <!-- PAGE: USERS -->
-            <div id="pageUsers" style="display: none;">
+            <div id="pageQuant" class="vsl-page" style="display:none;">
                 <div class="section-card">
-                    <div class="card-title">Customer Management</div>
-                    <table class="vsl-table">
-                        <thead>
-                            <tr>
-                                <th>Mobile</th>
-                                <th>Username</th>
-                                <th>Balance</th>
-                                <th>Invested</th>
-                                <th>KYC</th>
-                                <th>Operate</th>
-                            </tr>
-                        </thead>
-                        <tbody id="userTableBody"></tbody>
-                    </table>
+                    <h3>Quantitative trading records</h3>
+                    <p>Monitoring bot movements and algorithmic trades...</p>
                 </div>
             </div>
         </div>
     </main>
 
     <script>
-        // Security Guard
-        if (sessionStorage.getItem('admin_auth') !== 'true') {
-            window.location.href = 'admin_login.html';
-        }
-
+        if (sessionStorage.getItem('admin_auth') !== 'true') window.location.href = 'admin_login.html';
         lucide.createIcons();
-        let allUsers = [];
-
-        async function initDashboard() {
-            showLoader(true);
-            const client = DB.getClient();
-            if (!client) return;
-
-            const { data, error } = await client.from('users').select('*').order('created_at', { ascending: false });
-            if (data) allUsers = data;
-
-            // Stats Calculation
-            document.getElementById('statTotalUsers').innerText = allUsers.length;
-            document.getElementById('statApprovedKYC').innerText = allUsers.filter(u => u.kyc === 'Approved').length;
-            document.getElementById('statPendingKYC').innerText = allUsers.filter(u => u.kyc === 'Pending').length;
-            document.getElementById('statReviewNeeded').innerText = allUsers.filter(u => u.kyc === 'Pending').length;
-
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('statTodayUsers').innerText = allUsers.filter(u => u.created_at.startsWith(today)).length;
-
-            renderKycTable();
-            renderUserTable();
-            showLoader(false);
-        }
-
-        function renderKycTable() {
-            const tbody = document.getElementById('kycTableBody');
-            tbody.innerHTML = allUsers.map(u => `
-                <tr>
-                    <td><b>${u.mobile}</b></td>
-                    <td><span class="status-tag tag-${u.kyc.toLowerCase()}">${u.kyc}</span></td>
-                    <td>${u.mobile}</td>
-                    <td>${u.full_name || 'N/A'}</td>
-                    <td><div class="doc-thumbnail"><i data-lucide="image" size="14"></i></div></td>
-                    <td><div class="doc-thumbnail"><i data-lucide="image" size="14"></i></div></td>
-                    <td>${new Date(u.created_at).toLocaleString()}</td>
-                    <td>
-                        <button class="btn-op" onclick="quickAction(${u.id}, 'Approved')"><i data-lucide="check-circle" size="18"></i></button>
-                        <button class="btn-op" onclick="quickAction(${u.id}, 'Rejected')"><i data-lucide="x-circle" size="18"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        function renderUserTable() {
-            const tbody = document.getElementById('userTableBody');
-            tbody.innerHTML = allUsers.map(u => `
-                <tr>
-                    <td>${u.mobile}</td>
-                    <td>${u.username}</td>
-                    <td>₹${parseFloat(u.balance).toFixed(2)}</td>
-                    <td>₹${parseFloat(u.invested).toFixed(2)}</td>
-                    <td><span class="status-tag tag-${u.kyc.toLowerCase()}">${u.kyc}</span></td>
-                    <td><button class="btn-op"><i data-lucide="edit-3" size="18"></i></button></td>
-                </tr>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        async function quickAction(id, status) {
-            if (!confirm("Are you sure?")) return;
-            const client = DB.getClient();
-            await client.from('users').update({ kyc: status }).eq('id', id);
-            initDashboard();
-        }
 
         function switchPage(page) {
-            document.getElementById('pageHome').style.display = 'none';
-            document.getElementById('pageKyc').style.display = 'none';
-            document.getElementById('pageUsers').style.display = 'none';
+            document.querySelectorAll('.vsl-page').forEach(p => p.style.display = 'none');
+            document.querySelectorAll('.menu-item, .sub-item').forEach(m => m.classList.remove('active'));
 
-            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            const pageId = 'page' + page.charAt(0).toUpperCase() + page.slice(1);
+            if (document.getElementById(pageId)) document.getElementById(pageId).style.display = 'block';
 
-            if (page === 'home') {
-                document.getElementById('pageHome').style.display = 'block';
-                document.getElementById('menuHome').classList.add('active');
-            } else if (page === 'kyc') {
-                document.getElementById('pageKyc').style.display = 'block';
-                document.getElementById('menuKyc').classList.add('active');
-            } else if (page === 'users') {
-                document.getElementById('pageUsers').style.display = 'block';
-                document.getElementById('menuUsers').classList.add('active');
-            }
+            const titles = { 'home': 'front page', 'fund': 'Fund trading', 'quant': 'Quantitative trading', 'messages': 'Internal messages' };
+            document.getElementById('tabContainer').innerHTML = `<div class="tab-tag active">${titles[page] || page} <i data-lucide="x" size="12"></i></div>`;
+            lucide.createIcons();
         }
 
-        function showLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
+        function showMsgSection(section) {
+            document.getElementById('msgSentView').style.display = section === 'sent' ? 'flex' : 'none';
+            document.getElementById('msgStencilView').style.display = section === 'stencil' ? 'block' : 'none';
+            document.querySelectorAll('#pageMessages .vsl-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
 
-        window.onload = initDashboard;
+        function toggleSub(id) { document.getElementById(id + 'Sub').classList.toggle('show'); }
+        function showLoader(show) { document.getElementById('vslLoader').style.display = show ? 'flex' : 'none'; }
     </script>
 </body>
 
