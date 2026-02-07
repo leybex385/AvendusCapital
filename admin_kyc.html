@@ -518,36 +518,48 @@
             showLoader(false);
         }
 
+        let openTabs = ['home'];
+        const pageNames = {
+            'home': 'front page',
+            'kyc': 'Real-name authentication',
+            'users': 'Customer Management',
+            'deposits': 'Deposit records',
+            'withdrawals': 'Withdrawal records',
+            'messages': 'Internal messages'
+        };
+
         function switchPage(p) {
+            if (!openTabs.includes(p)) openTabs.push(p);
+            renderTabs();
             document.querySelectorAll('.vsl-page').forEach(x => x.style.display = 'none');
             document.querySelectorAll('.menu-item, .sub-item').forEach(x => x.classList.remove('active'));
-
             const pageId = 'page' + p.charAt(0).toUpperCase() + p.slice(1);
             const targetPage = document.getElementById(pageId);
-
             if (targetPage) {
                 targetPage.style.display = 'block';
                 const btn = document.getElementById('btn_' + p);
                 if (btn) btn.classList.add('active');
-
-                // Update Tab Bar naming
-                const pageNames = {
-                    'home': 'front page',
-                    'kyc': 'Real-name authentication',
-                    'users': 'Customer Management',
-                    'deposits': 'Deposit records',
-                    'withdrawals': 'Withdrawal records',
-                    'messages': 'Internal messages'
-                };
-
-                const tabTitle = pageNames[p] || p;
-                document.getElementById('tabContainer').innerHTML = `
-                    <div class="tab-tag active">
-                        ${tabTitle} <i data-lucide="x" size="12" onclick="switchPage('home')"></i>
-                    </div>
-                `;
-                lucide.createIcons();
             }
+            lucide.createIcons();
+        }
+
+        function renderTabs() {
+            const container = document.getElementById('tabContainer');
+            const activeP = Array.from(document.querySelectorAll('.vsl-page')).find(p => p.style.display !== 'none')?.id.replace('page', '').toLowerCase() || 'home';
+            container.innerHTML = openTabs.map(t => `
+                <div class="tab-tag ${t === activeP ? 'active' : ''}" onclick="switchPage('${t}')">
+                    ${pageNames[t] || t} 
+                    ${t !== 'home' ? `<i data-lucide="x" size="12" onclick="event.stopPropagation(); closeTab('${t}')"></i>` : ''}
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function closeTab(p) {
+            openTabs = openTabs.filter(t => t !== p);
+            const activeP = Array.from(document.querySelectorAll('.vsl-page')).find(p => p.style.display !== 'none')?.id.replace('page', '').toLowerCase();
+            if (activeP === p) switchPage(openTabs[openTabs.length - 1]);
+            else renderTabs();
         }
 
         function openMsgModal() {
