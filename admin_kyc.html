@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VSLNHW Admin - Master Dashboard</title>
+    <title>VSLNHW Admin - Master Suite</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,7 +33,7 @@
             overflow-x: hidden;
         }
 
-        /* Sidebar Style */
+        /* Sidebar & Layout */
         .sidebar {
             width: 260px;
             background: var(--sidebar-bg);
@@ -183,7 +183,7 @@
         .vsl-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1400px;
+            min-width: 1300px;
         }
 
         .vsl-table th {
@@ -202,6 +202,7 @@
             vertical-align: middle;
         }
 
+        /* Status Pills */
         .pill {
             padding: 3px 8px;
             border-radius: 4px;
@@ -224,7 +225,7 @@
             color: #991b1b;
         }
 
-        /* Messaging Center UI */
+        /* Messaging UI */
         .messaging-layout {
             display: flex;
             gap: 20px;
@@ -246,12 +247,7 @@
             border-radius: 8px;
             background: white;
             padding: 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: var(--text-muted);
+            overflow-y: auto;
         }
 
         .msg-item {
@@ -263,48 +259,6 @@
 
         .msg-item:hover {
             background: #f8fafc;
-        }
-
-        .msg-item b {
-            font-size: 0.85rem;
-            color: #1e293b;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .msg-date {
-            font-size: 0.65rem;
-            color: #94a3b8;
-        }
-
-        .stencil-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-        }
-
-        .stencil-card {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
-            background: white;
-            transition: 0.2s;
-            cursor: pointer;
-        }
-
-        .stencil-card:hover {
-            border-color: var(--primary-orange);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .stencil-title {
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 5px;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
 
         .vsl-btn {
@@ -362,14 +316,6 @@
                 <div class="sub-item" id="btn_withdrawals" onclick="switchPage('withdrawals')"><i
                         data-lucide="arrow-up-from-line" size="14"></i> Withdrawal records</div>
             </div>
-            <div class="menu-item" onclick="toggleSub('transaction')"><i data-lucide="repeat" size="18"></i> Transaction
-                records <i data-lucide="chevron-down" size="14" style="margin-left:auto;"></i></div>
-            <div class="sub-menu" id="transactionSub">
-                <div class="sub-item" id="btn_stock" onclick="switchPage('stock')"><i data-lucide="line-chart"
-                        size="14"></i> Stock trading</div>
-                <div class="sub-item" id="btn_fund" onclick="switchPage('fund')"><i data-lucide="pie-chart"
-                        size="14"></i> Fund trading</div>
-            </div>
             <div class="menu-item" id="btn_messages" onclick="switchPage('messages')"><i data-lucide="send"
                     size="18"></i> Internal messages</div>
         </nav>
@@ -377,8 +323,7 @@
 
     <main class="main-content">
         <header class="top-nav">
-            <div style="font-size: 0.9rem; display: flex; align-items: center; gap: 10px;">Welcome, <b>admin</b> <i
-                    data-lucide="settings" size="18"></i></div>
+            <div style="font-size: 0.9rem; display: flex; align-items: center; gap: 10px;">Welcome, <b>admin</b></div>
         </header>
 
         <div class="page-tabs" id="tabContainer">
@@ -389,13 +334,25 @@
             <!-- PAGE: HOME -->
             <div id="pageHome" class="vsl-page">
                 <div class="section-card">
-                    <h3>Dashboard Summary</h3>
-                    <div id="stat_total" style="font-size:1.5rem; font-weight:800; color:var(--primary-blue);">
-                        Loading...</div>
+                    <h3>Dashboard Overview</h3>
+                    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                        <div class="section-card" style="background:#f0f9ff; margin:0;">
+                            <div style="font-size:0.75rem;">TOTAL USERS</div>
+                            <h2 id="st_total">0</h2>
+                        </div>
+                        <div class="section-card" style="background:#f0fdf4; margin:0;">
+                            <div style="font-size:0.75rem;">PENDING KYC</div>
+                            <h2 id="st_kyc">0</h2>
+                        </div>
+                        <div class="section-card" style="background:#fff7ed; margin:0;">
+                            <div style="font-size:0.75rem;">PENDING DEPOSITS</div>
+                            <h2 id="st_dep">0</h2>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- PAGE: KYC AUTHENTICATION -->
+            <!-- PAGE: KYC -->
             <div id="pageKyc" class="vsl-page" style="display:none;">
                 <div class="section-card">
                     <h3>Real-name authentication</h3>
@@ -405,13 +362,12 @@
                                 <tr>
                                     <th>User</th>
                                     <th>Status</th>
-                                    <th>Mobile</th>
-                                    <th>Full Name</th>
-                                    <th>Apply Time</th>
+                                    <th>Name</th>
+                                    <th>Time</th>
                                     <th>Operate</th>
                                 </tr>
                             </thead>
-                            <tbody id="kycTableBody"></tbody>
+                            <tbody id="kycList"></tbody>
                         </table>
                     </div>
                 </div>
@@ -425,15 +381,15 @@
                         <table class="vsl-table">
                             <thead>
                                 <tr>
-                                    <th>Status</th>
                                     <th>Client</th>
-                                    <th>Full Name</th>
+                                    <th>Name</th>
                                     <th>Balance</th>
                                     <th>VIP</th>
+                                    <th>Credit</th>
                                     <th>Operate</th>
                                 </tr>
                             </thead>
-                            <tbody id="userTableBody"></tbody>
+                            <tbody id="userList"></tbody>
                         </table>
                     </div>
                 </div>
@@ -442,238 +398,163 @@
             <!-- PAGE: DEPOSITS -->
             <div id="pageDeposits" class="vsl-page" style="display:none;">
                 <div class="section-card">
-                    <h3>Deposit records</h3>
-                    <p>Fetching deposit data...</p>
+                    <h3>Deposit Records</h3>
+                    <div class="vsl-table-wrap">
+                        <table class="vsl-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                    <th>Operate</th>
+                                </tr>
+                            </thead>
+                            <tbody id="depList"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <!-- PAGE: INTERNAL MESSAGES -->
+            <!-- PAGE: WITHDRAWALS -->
+            <div id="pageWithdrawals" class="vsl-page" style="display:none;">
+                <div class="section-card">
+                    <h3>Withdrawal Records</h3>
+                    <div class="vsl-table-wrap">
+                        <table class="vsl-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User</th>
+                                    <th>Amount</th>
+                                    <th>Bank</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                    <th>Operate</th>
+                                </tr>
+                            </thead>
+                            <tbody id="withList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE: MESSAGES -->
             <div id="pageMessages" class="vsl-page" style="display:none;">
                 <div class="section-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <h3 style="margin:0;">Internal Messaging Center</h3>
-                        <button class="vsl-btn orange" onclick="openNewMsgModal()">New Message</button>
+                        <h3>Internal Messaging Center</h3>
+                        <button class="vsl-btn orange" onclick="openMsgModal()">+ New Message</button>
                     </div>
-                    <div style="display:flex; gap:10px; margin-bottom:20px;">
-                        <button class="vsl-btn active" id="msgTabSent" onclick="showMsgSection('sent')">Sent</button>
-                        <button class="vsl-btn" id="msgTabStencil" onclick="showMsgSection('stencil')">Stencil</button>
-                    </div>
-
-                    <div id="msgSentView" class="messaging-layout">
-                        <div class="message-list" id="sentMsgList">
-                            <div style="text-align:center; padding:20px; color:#94a3b8;">Loading messages...</div>
-                        </div>
-                        <div class="message-content" id="msgContentArea">
-                            <i data-lucide="mail-open" size="40"></i>
-                            <p>Select a message to view content</p>
+                    <div class="messaging-layout">
+                        <div class="message-list" id="sentMsgs"></div>
+                        <div class="message-content" id="msgBodyArea">
+                            <p>Select a message to read.</p>
                         </div>
                     </div>
-
-                    <div id="msgStencilView" style="display:none;">
-                        <div class="stencil-grid">
-                            <div class="stencil-card" onclick="useStencil('System Announcement')">
-                                <div class="stencil-title"><i data-lucide="megaphone" size="14"></i> Announcement</div>
-                                <p style="font-size:0.7rem; color:#64748b;">Template for general system news...</p>
-                            </div>
-                            <div class="stencil-card" onclick="useStencil('Reward Notice')">
-                                <div class="stencil-title"><i data-lucide="award" size="14"></i> Reward Notice</div>
-                                <p style="font-size:0.7rem; color:#64748b;">Template for user bonuses...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- MODAL: NEW MESSAGE -->
-            <div id="newMsgModal" class="loader" style="background: rgba(0,0,0,0.5); z-index: 2000;">
-                <div class="section-card" style="width: 500px; max-width: 90vw; position: relative;">
-                    <button onclick="closeMsgModal()"
-                        style="position:absolute; top:15px; right:15px; border:none; background:none; cursor:pointer; color:#94a3b8;"><i
-                            data-lucide="x" size="20"></i></button>
-                    <h3 style="margin-top:0; margin-bottom:20px;">Send Internal Message</h3>
-
-                    <div style="margin-bottom:15px;">
-                        <label
-                            style="font-size:0.75rem; font-weight:600; color:#64748b; display:block; margin-bottom:5px;">Select
-                            User</label>
-                        <select id="msgTargetUser"
-                            style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:6px; outline:none;"></select>
-                    </div>
-
-                    <div style="margin-bottom:15px;">
-                        <label
-                            style="font-size:0.75rem; font-weight:600; color:#64748b; display:block; margin-bottom:5px;">Message
-                            Title</label>
-                        <input type="text" id="msgTitle" placeholder="e.g., Important Account Notice"
-                            style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:6px; outline:none; box-sizing:border-box;">
-                    </div>
-
-                    <div style="margin-bottom:20px;">
-                        <label
-                            style="font-size:0.75rem; font-weight:600; color:#64748b; display:block; margin-bottom:5px;">Content</label>
-                        <textarea id="msgBody" rows="5" placeholder="Type your message here..."
-                            style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:6px; outline:none; resize:none; font-family:inherit; box-sizing:border-box;"></textarea>
-                    </div>
-
-                    <div style="display:flex; justify-content:flex-end; gap:10px;">
-                        <button class="vsl-btn" onclick="closeMsgModal()">Cancel</button>
-                        <button class="vsl-btn orange" id="sendBtn" onclick="sendMessage()">Send Message</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PLACEHOLDERS FOR OTHER PAGES -->
-            <div id="pageWithdrawals" class="vsl-page" style="display:none;">
-                <div class="section-card">
-                    <h3>Withdrawal records</h3>
-                </div>
-            </div>
-            <div id="pageStock" class="vsl-page" style="display:none;">
-                <div class="section-card">
-                    <h3>Stock trading</h3>
-                </div>
-            </div>
-            <div id="pageFund" class="vsl-page" style="display:none;">
-                <div class="section-card">
-                    <h3>Fund trading</h3>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- NEW MESSAGE MODAL -->
+    <div id="msgModal" class="loader" style="background:rgba(0,0,0,0.5); z-index:2000;">
+        <div class="section-card" style="width:500px;">
+            <h3>Compose Message</h3>
+            <select id="msgTarget"
+                style="width:100%; padding:10px; margin-bottom:15px; border-radius:6px; border:1px solid #ddd;"></select>
+            <input id="msgTitle" placeholder="Subject"
+                style="width:100%; padding:10px; margin-bottom:15px; border-radius:6px; border:1px solid #ddd;">
+            <textarea id="msgBody" rows="5" placeholder="Message content..."
+                style="width:100%; padding:10px; border-radius:6px; border:1px solid #ddd;"></textarea>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                <button class="vsl-btn"
+                    onclick="document.getElementById('msgModal').style.display='none'">Cancel</button>
+                <button class="vsl-btn orange" onclick="sendMsg()">Send</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         if (sessionStorage.getItem('admin_auth') !== 'true') window.location.href = 'admin_login.html';
         lucide.createIcons();
+        let allUsers = [];
 
         async function init() {
             showLoader(true);
             const client = DB.getClient();
             if (!client) return;
-            const { data: users } = await client.from('users').select('*').order('created_at', { ascending: false });
-            if (users) {
-                document.getElementById('stat_total').innerText = "Total Users: " + users.length;
-                renderKyc(users);
-                renderUsers(users);
+
+            const [{ data: u }, { data: d }, { data: w }, { data: m }] = await Promise.all([
+                client.from('users').select('*').order('created_at', { ascending: false }),
+                client.from('deposits').select('*, users(mobile,username)').order('created_at', { ascending: false }),
+                client.from('withdrawals').select('*, users(mobile,username)').order('created_at', { ascending: false }),
+                client.from('messages').select('*, users(mobile)').eq('sender', 'Admin').order('created_at', { ascending: false })
+            ]);
+
+            if (u) {
+                allUsers = u;
+                document.getElementById('st_total').innerText = u.length;
+                document.getElementById('st_kyc').innerText = u.filter(x => x.kyc === 'Pending').length;
+
+                document.getElementById('userList').innerHTML = u.map(x => `<tr><td>${x.mobile}</td><td>${x.username}</td><td>₹${parseFloat(x.balance).toFixed(2)}</td><td>${x.vip}</td><td>${x.credit_score}</td><td><i data-lucide="edit" size="16"></i></td></tr>`).join('');
+                document.getElementById('kycList').innerHTML = u.map(x => `<tr><td>${x.mobile}</td><td><span class="pill pill-${x.kyc}">${x.kyc}</span></td><td>${x.username}</td><td>${new Date(x.created_at).toLocaleDateString()}</td><td><i data-lucide="check" style="color:green;cursor:pointer"></i></td></tr>`).join('');
             }
+            if (d) {
+                document.getElementById('st_dep').innerText = d.filter(x => x.status === 'Pending').length;
+                document.getElementById('depList').innerHTML = d.map(x => `<tr><td>#${x.id}</td><td>${x.users?.mobile}</td><td>₹${parseFloat(x.amount).toFixed(2)}</td><td><span class="pill pill-${x.status}">${x.status}</span></td><td>${new Date(x.created_at).toLocaleString()}</td><td><i data-lucide="thumbs-up" style="color:blue;cursor:pointer"></i></td></tr>`).join('');
+            }
+            if (w) {
+                document.getElementById('withList').innerHTML = w.map(x => `<tr><td>#${x.id}</td><td>${x.users?.mobile}</td><td>₹${parseFloat(x.amount).toFixed(2)}</td><td>${x.bank_name}</td><td><span class="pill pill-${x.status}">${x.status}</span></td><td>${new Date(x.created_at).toLocaleString()}</td><td><i data-lucide="more-horizontal"></i></td></tr>`).join('');
+            }
+            if (m) {
+                document.getElementById('sentMsgs').innerHTML = m.map(x => {
+                    const pj = JSON.parse(x.message);
+                    return `<div class="msg-item" onclick='viewM(${JSON.stringify(x).replace(/'/g, "&apos;")})'><b>${pj.title}</b><div style="font-size:0.7rem">To: ${x.users?.mobile}</div></div>`;
+                }).join('');
+            }
+            lucide.createIcons();
             showLoader(false);
         }
 
-        function renderKyc(users) {
-            const tbody = document.getElementById('kycTableBody');
-            tbody.innerHTML = users.map(u => `<tr><td><b>${u.mobile}</b></td><td><span class="pill pill-${u.kyc}">${u.kyc}</span></td><td>${u.mobile}</td><td>${u.username}</td><td>${new Date(u.created_at).toLocaleString()}</td><td><i data-lucide="check-circle" style="color:#10b981"></i></td></tr>`).join('');
+        function switchPage(p) {
+            document.querySelectorAll('.vsl-page').forEach(x => x.style.display = 'none');
+            document.querySelectorAll('.menu-item, .sub-item').forEach(x => x.classList.remove('active'));
+            document.getElementById('page' + p.charAt(0).toUpperCase() + p.slice(1)).style.display = 'block';
+            const btn = document.getElementById('btn_' + p); if (btn) btn.classList.add('active');
             lucide.createIcons();
         }
 
-        function renderUsers(users) {
-            const tbody = document.getElementById('userTableBody');
-            tbody.innerHTML = users.map(u => `<tr><td><i data-lucide="check" style="color:#10b981"></i></td><td>${u.mobile}</td><td>${u.username}</td><td>₹${parseFloat(u.balance).toFixed(2)}</td><td>${u.vip || 0}</td><td><i data-lucide="edit" style="color:var(--primary-orange)"></i></td></tr>`).join('');
-            lucide.createIcons();
+        function openMsgModal() {
+            document.getElementById('msgTarget').innerHTML = '<option value="all">All Users</option>' + allUsers.map(u => `<option value="${u.id}">${u.mobile}</option>`).join('');
+            document.getElementById('msgModal').style.display = 'flex';
         }
 
-        function switchPage(page) {
-            document.querySelectorAll('.vsl-page').forEach(p => p.style.display = 'none');
-            document.querySelectorAll('.menu-item, .sub-item').forEach(m => m.classList.remove('active'));
-            const pageId = 'page' + page.charAt(0).toUpperCase() + page.slice(1);
-            if (document.getElementById(pageId)) document.getElementById(pageId).style.display = 'block';
-            const btnId = 'btn_' + page;
-            if (document.getElementById(btnId)) document.getElementById(btnId).classList.add('active');
-            lucide.createIcons();
-        }
-
-        function showMsgSection(section) {
-            document.getElementById('msgSentView').style.display = section === 'sent' ? 'flex' : 'none';
-            document.getElementById('msgStencilView').style.display = section === 'stencil' ? 'block' : 'none';
-            document.getElementById('msgTabSent').classList.toggle('active', section === 'sent');
-            document.getElementById('msgTabStencil').classList.toggle('active', section === 'stencil');
-            if (section === 'sent') fetchMessages();
-        }
-
-        // Messaging Functions
-        function openNewMsgModal() {
-            const select = document.getElementById('msgTargetUser');
-            select.innerHTML = '<option value="all">All Users</option>' +
-                allUsers.map(u => `<option value="${u.id}">${u.mobile} (${u.username})</option>`).join('');
-            document.getElementById('newMsgModal').style.display = 'flex';
-        }
-
-        function closeMsgModal() { document.getElementById('newMsgModal').style.display = 'none'; }
-
-        async function sendMessage() {
-            const userId = document.getElementById('msgTargetUser').value;
-            const title = document.getElementById('msgTitle').value;
-            const body = document.getElementById('msgBody').value;
-
-            if (!title || !body) return alert("Please fill title and content!");
+        async function sendMsg() {
+            const client = DB.getClient();
+            const tid = document.getElementById('msgTarget').value;
+            const msgData = JSON.stringify({ title: document.getElementById('msgTitle').value, body: document.getElementById('msgBody').value });
 
             showLoader(true);
-            const client = DB.getClient();
-
-            const messageData = JSON.stringify({ title, body });
-
-            try {
-                if (userId === 'all') {
-                    const messages = allUsers.map(u => ({ user_id: u.id, message: messageData, sender: 'Admin' }));
-                    await client.from('messages').insert(messages);
-                } else {
-                    await client.from('messages').insert({ user_id: parseInt(userId), message: messageData, sender: 'Admin' });
-                }
-                alert("Message sent successfully!");
-                closeMsgModal();
-                fetchMessages();
-            } catch (e) {
-                alert("Error sending message: " + e.message);
+            if (tid === 'all') {
+                const batch = allUsers.map(u => ({ user_id: u.id, message: msgData, sender: 'Admin' }));
+                await client.from('messages').insert(batch);
+            } else {
+                await client.from('messages').insert({ user_id: parseInt(tid), message: msgData, sender: 'Admin' });
             }
-            showLoader(false);
+            alert("Sent!");
+            document.getElementById('msgModal').style.display = 'none';
+            init();
         }
 
-        async function fetchMessages() {
-            const client = DB.getClient();
-            const { data: msgs } = await client.from('messages').select('*, users(mobile)').eq('sender', 'Admin').order('created_at', { ascending: false });
-
-            const list = document.getElementById('sentMsgList');
-            if (!msgs || msgs.length === 0) {
-                list.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">No messages sent.</div>';
-                return;
-            }
-
-            list.innerHTML = msgs.map(m => {
-                const data = JSON.parse(m.message);
-                return `
-                    <div class="msg-item" onclick='viewMessage(${JSON.stringify(m).replace(/'/g, "&apos;")})'>
-                        <b>${data.title}</b>
-                        <div style="font-size:0.7rem; color:#64748b; margin-bottom:5px;">To: ${m.users ? m.users.mobile : 'Unknown'}</div>
-                        <div class="msg-date">${new Date(m.created_at).toLocaleString()}</div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function viewMessage(m) {
-            const data = JSON.parse(m.message);
-            document.getElementById('msgContentArea').innerHTML = `
-                <div style="text-align:left; width:100%;">
-                    <h2 style="margin-top:0;">${data.title}</h2>
-                    <div style="color:#64748b; font-size:0.8rem; margin-bottom:20px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
-                        To: ${m.users ? m.users.mobile : 'All'} | Sent: ${new Date(m.created_at).toLocaleString()}
-                    </div>
-                    <div style="font-size:0.95rem; line-height:1.6; color:#334155; white-space:pre-wrap;">${data.body}</div>
-                </div>
-            `;
-        }
-
-        function useStencil(type) {
-            openNewMsgModal();
-            if (type === 'System Announcement') {
-                document.getElementById('msgTitle').value = "System Maintenance Notice";
-                document.getElementById('msgBody').value = "Dear user, the system will undergo maintenance on [Date] at [Time]. Trading services will be temporarily unavailable.";
-            } else if (type === 'Reward Notice') {
-                document.getElementById('msgTitle').value = "Congratulation! Reward Received";
-                document.getElementById('msgBody').value = "You have received a special bonus of [Amount] in your account. Check your balance now!";
-            }
+        function viewM(x) {
+            const pj = JSON.parse(x.message);
+            document.getElementById('msgBodyArea').innerHTML = `<h3>${pj.title}</h3><hr><p style="text-align:left">${pj.body}</p>`;
         }
 
         function toggleSub(id) { document.getElementById(id + 'Sub').classList.toggle('show'); }
-        function showLoader(show) { document.getElementById('vslLoader').style.display = show ? 'flex' : 'none'; }
+        function showLoader(s) { document.getElementById('vslLoader').style.display = s ? 'flex' : 'none'; }
         window.onload = init;
     </script>
 </body>
