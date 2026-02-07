@@ -451,6 +451,118 @@
             border-color: var(--primary-orange);
         }
 
+        /* KYC Verification (Table Page) Specifics */
+        .kyc-verify-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .kyc-verify-filters {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            flex-grow: 1;
+            margin-right: 20px;
+        }
+
+        .kyc-filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .kyc-filter-item label {
+            font-size: 0.75rem;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .kyc-filter-input {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            background: white;
+        }
+
+        .kyc-status-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .kyc-status-pill {
+            padding: 6px 15px;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+            color: #64748b;
+        }
+
+        .kyc-status-pill:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .kyc-status-pill.active {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .kyc-table-img {
+            width: 50px;
+            height: 35px;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            object-fit: cover;
+            background: #f8fafc;
+            cursor: pointer;
+        }
+
+        .kyc-refresh-btn {
+            background: #f97316;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .kyc-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+        }
+
+        .kyc-badge.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .kyc-badge.approved {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .kyc-badge.reject {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
         .kyc-image-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -676,26 +788,80 @@
             <!-- STUBS FOR OTHERS -->
             <div id="pageKyc" class="vsl-page" style="display:none;">
                 <div class="section-card">
-                    <h3>Real-name authentication</h3>
+                    <div class="kyc-verify-header">
+                        <div class="kyc-verify-filters">
+                            <div class="kyc-filter-item">
+                                <label>Username</label>
+                                <input type="text" class="kyc-filter-input" placeholder="Please enter your username">
+                            </div>
+                            <div class="kyc-filter-item">
+                                <label>Customer's Full Name</label>
+                                <input type="text" class="kyc-filter-input"
+                                    placeholder="Please enter the customer's full name">
+                            </div>
+                            <div class="kyc-filter-item">
+                                <label>Customer-Verified Mobile Phone Number</label>
+                                <input type="text" class="kyc-filter-input"
+                                    placeholder="Please enter your verified mobile phone number">
+                            </div>
+                            <div class="kyc-filter-item">
+                                <label>Salesperson</label>
+                                <input type="text" class="kyc-filter-input"
+                                    placeholder="Please enter the business name">
+                            </div>
+                        </div>
+                        <button class="kyc-refresh-btn" onclick="init()"><i data-lucide="refresh-cw" size="16"></i>
+                            refresh</button>
+                    </div>
+
+                    <div class="kyc-status-bar">
+                        <div class="kyc-status-pill active">all</div>
+                        <div class="kyc-status-pill">Approved</div>
+                        <div class="kyc-status-pill">reject</div>
+                        <div class="kyc-status-pill">Pending review</div>
+                        <div class="kyc-status-pill">Not submitted</div>
+                    </div>
+
                     <div class="vsl-table-wrap">
                         <table class="vsl-table" style="width:100%; border-collapse:collapse;">
                             <thead>
-                                <tr style="background:#f8fafc; text-align:left;">
+                                <tr style="background:#f8fafc; text-align:left; border-top: 1px solid #e2e8f0;">
                                     <th
-                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
-                                        User</th>
+                                        style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
+                                        Customer (username)</th>
                                     <th
-                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
-                                        Status</th>
+                                        style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
+                                        state</th>
                                     <th
-                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
-                                        Name</th>
+                                        style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
+                                        Verify mobile phone number</th>
                                     <th
-                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
-                                        Time</th>
+                                        style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
+                                        Full name</th>
                                     <th
-                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
-                                        Operate</th>
+                                        style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
+                                        ID number</th>
+                                    <th
+                                        style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
+                                        Date of birth</th>
+                                    <th
+                                        style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
+                                        ID photo (front view)</th>
+                                    <th
+                                        style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
+                                        ID photo (back)</th>
+                                    <th
+                                        style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
+                                        salesperson</th>
+                                    <th
+                                        style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
+                                        Application time</th>
+                                    <th
+                                        style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
+                                        information</th>
+                                    <th
+                                        style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
+                                        operate</th>
                                 </tr>
                             </thead>
                             <tbody id="kycList"></tbody>
@@ -1165,11 +1331,12 @@
             if (!client) return;
 
             // Fetch core data first
-            const [{ data: u }, { data: d }, { data: w }, { data: m }] = await Promise.all([
+            const [{ data: u }, { data: d }, { data: w }, { data: m }, { data: ks }] = await Promise.all([
                 client.from('users').select('*').order('created_at', { ascending: false }),
                 client.from('deposits').select('*, users(mobile,username)').order('created_at', { ascending: false }),
                 client.from('withdrawals').select('*, users(mobile,username)').order('created_at', { ascending: false }),
-                client.from('messages').select('*, users(mobile)').eq('sender', 'Admin').order('created_at', { ascending: false })
+                client.from('messages').select('*, users(mobile)').eq('sender', 'Admin').order('created_at', { ascending: false }),
+                client.from('kyc_submissions').select('*').order('submitted_at', { ascending: false })
             ]);
 
             // Attempt to fetch additional modules (Safe fetch to handle missing tables)
@@ -1220,19 +1387,36 @@
                 `).join('');
 
                 // Render KYC
-                document.getElementById('kycList').innerHTML = u.map(x => `
-                    <tr>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.mobile}</td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><span style="padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.7rem; background:${x.kyc === 'Approved' ? '#dcfce7' : '#fef3c7'}; color:${x.kyc === 'Approved' ? '#166534' : '#92400e'};">${x.kyc}</span></td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.username}</td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${new Date(x.created_at).toLocaleDateString()}</td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">
-                            <div class="btn-edit-wrap">
-                                <i data-lucide="edit" size="16" style="cursor:pointer" onclick="openKycEdit('${x.id}')"></i>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
+                document.getElementById('kycList').innerHTML = u.map(x => {
+                    const sub = ks ? ks.find(s => s.user_id === x.id) : null;
+                    const statusClass = x.kyc === 'Approved' ? 'approved' : (x.kyc === 'Rejected' ? 'reject' : 'pending');
+                    const statusText = x.kyc === 'Pending' ? '待审核' : x.kyc;
+                    return `
+                        <tr>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.mobile}</td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><span class="kyc-badge ${statusClass}">${statusText}</span></td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.mobile}</td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.username || '-'}</td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.id_number || '-'}</td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.dob || '1991-12-22'}</td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9;">
+                                ${sub?.id_front_url ? `<img src="${sub.id_front_url}" class="kyc-table-img" onclick="openKycEdit('${x.id}')">` : `<div class="kyc-table-img" style="display:flex;align-items:center;justify-content:center;"><i data-lucide="image" size="14"></i></div>`}
+                            </td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9;">
+                                ${sub?.id_back_url ? `<img src="${sub.id_back_url}" class="kyc-table-img" onclick="openKycEdit('${x.id}')">` : `<div class="kyc-table-img" style="display:flex;align-items:center;justify-content:center;"><i data-lucide="image" size="14"></i></div>`}
+                            </td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">-</td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${new Date(x.created_at).toLocaleString()}</td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">-</td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9;">
+                                <div class="btn-edit-wrap" style="display:flex; gap:8px;">
+                                    <i data-lucide="edit-3" size="16" style="cursor:pointer" onclick="openKycEdit('${x.id}')"></i>
+                                    <i data-lucide="file-text" size="16" style="cursor:pointer" onclick="openKycEdit('${x.id}')"></i>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
             }
 
             // Render Deposits
