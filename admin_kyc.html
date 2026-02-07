@@ -4,309 +4,508 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KYC Management - Avendus Admin</title>
+    <title>VSLNHW Admin Dashboard</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>const supabasejs = window.supabase;</script>
     <script src="db.js"></script>
     <style>
+        :root {
+            --sidebar-bg: #ffffff;
+            --main-bg: #f5f7fb;
+            --primary-blue: #00b4d8;
+            --text-main: #334155;
+            --border-color: #e2e8f0;
+        }
+
         body {
-            background-color: #0f172a;
-            color: #f8fafc;
-            font-family: 'Outfit', sans-serif;
-            overflow-x: hidden;
+            background-color: var(--main-bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
         }
 
-        .admin-sidebar {
-            width: 280px;
-            background: #1e293b;
+        /* Sidebar Style */
+        .sidebar {
+            width: 240px;
+            background: var(--sidebar-bg);
             height: 100vh;
+            border-right: 1px solid var(--border-color);
             position: fixed;
-            padding: 2rem;
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
         }
 
-        .admin-main {
-            margin-left: 280px;
-            padding: 2.5rem;
-            min-height: 100vh;
+        .logo-area {
+            padding: 20px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: #1e1b4b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .admin-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 2rem;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 2rem;
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #4338ca, #6366f1);
+            border-radius: 6px;
         }
 
-        .nav-item {
+        .search-nav {
+            padding: 15px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .nav-menu {
+            flex-grow: 1;
+            padding: 10px;
+        }
+
+        .menu-item {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px 16px;
-            color: #94a3b8;
+            padding: 12px;
+            color: #64748b;
             text-decoration: none;
-            border-radius: 10px;
-            transition: 0.2s;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            margin-bottom: 4px;
             cursor: pointer;
-            margin-bottom: 0.5rem;
+            transition: 0.2s;
         }
 
-        .nav-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
+        .menu-item.active {
+            background: #e0f2fe;
+            color: #0369a1;
+            font-weight: 600;
         }
 
-        .nav-item.active {
-            background: #3b82f6;
-            color: white;
+        .menu-item:hover:not(.active) {
+            background: #f8fafc;
         }
 
-        .admin-table {
+        /* Main Content */
+        .content-area {
+            margin-left: 240px;
+            flex-grow: 1;
+            min-height: 100vh;
+        }
+
+        /* Top Bar */
+        .topbar {
+            background: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .admin-profile {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Content Header */
+        .page-header {
+            padding: 20px 30px;
+            background: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .breadcrumb {
+            color: #f97316;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Dashboard Overview */
+        .dashboard-container {
+            padding: 30px;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .card-subtitle {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        /* Specific Color for Numbers */
+        .val-blue {
+            color: #3b82f6;
+        }
+
+        .val-red {
+            color: #ef4444;
+        }
+
+        .val-green {
+            color: #10b981;
+        }
+
+        /* KYC Table Style */
+        .vsl-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 1rem;
         }
 
-        .admin-table th {
+        .vsl-table th {
             text-align: left;
-            padding: 1rem;
+            padding: 12px;
+            font-size: 0.75rem;
+            color: #64748b;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .vsl-table td {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.85rem;
+        }
+
+        .doc-thumbnail {
+            width: 50px;
+            height: 35px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: #94a3b8;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .admin-table td {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-            font-size: 0.9rem;
-        }
-
-        .status-pill {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            border: 1px solid transparent;
-        }
-
-        .pill-Pending {
-            background: #f59e0b20;
-            color: #f59e0b;
-            border-color: #f59e0b40;
-        }
-
-        .pill-Approved {
-            background: #10b98120;
-            color: #10b981;
-            border-color: #10b98140;
-        }
-
-        .pill-Rejected {
-            background: #ef444420;
-            color: #ef4444;
-            border-color: #ef444440;
-        }
-
-        .btn-action {
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: none;
-            font-size: 0.75rem;
-            font-weight: 600;
             cursor: pointer;
-            transition: 0.2s;
-            white-space: nowrap;
+            overflow: hidden;
         }
 
-        .btn-blue {
-            background: #3b82f6;
-            color: white;
+        .doc-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        .btn-green {
-            background: #10b981;
-            color: white;
+        .status-tag {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
         }
 
-        .btn-red {
-            background: #ef4444;
-            color: white;
+        .tag-approved {
+            background: #dcfce7;
+            color: #166534;
         }
 
-        .btn-action:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
+        .tag-pending {
+            background: #fef3c7;
+            color: #92400e;
         }
 
-        /* Modal */
-        .modal {
+        .tag-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .btn-op {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .btn-op:hover {
+            color: #3b82f6;
+        }
+
+        /* Tabs */
+        .tab-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 6px 15px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+            background: white;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            background: #fff;
+            border-color: #f97316;
+            color: #f97316;
+        }
+
+        .loader-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(255, 255, 255, 0.7);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            padding: 20px;
-        }
-
-        .modal-content {
-            background: #1e293b;
-            width: 100%;
-            max-width: 600px;
-            border-radius: 20px;
-            padding: 2rem;
-            border: 1px solid #334155;
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #94a3b8;
-            font-size: 0.85rem;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.8rem;
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            color: white;
-            outline: none;
-        }
-
-        .form-input:focus {
-            border-color: #3b82f6;
-        }
-
-        .loading-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
         }
     </style>
 </head>
 
 <body>
-    <div class="loading-overlay" id="loader"><i data-lucide="loader-2" class="animate-spin" size="48"></i></div>
+    <div class="loader-overlay" id="loader"><i data-lucide="loader-2" class="animate-spin"></i></div>
 
-    <aside class="admin-sidebar">
-        <div
-            style="font-size: 1.5rem; font-weight: 800; color: #3b82f6; margin-bottom: 2rem; display: flex; align-items: center; gap: 10px;">
-            <i data-lucide="shield-check"></i> Admin
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo-area">
+            <div class="logo-icon"></div>
+            VSLNHW
         </div>
-        <nav>
-            <div class="nav-item active" id="navKyc" onclick="switchTab('kyc')"><i data-lucide="file-check"></i> KYC
-                Review</div>
-            <div class="nav-item" id="navUsers" onclick="switchTab('users')"><i data-lucide="users"></i> User Management
+        <div class="search-nav">
+            <input type="text" class="search-box" placeholder="search...">
+        </div>
+        <nav class="nav-menu">
+            <div class="menu-item active" id="menuHome" onclick="switchPage('home')">
+                <i data-lucide="home" size="18"></i> front page
+            </div>
+            <div class="menu-item" id="menuKyc" onclick="switchPage('kyc')">
+                <i data-lucide="user-check" size="18"></i> Real-name authent...
+            </div>
+            <div class="menu-item" id="menuUsers" onclick="switchPage('users')">
+                <i data-lucide="users" size="18"></i> Customer Manage...
+            </div>
+            <div class="menu-item">
+                <i data-lucide="wallet" size="18"></i> Financial Manag...
+            </div>
+            <div class="menu-item">
+                <i data-lucide="repeat" size="18"></i> Transaction recor...
+            </div>
+            <div class="menu-item">
+                <i data-lucide="message-square" size="18"></i> Internal messages
             </div>
         </nav>
     </aside>
 
-    <main class="admin-main">
-        <header class="admin-header">
-            <h1 id="tabTitle">KYC Review</h1>
-            <p id="tabDesc" style="color: #94a3b8;">Handle pending verification requests.</p>
+    <!-- Content -->
+    <main class="content-area">
+        <header class="topbar">
+            <div class="admin-profile">
+                Welcome, <b>admin</b>
+                <i data-lucide="settings" size="18" style="color: #94a3b8; cursor: pointer;"></i>
+                <i data-lucide="sun" size="18" style="color: #94a3b8; cursor: pointer;"></i>
+            </div>
         </header>
 
-        <!-- KYC Tab -->
-        <div id="tabKyc" class="tab-content">
-            <section class="admin-card">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Mobile</th>
-                            <th>Name</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="kycList"></tbody>
-                </table>
-            </section>
+        <div class="page-header">
+            <div class="breadcrumb"><i data-lucide="rotate-ccw" size="14"></i> front page</div>
         </div>
 
-        <!-- Users Tab -->
-        <div id="tabUsers" class="tab-content" style="display: none;">
-            <section class="admin-card">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Balance</th>
-                            <th>Invested</th>
-                            <th>KYC</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userList"></tbody>
-                </table>
-            </section>
+        <div class="dashboard-container">
+            <!-- PAGE: HOME (DASHBOARD) -->
+            <div id="pageHome">
+                <div class="tab-bar">
+                    <button class="tab-btn active">Overview</button>
+                    <button class="tab-btn">Product</button>
+                </div>
+
+                <!-- User Info -->
+                <div class="section-card">
+                    <div class="card-title">User Information</div>
+                    <div class="card-subtitle">Current login session information</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">NAME</div>
+                            <div class="stat-value" style="color: #1e293b;">admin</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">ROLE</div>
+                            <div class="stat-value" style="color: #1e293b;">business</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">USER ID</div>
+                            <div class="stat-value"
+                                style="color: #1e293b; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis;">
+                                admin_session_active</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Overview -->
+                <div class="section-card">
+                    <div class="card-title">Customer Overview</div>
+                    <div class="card-subtitle">Registration and Real-Name Authentication Progress</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">TOTAL NUMBER OF REGISTRATIONS</div>
+                            <div class="stat-value val-blue" id="statTotalUsers">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">REGISTER TODAY</div>
+                            <div class="stat-value val-blue" id="statTodayUsers">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">REGISTERED CUSTOMERS</div>
+                            <div class="stat-value val-blue" id="statApprovedKYC">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">UNREGISTERED CUSTOMERS</div>
+                            <div class="stat-value val-blue" id="statPendingKYC">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">CLIENTS PENDING REVIEW</div>
+                            <div class="stat-value val-blue" id="statReviewNeeded">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recharge Overview -->
+                <div class="section-card">
+                    <div class="card-title">Recharge Overview</div>
+                    <div class="card-subtitle">Cumulative and today's recharge data</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">TOTAL RECHARGE AMOUNT</div>
+                            <div class="stat-value val-blue">₹0.00</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">TOTAL USERS WHO RECHARGED</div>
+                            <div class="stat-value val-blue">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">TODAY'S RECHARGE AMOUNT</div>
+                            <div class="stat-value val-green">₹0.00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE: KYC REVIEW -->
+            <div id="pageKyc" style="display: none;">
+                <div class="section-card">
+                    <div class="card-title">KYC Verification</div>
+                    <div style="display: flex; gap: 10px; margin: 15px 0;">
+                        <input type="text" class="search-box" style="width: 200px;" placeholder="Username">
+                        <input type="text" class="search-box" style="width: 200px;" placeholder="Customer's Full Name">
+                        <button class="tab-btn active"
+                            style="background: #f97316; color: white; border: none;">Refresh</button>
+                    </div>
+
+                    <div class="tab-bar">
+                        <button class="tab-btn active">all</button>
+                        <button class="tab-btn">Approved</button>
+                        <button class="tab-btn">reject</button>
+                        <button class="tab-btn">Pending review</button>
+                    </div>
+
+                    <table class="vsl-table">
+                        <thead>
+                            <tr>
+                                <th>Customer (username)</th>
+                                <th>State</th>
+                                <th>Mobile</th>
+                                <th>Full Name</th>
+                                <th>ID Photo (front)</th>
+                                <th>ID Photo (back)</th>
+                                <th>Application time</th>
+                                <th>Operate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="kycTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PAGE: USERS -->
+            <div id="pageUsers" style="display: none;">
+                <div class="section-card">
+                    <div class="card-title">Customer Management</div>
+                    <table class="vsl-table">
+                        <thead>
+                            <tr>
+                                <th>Mobile</th>
+                                <th>Username</th>
+                                <th>Balance</th>
+                                <th>Invested</th>
+                                <th>KYC</th>
+                                <th>Operate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </main>
-
-    <!-- Edit User Modal -->
-    <div class="modal" id="editModal">
-        <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
-                <h2 id="editTitle">Edit User</h2>
-                <button onclick="closeModal()" style="background:none; border:none; color:white; cursor:pointer;"><i
-                        data-lucide="x"></i></button>
-            </div>
-            <input type="hidden" id="editUserId">
-            <div class="form-group">
-                <label>Username</label>
-                <input type="text" id="editUsername" class="form-input">
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="form-group">
-                    <label>Balance ($)</label>
-                    <input type="number" id="editBalance" class="form-input" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label>Invested ($)</label>
-                    <input type="number" id="editInvested" class="form-input" step="0.01">
-                </div>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="form-group">
-                    <label>Credit Score</label>
-                    <input type="number" id="editCredit" class="form-input">
-                </div>
-                <div class="form-group">
-                    <label>VIP Level</label>
-                    <input type="number" id="editVip" class="form-input">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>KYC Status</label>
-                <select id="editKyc" class="form-input">
-                    <option value="Pending">Pending</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
-                </select>
-            </div>
-            <button class="btn-action btn-blue" style="width: 100%; padding: 12px;" onclick="saveUser()">Save
-                Changes</button>
-        </div>
-    </div>
 
     <script>
         // Security Guard
@@ -317,115 +516,92 @@
         lucide.createIcons();
         let allUsers = [];
 
-        async function fetchAll() {
+        async function initDashboard() {
             showLoader(true);
             const client = DB.getClient();
-            if (!client) return alert("Supabase Cloud is not connected.");
+            if (!client) return;
 
             const { data, error } = await client.from('users').select('*').order('created_at', { ascending: false });
-            if (error) alert(error.message);
-            else allUsers = data;
+            if (data) allUsers = data;
 
-            renderKYC();
-            renderUsers();
+            // Stats Calculation
+            document.getElementById('statTotalUsers').innerText = allUsers.length;
+            document.getElementById('statApprovedKYC').innerText = allUsers.filter(u => u.kyc === 'Approved').length;
+            document.getElementById('statPendingKYC').innerText = allUsers.filter(u => u.kyc === 'Pending').length;
+            document.getElementById('statReviewNeeded').innerText = allUsers.filter(u => u.kyc === 'Pending').length;
+
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('statTodayUsers').innerText = allUsers.filter(u => u.created_at.startsWith(today)).length;
+
+            renderKycTable();
+            renderUserTable();
             showLoader(false);
         }
 
-        function renderKYC() {
-            const list = allUsers.filter(u => u.kyc === 'Pending');
-            const tbody = document.getElementById('kycList');
-            if (list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem; color:#64748b;">No pending KYC requests.</td></tr>';
-                return;
-            }
-            tbody.innerHTML = list.map(u => `
-                <tr>
-                    <td><b>${u.mobile}</b></td>
-                    <td>${u.full_name || 'N/A'}</td>
-                    <td><span class="status-pill pill-Pending">Pending</span></td>
-                    <td style="display: flex; gap: 8px;">
-                        <button class="btn-action btn-green" onclick="quickUpdateKyc(${u.id}, 'Approved')">Approve</button>
-                        <button class="btn-action btn-red" onclick="quickUpdateKyc(${u.id}, 'Rejected')">Reject</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function renderUsers() {
-            const tbody = document.getElementById('userList');
+        function renderKycTable() {
+            const tbody = document.getElementById('kycTableBody');
             tbody.innerHTML = allUsers.map(u => `
                 <tr>
+                    <td><b>${u.mobile}</b></td>
+                    <td><span class="status-tag tag-${u.kyc.toLowerCase()}">${u.kyc}</span></td>
+                    <td>${u.mobile}</td>
+                    <td>${u.full_name || 'N/A'}</td>
+                    <td><div class="doc-thumbnail"><i data-lucide="image" size="14"></i></div></td>
+                    <td><div class="doc-thumbnail"><i data-lucide="image" size="14"></i></div></td>
+                    <td>${new Date(u.created_at).toLocaleString()}</td>
                     <td>
-                        <div style="font-weight:700;">${u.mobile}</div>
-                        <div style="font-size:0.75rem; color:#64748b;">${u.username}</div>
+                        <button class="btn-op" onclick="quickAction(${u.id}, 'Approved')"><i data-lucide="check-circle" size="18"></i></button>
+                        <button class="btn-op" onclick="quickAction(${u.id}, 'Rejected')"><i data-lucide="x-circle" size="18"></i></button>
                     </td>
-                    <td>$${parseFloat(u.balance).toFixed(2)}</td>
-                    <td>$${parseFloat(u.invested).toFixed(2)}</td>
-                    <td><span class="status-pill pill-${u.kyc}">${u.kyc}</span></td>
-                    <td><button class="btn-action btn-blue" onclick="editUser(${u.id})">Edit User</button></td>
                 </tr>
             `).join('');
+            lucide.createIcons();
         }
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        function renderUserTable() {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = allUsers.map(u => `
+                <tr>
+                    <td>${u.mobile}</td>
+                    <td>${u.username}</td>
+                    <td>₹${parseFloat(u.balance).toFixed(2)}</td>
+                    <td>₹${parseFloat(u.invested).toFixed(2)}</td>
+                    <td><span class="status-tag tag-${u.kyc.toLowerCase()}">${u.kyc}</span></td>
+                    <td><button class="btn-op"><i data-lucide="edit-3" size="18"></i></button></td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
 
-            if (tab === 'kyc') {
-                document.getElementById('tabKyc').style.display = 'block';
-                document.getElementById('navKyc').classList.add('active');
-                document.getElementById('tabTitle').innerText = 'KYC Review';
-                document.getElementById('tabDesc').innerText = 'Handle pending verification requests.';
-            } else {
-                document.getElementById('tabUsers').style.display = 'block';
-                document.getElementById('navUsers').classList.add('active');
-                document.getElementById('tabTitle').innerText = 'User Management';
-                document.getElementById('tabDesc').innerText = 'Edit user balances, scores, and details.';
+        async function quickAction(id, status) {
+            if (!confirm("Are you sure?")) return;
+            const client = DB.getClient();
+            await client.from('users').update({ kyc: status }).eq('id', id);
+            initDashboard();
+        }
+
+        function switchPage(page) {
+            document.getElementById('pageHome').style.display = 'none';
+            document.getElementById('pageKyc').style.display = 'none';
+            document.getElementById('pageUsers').style.display = 'none';
+
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+
+            if (page === 'home') {
+                document.getElementById('pageHome').style.display = 'block';
+                document.getElementById('menuHome').classList.add('active');
+            } else if (page === 'kyc') {
+                document.getElementById('pageKyc').style.display = 'block';
+                document.getElementById('menuKyc').classList.add('active');
+            } else if (page === 'users') {
+                document.getElementById('pageUsers').style.display = 'block';
+                document.getElementById('menuUsers').classList.add('active');
             }
         }
 
-        async function quickUpdateKyc(id, status) {
-            if (!confirm(`Confirm ${status} for this user?`)) return;
-            const client = DB.getClient();
-            await client.from('users').update({ kyc: status }).eq('id', id);
-            fetchAll();
-        }
-
-        function editUser(id) {
-            const u = allUsers.find(x => x.id === id);
-            document.getElementById('editUserId').value = u.id;
-            document.getElementById('editUsername').value = u.username;
-            document.getElementById('editBalance').value = u.balance;
-            document.getElementById('editInvested').value = u.invested;
-            document.getElementById('editCredit').value = u.credit_score || 100;
-            document.getElementById('editVip').value = u.vip || 0;
-            document.getElementById('editKyc').value = u.kyc;
-            document.getElementById('editModal').style.display = 'flex';
-        }
-
-        async function saveUser() {
-            const id = document.getElementById('editUserId').value;
-            const updates = {
-                username: document.getElementById('editUsername').value,
-                balance: parseFloat(document.getElementById('editBalance').value),
-                invested: parseFloat(document.getElementById('editInvested').value),
-                credit_score: parseInt(document.getElementById('editCredit').value),
-                vip: parseInt(document.getElementById('editVip').value),
-                kyc: document.getElementById('editKyc').value
-            };
-
-            showLoader(true);
-            const client = DB.getClient();
-            await client.from('users').update(updates).eq('id', id);
-            closeModal();
-            fetchAll();
-        }
-
-        function closeModal() { document.getElementById('editModal').style.display = 'none'; }
         function showLoader(show) { document.getElementById('loader').style.display = show ? 'flex' : 'none'; }
 
-        // Start
-        window.onload = fetchAll;
+        window.onload = initDashboard;
     </script>
 </body>
 
