@@ -487,9 +487,28 @@
             <!-- STUBS FOR OTHERS -->
             <div id="pageKyc" class="vsl-page" style="display:none;">
                 <div class="section-card">
-                    <h3>KYC Review</h3>
+                    <h3>Real-name authentication</h3>
                     <div class="vsl-table-wrap">
-                        <table class="vsl-table">
+                        <table class="vsl-table" style="width:100%; border-collapse:collapse;">
+                            <thead>
+                                <tr style="background:#f8fafc; text-align:left;">
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        User</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Status</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Name</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Time</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Operate</th>
+                                </tr>
+                            </thead>
                             <tbody id="kycList"></tbody>
                         </table>
                     </div>
@@ -497,10 +516,99 @@
             </div>
             <div id="pageUsers" class="vsl-page" style="display:none;">
                 <div class="section-card">
-                    <h3>Users</h3>
+                    <h3>Customer Management</h3>
                     <div class="vsl-table-wrap">
-                        <table class="vsl-table">
+                        <table class="vsl-table" style="width:100%; border-collapse:collapse;">
+                            <thead>
+                                <tr style="background:#f8fafc; text-align:left;">
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Client</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Name</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Balance</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        VIP</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Credit</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Operate</th>
+                                </tr>
+                            </thead>
                             <tbody id="userList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="pageDeposits" class="vsl-page" style="display:none;">
+                <div class="section-card">
+                    <h3>Deposit records</h3>
+                    <div class="vsl-table-wrap">
+                        <table class="vsl-table" style="width:100%; border-collapse:collapse;">
+                            <thead>
+                                <tr style="background:#f8fafc; text-align:left;">
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        ID</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        User</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Amount</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Status</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Time</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Operate</th>
+                                </tr>
+                            </thead>
+                            <tbody id="depList"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="pageWithdrawals" class="vsl-page" style="display:none;">
+                <div class="section-card">
+                    <h3>Withdrawal records</h3>
+                    <div class="vsl-table-wrap">
+                        <table class="vsl-table" style="width:100%; border-collapse:collapse;">
+                            <thead>
+                                <tr style="background:#f8fafc; text-align:left;">
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        ID</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        User</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Amount</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Bank</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Status</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Time</th>
+                                    <th
+                                        style="padding:12px; font-size:0.75rem; color:#64748b; border-bottom:2px solid #e2e8f0;">
+                                        Operate</th>
+                                </tr>
+                            </thead>
+                            <tbody id="withList"></tbody>
                         </table>
                     </div>
                 </div>
@@ -544,15 +652,84 @@
             showLoader(true);
             const client = DB.getClient();
             if (!client) return;
-            const [{ data: u }, { data: m }] = await Promise.all([
-                client.from('users').select('*'),
+            const [{ data: u }, { data: d }, { data: w }, { data: m }] = await Promise.all([
+                client.from('users').select('*').order('created_at', { ascending: false }),
+                client.from('deposits').select('*, users(mobile,username)').order('created_at', { ascending: false }),
+                client.from('withdrawals').select('*, users(mobile,username)').order('created_at', { ascending: false }),
                 client.from('messages').select('*, users(mobile)').eq('sender', 'Admin').order('created_at', { ascending: false })
             ]);
-            if (u) allUsers = u;
+
+            if (u) {
+                allUsers = u;
+                document.getElementById('stat_summary').innerHTML = `
+                    <div class="section-card" style="background:#f0f9ff; margin:0; flex:1;">
+                        <div style="font-size:0.75rem;">TOTAL USERS</div>
+                        <h2>${u.length}</h2>
+                    </div>
+                    <div class="section-card" style="background:#f0fdf4; margin:0; flex:1;">
+                        <div style="font-size:0.75rem;">PENDING KYC</div>
+                        <h2>${u.filter(x => x.kyc === 'Pending').length}</h2>
+                    </div>
+                    <div class="section-card" style="background:#fff7ed; margin:0; flex:1;">
+                        <div style="font-size:0.75rem;">PENDING DEPOSITS</div>
+                        <h2>${d ? d.filter(x => x.status === 'Pending').length : 0}</h2>
+                    </div>
+                `;
+
+                document.getElementById('userList').innerHTML = u.map(x => `
+                    <tr>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.mobile}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.username}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">₹${parseFloat(x.balance).toFixed(2)}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.vip}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.credit_score}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><i data-lucide="edit" size="16" style="cursor:pointer"></i></td>
+                    </tr>
+                `).join('');
+
+                document.getElementById('kycList').innerHTML = u.map(x => `
+                    <tr>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.mobile}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><span style="padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.7rem; background:${x.kyc === 'Approved' ? '#dcfce7' : '#fef3c7'}; color:${x.kyc === 'Approved' ? '#166534' : '#92400e'};">${x.kyc}</span></td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.username}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${new Date(x.created_at).toLocaleDateString()}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><i data-lucide="check" style="color:green;cursor:pointer"></i></td>
+                    </tr>
+                `).join('');
+            }
+
+            if (d && document.getElementById('depList')) {
+                document.getElementById('depList').innerHTML = d.map(x => `
+                    <tr>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">#${x.id}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.users?.mobile}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">₹${parseFloat(x.amount).toFixed(2)}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><span style="padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.7rem; background:#fef3c7; color:#92400e;">${x.status}</span></td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${new Date(x.created_at).toLocaleString()}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><i data-lucide="thumbs-up" style="color:blue;cursor:pointer"></i></td>
+                    </tr>
+                `).join('');
+            }
+
+            if (w && document.getElementById('withList')) {
+                document.getElementById('withList').innerHTML = w.map(x => `
+                    <tr>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">#${x.id}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.users?.mobile}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">₹${parseFloat(x.amount).toFixed(2)}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.bank_name}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><span style="padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.7rem; background:#fee2e2; color:#991b1b;">${x.status}</span></td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${new Date(x.created_at).toLocaleString()}</td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><i data-lucide="more-horizontal"></i></td>
+                    </tr>
+                `).join('');
+            }
+
             if (m) {
                 allMsgs = m;
                 renderMessages(m);
             }
+            lucide.createIcons();
             showLoader(false);
         }
 
