@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VSLNHW Admin - Ultimate Enterprise Suite</title>
+    <title>VSLNHW Admin - Unified Dashboard</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,7 +33,7 @@
             overflow-x: hidden;
         }
 
-        /* Sidebar & Navigation */
+        /* Sidebar & Layout */
         .sidebar {
             width: 260px;
             background: var(--sidebar-bg);
@@ -115,7 +115,6 @@
             font-weight: 600;
         }
 
-        /* Main Workspace */
         .main-content {
             margin-left: 260px;
             flex-grow: 1;
@@ -134,6 +133,7 @@
             gap: 20px;
         }
 
+        /* Unified Page Tabs */
         .page-tabs {
             background: #fff;
             padding: 10px 20px;
@@ -153,7 +153,6 @@
             align-items: center;
             gap: 8px;
             cursor: pointer;
-            white-space: nowrap;
         }
 
         .tab-tag.active {
@@ -176,7 +175,7 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
-        /* VSL Record Table UI */
+        /* Unified Table UI */
         .vsl-table-wrap {
             overflow-x: auto;
             margin-top: 10px;
@@ -185,7 +184,7 @@
         .vsl-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 1500px;
+            min-width: 1400px;
         }
 
         .vsl-table th {
@@ -201,117 +200,30 @@
             padding: 12px 10px;
             border-bottom: 1px solid #f1f5f9;
             font-size: 0.8rem;
-            color: #334155;
+            vertical-align: middle;
         }
 
-        /* Messaging Center UI */
-        .messaging-layout {
-            display: flex;
-            gap: 20px;
-            height: 600px;
-        }
-
-        .message-list {
-            width: 350px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: white;
-            padding: 15px;
-            overflow-y: auto;
-        }
-
-        .message-content {
-            flex: 1;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: white;
-            padding: 40px;
-            text-align: center;
-            color: var(--text-muted);
-        }
-
-        .msg-item {
-            padding: 15px;
-            border-bottom: 1px solid #f1f5f9;
-            cursor: pointer;
-            border-radius: 6px;
-            margin-bottom: 5px;
-        }
-
-        .msg-item:hover {
-            background: #f8fafc;
-        }
-
-        .msg-item b {
-            font-size: 0.9rem;
-            color: #1e293b;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .msg-date {
-            font-size: 0.7rem;
-            color: #94a3b8;
-        }
-
-        .stencil-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 15px;
-        }
-
-        .stencil-card {
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            background: white;
-            transition: 0.2s;
-            cursor: pointer;
-        }
-
-        .stencil-card:hover {
-            border-color: var(--primary-orange);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .stencil-title {
+        /* Status Pills */
+        .pill {
+            padding: 3px 8px;
+            border-radius: 4px;
             font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 0.7rem;
         }
 
-        /* Utility buttons */
-        .vsl-btn {
-            padding: 6px 15px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            border: 1px solid var(--border-color);
-            transition: 0.2s;
+        .pill-Approved {
+            background: #dcfce7;
+            color: #166534;
         }
 
-        .vsl-btn.active {
-            background: var(--primary-orange);
-            color: white;
-            border-color: var(--primary-orange);
+        .pill-Pending {
+            background: #fef3c7;
+            color: #92400e;
         }
 
-        .vsl-btn.green {
-            background: #10b981;
-            color: white;
-            border: none;
-        }
-
-        .mode-togglers {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            align-items: center;
+        .pill-Rejected {
+            background: #fee2e2;
+            color: #991b1b;
         }
 
         .loader {
@@ -323,44 +235,56 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* Bank Info Card */
+        .bank-card {
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid #3b82f6;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 
 <body>
     <div class="loader" id="vslLoader"><i data-lucide="loader-2" class="animate-spin" size="48"></i></div>
 
+    <!-- SIDEBAR -->
     <aside class="sidebar">
         <div class="logo-area">
             <div class="logo-box"></div> VSLNHW Admin
         </div>
         <nav class="nav-menu">
-            <div class="menu-item active" onclick="switchPage('home')"><i data-lucide="home" size="18"></i> front page
-            </div>
-            <div class="menu-item" onclick="switchPage('kyc')"><i data-lucide="user-check" size="18"></i> Real-name
-                authentication</div>
-            <div class="menu-item" onclick="switchPage('users')"><i data-lucide="users" size="18"></i> Customer
-                Management</div>
+            <div class="menu-item active" id="btn_home" onclick="switchPage('home')"><i data-lucide="home"
+                    size="18"></i> front page</div>
+            <div class="menu-item" id="btn_kyc" onclick="switchPage('kyc')"><i data-lucide="user-check" size="18"></i>
+                Real-name authentication</div>
+            <div class="menu-item" id="btn_users" onclick="switchPage('users')"><i data-lucide="users" size="18"></i>
+                Customer Management</div>
             <div class="menu-item" onclick="toggleSub('financial')"><i data-lucide="wallet" size="18"></i> Financial
                 Management <i data-lucide="chevron-down" size="14" style="margin-left:auto;"></i></div>
             <div class="sub-menu" id="financialSub">
-                <div class="sub-item" onclick="switchPage('deposits')"><i data-lucide="arrow-down-to-line"
-                        size="14"></i> Deposit records</div>
-                <div class="sub-item" onclick="switchPage('withdrawals')"><i data-lucide="arrow-up-from-line"
-                        size="14"></i> Withdrawal records</div>
-                <div class="sub-item"><i data-lucide="hand-coins" size="14"></i> Loan records</div>
+                <div class="sub-item" id="btn_deposits" onclick="switchPage('deposits')"><i
+                        data-lucide="arrow-down-to-line" size="14"></i> Deposit records</div>
+                <div class="sub-item" id="btn_withdrawals" onclick="switchPage('withdrawals')"><i
+                        data-lucide="arrow-up-from-line" size="14"></i> Withdrawal records</div>
+                <div class="sub-item" id="btn_loans" onclick="switchPage('loans')"><i data-lucide="hand-coins"
+                        size="14"></i> Loan records</div>
             </div>
             <div class="menu-item" onclick="toggleSub('transaction')"><i data-lucide="repeat" size="18"></i> Transaction
                 records <i data-lucide="chevron-down" size="14" style="margin-left:auto;"></i></div>
             <div class="sub-menu" id="transactionSub">
-                <div class="sub-item" onclick="switchPage('stock')"><i data-lucide="line-chart" size="14"></i> Stock
-                    trading</div>
-                <div class="sub-item" onclick="switchPage('fund')"><i data-lucide="pie-chart" size="14"></i> Fund
-                    trading</div>
-                <div class="sub-item" onclick="switchPage('quant')"><i data-lucide="zap" size="14"></i> Quantitative
-                    trading</div>
+                <div class="sub-item" id="btn_stock" onclick="switchPage('stock')"><i data-lucide="line-chart"
+                        size="14"></i> Stock trading</div>
+                <div class="sub-item" id="btn_fund" onclick="switchPage('fund')"><i data-lucide="pie-chart"
+                        size="14"></i> Fund trading</div>
+                <div class="sub-item" id="btn_quant" onclick="switchPage('quant')"><i data-lucide="zap" size="14"></i>
+                    Quantitative trading</div>
             </div>
-            <div class="menu-item" onclick="switchPage('messages')"><i data-lucide="send" size="18"></i> Internal
-                messages</div>
+            <div class="menu-item" id="btn_messages" onclick="switchPage('messages')"><i data-lucide="send"
+                    size="18"></i> Internal messages</div>
         </nav>
     </aside>
 
@@ -375,116 +299,167 @@
         </div>
 
         <div class="container">
-            <!-- PAGE: FUND TRADING -->
-            <div id="pageFund" class="vsl-page" style="display:none;">
+            <!-- PAGE: HOME -->
+            <div id="pageHome" class="vsl-page">
                 <div class="section-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <h3 style="margin:0;">Fund transaction records</h3>
-                        <div class="mode-togglers"><button class="vsl-btn active">Reality</button><button
-                                class="vsl-btn">Robot</button><button class="vsl-btn active"
-                                style="background:#f97316; color:white; border:none;">Refresh</button></div>
+                    <h3>Dashboard Overview</h3>
+                    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+                        <div class="section-card" style="margin:0; background:#f0f9ff; border-color:#bae6fd;">
+                            <div style="font-size:0.75rem; color:#0369a1;">TOTAL USERS</div>
+                            <div style="font-size:1.5rem; font-weight:800; color:#0369a1;" id="stat_total">0</div>
+                        </div>
+                        <div class="section-card" style="margin:0; background:#f0fdf4; border-color:#bbf7d0;">
+                            <div style="font-size:0.75rem; color:#166534;">PENDING KYC</div>
+                            <div style="font-size:1.5rem; font-weight:800; color:#166534;" id="stat_kyc">0</div>
+                        </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- PAGE: KYC AUTHENTICATION -->
+            <div id="pageKyc" class="vsl-page" style="display:none;">
+                <div class="section-card">
+                    <h3>Real-name authentication</h3>
                     <div class="vsl-table-wrap">
                         <table class="vsl-table">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Locking</th>
-                                    <th>State</th>
-                                    <th>Username</th>
-                                    <th>Account</th>
-                                    <th>Nation</th>
-                                    <th>Product</th>
-                                    <th>Exchange</th>
-                                    <th>Code</th>
-                                    <th>Period</th>
-                                    <th>Profit</th>
-                                    <th>Purchase Price</th>
+                                    <th>User</th>
+                                    <th>Status</th>
+                                    <th>Mobile</th>
+                                    <th>Full Name</th>
+                                    <th>ID Photo</th>
+                                    <th>Apply Time</th>
                                     <th>Operate</th>
                                 </tr>
                             </thead>
-                            <tbody id="fundTableBody"></tbody>
+                            <tbody id="kycTableBody"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- PAGE: INTERNAL MESSAGES -->
-            <div id="pageMessages" class="vsl-page" style="display:none;">
+            <!-- PAGE: CUSTOMER MANAGEMENT -->
+            <div id="pageUsers" class="vsl-page" style="display:none;">
                 <div class="section-card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <h3 style="margin:0;">Internal Messaging Center</h3>
-                        <div style="display:flex; gap:10px;"><button class="vsl-btn green">Create a new message</button>
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:10px; margin-bottom:20px;">
-                        <button class="vsl-btn active" onclick="showMsgSection('sent')">Sent</button>
-                        <button class="vsl-btn" onclick="showMsgSection('stencil')">Stencil</button>
-                    </div>
-
-                    <!-- SENT MESSAGES VIEW -->
-                    <div id="msgSentView" class="messaging-layout">
-                        <div class="message-list">
-                            <input type="text" placeholder="Search title..."
-                                style="width:100%; padding:8px; border:1px solid #e2e8f0; border-radius:4px; margin-bottom:15px;">
-                            <div class="msg-item"><b>Important Notice</b>
-                                <div class="msg-date">12-01-2026 09:32:02</div>
-                            </div>
-                            <div class="msg-item"><b>System Update</b>
-                                <div class="msg-date">06-02-2026 23:08:10</div>
-                            </div>
-                            <div class="msg-item"><b>Welcome</b>
-                                <div class="msg-date">06-02-2026 23:04:21</div>
-                            </div>
-                        </div>
-                        <div class="message-content">
-                            <i data-lucide="mail-open" size="48" style="margin-bottom:20px; opacity:0.3;"></i>
-                            <p>Please select an internal message to view.</p>
-                        </div>
-                    </div>
-
-                    <!-- STENCIL VIEW -->
-                    <div id="msgStencilView" style="display:none;">
-                        <div class="stencil-grid">
-                            <div class="stencil-card">
-                                <div class="stencil-title"><i data-lucide="megaphone" size="16"></i> Capital Increase /
-                                    Dividend Announcement</div>
-                                <p style="font-size:0.75rem; color:#64748b;">System generated notice for user bonus...
-                                </p>
-                            </div>
-                            <div class="stencil-card">
-                                <div class="stencil-title"><i data-lucide="award" size="16"></i> Congratulations on Your
-                                    IPO Allocation!</div>
-                                <p style="font-size:0.75rem; color:#64748b;">Notice for users who won the IPO lot...</p>
-                            </div>
-                            <div class="stencil-card">
-                                <div class="stencil-title"><i data-lucide="trending-up" size="16"></i> IPO Listed now!
-                                </div>
-                                <p style="font-size:0.75rem; color:#64748b;">Official announcement for IPO market
-                                    listing...</p>
-                            </div>
-                            <div class="stencil-card">
-                                <div class="stencil-title"><i data-lucide="shield-check" size="16"></i> Order payment
-                                    successful!</div>
-                                <p style="font-size:0.75rem; color:#64748b;">Receipt confirmation for user purchases...
-                                </p>
-                            </div>
-                        </div>
+                    <h3>Customer Management</h3>
+                    <div class="vsl-table-wrap">
+                        <table class="vsl-table">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Client</th>
+                                    <th>Full Name</th>
+                                    <th>Account Info</th>
+                                    <th>VIP</th>
+                                    <th>Credit</th>
+                                    <th>Operate</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
-            <!-- HOME PLACEHOLDER -->
-            <div id="pageHome" class="vsl-page">
+            <!-- PAGE: DEPOSITS -->
+            <div id="pageDeposits" class="vsl-page" style="display:none;">
                 <div class="section-card">
-                    <h3>Admin Portal Ready</h3>
-                    <p>Select a sub-menu to start managing records.</p>
+                    <h3>Deposit records</h3>
+                    <div class="vsl-table-wrap">
+                        <table class="vsl-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User</th>
+                                    <th>Account</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                    <th>Operate</th>
+                                </tr>
+                            </thead>
+                            <tbody id="depositTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE: WITHDRAWALS -->
+            <div id="pageWithdrawals" class="vsl-page" style="display:none;">
+                <div class="section-card">
+                    <h3>Withdrawal records</h3>
+                    <div class="vsl-table-wrap">
+                        <table class="vsl-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Bank Details</th>
+                                    <th>Time</th>
+                                    <th>Operate</th>
+                                </tr>
+                            </thead>
+                            <tbody id="withdrawalTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE: LOANS -->
+            <div id="pageLoans" class="vsl-page" style="display:none;">
+                <div class="section-card">
+                    <h3>Loan records</h3>
+                    <p>No active loan applications found.</p>
+                </div>
+            </div>
+
+            <!-- PAGE: STOCK TRADING -->
+            <div id="pageStock" class="vsl-page" style="display:none;">
+                <div class="section-card">
+                    <h3>Stock trading records</h3>
+                    <div class="vsl-table-wrap">
+                        <table class="vsl-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>State</th>
+                                    <th>Username</th>
+                                    <th>Product</th>
+                                    <th>Exchange</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Total</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stockTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE: FUND & QUANT -->
+            <div id="pageFund" class="vsl-page" style="display:none;">
+                <div class="section-card">
+                    <h3>Fund trading records</h3>
+                    <p>No fund data records.</p>
                 </div>
             </div>
             <div id="pageQuant" class="vsl-page" style="display:none;">
                 <div class="section-card">
                     <h3>Quantitative trading records</h3>
-                    <p>Monitoring bot movements and algorithmic trades...</p>
+                    <p>No bot activity found.</p>
+                </div>
+            </div>
+
+            <!-- PAGE: MESSAGES -->
+            <div id="pageMessages" class="vsl-page" style="display:none;">
+                <div class="section-card">
+                    <h3>Internal Messaging Center</h3>
+                    <p>Messaging system operational.</p>
                 </div>
             </div>
         </div>
@@ -493,28 +468,90 @@
     <script>
         if (sessionStorage.getItem('admin_auth') !== 'true') window.location.href = 'admin_login.html';
         lucide.createIcons();
+        let allUsers = [];
+
+        async function initDashboard() {
+            showLoader(true);
+            const client = DB.getClient();
+            if (!client) return;
+
+            const { data: users } = await client.from('users').select('*').order('created_at', { ascending: false });
+            if (users) {
+                allUsers = users;
+                document.getElementById('stat_total').innerText = users.length;
+                document.getElementById('stat_kyc').innerText = users.filter(u => u.kyc === 'Pending').length;
+                renderKyc(users);
+                renderUsers(users);
+            }
+            showLoader(false);
+        }
+
+        function renderKyc(users) {
+            const tbody = document.getElementById('kycTableBody');
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td><b>${u.mobile}</b></td>
+                    <td><span class="pill pill-${u.kyc}">${u.kyc}</span></td>
+                    <td>${u.mobile}</td>
+                    <td>${u.username}</td>
+                    <td><div style="width:40px;height:25px;background:#eee;border-radius:4px;display:flex;align-items:center;justify-content:center"><i data-lucide="image" size="14"></i></div></td>
+                    <td>${new Date(u.created_at).toLocaleString()}</td>
+                    <td><button class="btn-op" onclick="quickUpdate(${u.id}, 'Approved')"><i data-lucide="check-circle" size="18" style="color:#10b981"></i></button></td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function renderUsers(users) {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = users.map(u => `
+                <tr>
+                    <td><i data-lucide="toggle-right" style="color:#10b981"></i></td>
+                    <td>${u.mobile}</td>
+                    <td>${u.username}</td>
+                    <td>₹${parseFloat(u.balance).toFixed(2)}</td>
+                    <td>${u.vip || 0}</td>
+                    <td>${u.credit_score || 100}</td>
+                    <td><i data-lucide="edit-3" style="cursor:pointer; color:#f97316;"></i></td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        async function quickUpdate(id, status) {
+            if (!confirm("Approve this request?")) return;
+            const client = DB.getClient();
+            await client.from('users').update({ kyc: status }).eq('id', id);
+            initDashboard();
+        }
 
         function switchPage(page) {
+            // Hide all pages
             document.querySelectorAll('.vsl-page').forEach(p => p.style.display = 'none');
+            // Deactivate all menu items
             document.querySelectorAll('.menu-item, .sub-item').forEach(m => m.classList.remove('active'));
 
+            // Show target page
             const pageId = 'page' + page.charAt(0).toUpperCase() + page.slice(1);
-            if (document.getElementById(pageId)) document.getElementById(pageId).style.display = 'block';
+            const el = document.getElementById(pageId);
+            if (el) {
+                el.style.display = 'block';
+                // Highlight menu
+                const btnId = 'btn_' + page;
+                const btn = document.getElementById(btnId);
+                if (btn) btn.classList.add('active');
+            }
 
-            const titles = { 'home': 'front page', 'fund': 'Fund trading', 'quant': 'Quantitative trading', 'messages': 'Internal messages' };
+            // Update Tab Title
+            const titles = { 'home': 'front page', 'kyc': 'Real-name authentication', 'users': 'Customer Management', 'deposits': 'Deposit records', 'withdrawals': 'Withdrawal records', 'stock': 'Stock trading', 'messages': 'Internal messages' };
             document.getElementById('tabContainer').innerHTML = `<div class="tab-tag active">${titles[page] || page} <i data-lucide="x" size="12"></i></div>`;
             lucide.createIcons();
         }
 
-        function showMsgSection(section) {
-            document.getElementById('msgSentView').style.display = section === 'sent' ? 'flex' : 'none';
-            document.getElementById('msgStencilView').style.display = section === 'stencil' ? 'block' : 'none';
-            document.querySelectorAll('#pageMessages .vsl-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-        }
-
         function toggleSub(id) { document.getElementById(id + 'Sub').classList.toggle('show'); }
         function showLoader(show) { document.getElementById('vslLoader').style.display = show ? 'flex' : 'none'; }
+
+        window.onload = initDashboard;
     </script>
 </body>
 
