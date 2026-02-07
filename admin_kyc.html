@@ -948,7 +948,7 @@
                         <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><span style="padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.7rem; background:${x.kyc === 'Approved' ? '#dcfce7' : '#fef3c7'}; color:${x.kyc === 'Approved' ? '#166534' : '#92400e'};">${x.kyc}</span></td>
                         <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.username}</td>
                         <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${new Date(x.created_at).toLocaleDateString()}</td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><i data-lucide="check" style="color:green;cursor:pointer"></i></td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><i data-lucide="edit" size="16" style="cursor:pointer"></i></td>
                     </tr>
                 `).join('');
             }
@@ -962,7 +962,7 @@
                         <td style="padding:12px; border-bottom:1px solid #f1f5f9;">₹${parseFloat(x.amount).toFixed(2)}</td>
                         <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><span style="padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.7rem; background:#fef3c7; color:#92400e;">${x.status}</span></td>
                         <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${new Date(x.created_at).toLocaleString()}</td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><i data-lucide="thumbs-up" style="color:blue;cursor:pointer"></i></td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><i data-lucide="edit" size="16" style="cursor:pointer"></i></td>
                     </tr>
                 `).join('');
             }
@@ -977,7 +977,7 @@
                         <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${x.bank_name}</td>
                         <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><span style="padding:3px 8px; border-radius:4px; font-weight:700; font-size:0.7rem; background:#fee2e2; color:#991b1b;">${x.status}</span></td>
                         <td style="padding:12px; border-bottom:1px solid #f1f5f9;">${new Date(x.created_at).toLocaleString()}</td>
-                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><i data-lucide="more-horizontal"></i></td>
+                        <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><i data-lucide="edit" size="16" style="cursor:pointer"></i></td>
                     </tr>
                 `).join('');
             }
