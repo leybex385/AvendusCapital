@@ -323,7 +323,13 @@
 
     <main class="main-content">
         <header class="top-nav">
-            <div style="font-size: 0.9rem; display: flex; align-items: center; gap: 10px;">Welcome, <b>admin</b></div>
+            <div style="font-size: 0.9rem; display: flex; align-items: center; gap: 15px;">
+                Welcome, <b>admin</b>
+                <button onclick="adminLogout()"
+                    style="background:none; border:none; cursor:pointer; color:#ef4444; display:flex; align-items:center; gap:5px; font-weight:600; font-size:0.85rem;">
+                    <i data-lucide="power" size="16"></i> Logout
+                </button>
+            </div>
         </header>
 
         <div class="page-tabs" id="tabContainer">
@@ -582,6 +588,13 @@
             alert("Sent!");
             document.getElementById('msgModal').style.display = 'none';
             init();
+        }
+
+        function adminLogout() {
+            if (confirm("Are you sure you want to logout?")) {
+                sessionStorage.removeItem('admin_auth');
+                window.location.href = 'admin_login.html';
+            }
         }
 
         function viewM(x) {
