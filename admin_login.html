@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Avendus Capital</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            background-color: #0f172a;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-area i {
+            color: #3b82f6;
+            margin-bottom: 10px;
+        }
+
+        .logo-area h1 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .logo-area p {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #475569;
+        }
+
+        .login-input {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid #334155;
+            padding: 12px 12px 12px 42px;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .login-input:focus {
+            border-color: #3b82f6;
+            background: #1e293b;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        #errorMessage {
+            color: #ef4444;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-area">
+                <i data-lucide="shield-check" size="48"></i>
+                <h1>Admin Terminal</h1>
+                <p>Authorized personnel only</p>
+            </div>
+
+            <div class="form-group">
+                <label>Admin Username</label>
+                <div class="input-wrapper">
+                    <i data-lucide="user" size="18"></i>
+                    <input type="text" id="adminUser" class="login-input" placeholder="Enter username">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Access Password</label>
+                <div class="input-wrapper">
+                    <i data-lucide="lock" size="18"></i>
+                    <input type="password" id="adminPass" class="login-input" placeholder="Enter password">
+                </div>
+            </div>
+
+            <button class="btn-login" onclick="handleLogin()">Grant Access</button>
+            <div id="errorMessage">Invalid credentials. Access denied.</div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Default Admin Credentials
+        const ADMIN_CREDENTIALS = {
+            user: "Hong Lei",
+            pass: "123456"
+        };
+
+        function handleLogin() {
+            const user = document.getElementById('adminUser').value;
+            const pass = document.getElementById('adminPass').value;
+            const error = document.getElementById('errorMessage');
+
+            if (user === ADMIN_CREDENTIALS.user && pass === ADMIN_CREDENTIALS.pass) {
+                // Set a session flag
+                sessionStorage.setItem('admin_auth', 'true');
+                window.location.href = 'admin_kyc.html';
+            } else {
+                error.style.display = 'block';
+                // Shake effect would be nice here
+            }
+        }
+
+        // Allow pressing Enter to login
+        document.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                handleLogin();
+            }
+        });
+    </script>
+</body>
+
+</html>
