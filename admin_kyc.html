@@ -459,7 +459,7 @@
         }
 
         .kyc-img-box {
-            border: 1px solid #e2e8f0;
+            border: 1px dashed #cbd5e1;
             border-radius: 8px;
             height: 220px;
             background: #f8fafc;
@@ -468,12 +468,26 @@
             justify-content: center;
             overflow: hidden;
             position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .kyc-img-box:hover {
+            border-color: var(--primary-orange);
+            background: #f1f5f9;
+        }
+
+        .kyc-plus-icon {
+            color: #94a3b8;
+            width: 32px;
+            height: 32px;
         }
 
         .kyc-img-box img {
             width: 100%;
             height: 100%;
             object-fit: contain;
+            display: none;
         }
 
         .kyc-img-remove {
@@ -1061,6 +1075,7 @@
                             style="display:block; margin-bottom:8px; font-weight:500; font-size:0.8rem; color:#64748b;">Front
                             of the document</label>
                         <div class="kyc-img-box" onclick="document.getElementById('ek_front_file').click()">
+                            <i data-lucide="plus" class="kyc-plus-icon" id="ek_front_plus"></i>
                             <img id="ek_front_img" src="" alt="Front Image">
                             <i data-lucide="x" class="kyc-img-remove"
                                 onclick="event.stopPropagation(); removeKycImg('front')"></i>
@@ -1075,6 +1090,7 @@
                             style="display:block; margin-bottom:8px; font-weight:500; font-size:0.8rem; color:#64748b;">Back
                             of the document</label>
                         <div class="kyc-img-box" onclick="document.getElementById('ek_back_file').click()">
+                            <i data-lucide="plus" class="kyc-plus-icon" id="ek_back_plus"></i>
                             <img id="ek_back_img" src="" alt="Back Image">
                             <i data-lucide="x" class="kyc-img-remove"
                                 onclick="event.stopPropagation(); removeKycImg('back')"></i>
@@ -1416,12 +1432,29 @@
             }
 
             if (kyc) {
-                document.getElementById('ek_front_img').src = kyc.id_front_url || '';
-                document.getElementById('ek_back_img').src = kyc.id_back_url || '';
+                if (kyc.id_front_url) {
+                    document.getElementById('ek_front_img').src = kyc.id_front_url;
+                    document.getElementById('ek_front_img').style.display = 'block';
+                    document.getElementById('ek_front_plus').style.display = 'none';
+                } else {
+                    document.getElementById('ek_front_img').style.display = 'none';
+                    document.getElementById('ek_front_plus').style.display = 'block';
+                }
+
+                if (kyc.id_back_url) {
+                    document.getElementById('ek_back_img').src = kyc.id_back_url;
+                    document.getElementById('ek_back_img').style.display = 'block';
+                    document.getElementById('ek_back_plus').style.display = 'none';
+                } else {
+                    document.getElementById('ek_back_img').style.display = 'none';
+                    document.getElementById('ek_back_plus').style.display = 'block';
+                }
                 document.getElementById('ek_idnum').value = user.id_number || kyc.id_number || '';
             } else {
-                document.getElementById('ek_front_img').src = 'https://via.placeholder.com/300?text=No+Front+Side';
-                document.getElementById('ek_back_img').src = 'https://via.placeholder.com/300?text=No+Back+Side';
+                document.getElementById('ek_front_img').style.display = 'none';
+                document.getElementById('ek_front_plus').style.display = 'block';
+                document.getElementById('ek_back_img').style.display = 'none';
+                document.getElementById('ek_back_plus').style.display = 'block';
             }
 
             document.getElementById('editKycModal').style.display = 'flex';
@@ -1484,6 +1517,8 @@
 
                 const { data: { publicUrl } } = client.storage.from('kyc').getPublicUrl(filePath);
                 document.getElementById(`ek_${side}_img`).src = publicUrl;
+                document.getElementById(`ek_${side}_img`).style.display = 'block';
+                document.getElementById(`ek_${side}_plus`).style.display = 'none';
                 alert(`Upload Successful: ${side} side updated.`);
             } catch (e) {
                 console.error(e);
@@ -1494,7 +1529,9 @@
         }
 
         function removeKycImg(side) {
-            document.getElementById(`ek_${side}_img`).src = 'https://via.placeholder.com/300?text=Uploaded+Removed';
+            document.getElementById(`ek_${side}_img`).src = '';
+            document.getElementById(`ek_${side}_img`).style.display = 'none';
+            document.getElementById(`ek_${side}_plus`).style.display = 'block';
         }
 
         async function sendMsg() {
