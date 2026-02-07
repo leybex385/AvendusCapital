@@ -521,9 +521,33 @@
         function switchPage(p) {
             document.querySelectorAll('.vsl-page').forEach(x => x.style.display = 'none');
             document.querySelectorAll('.menu-item, .sub-item').forEach(x => x.classList.remove('active'));
-            document.getElementById('page' + p.charAt(0).toUpperCase() + p.slice(1)).style.display = 'block';
-            const btn = document.getElementById('btn_' + p); if (btn) btn.classList.add('active');
-            lucide.createIcons();
+
+            const pageId = 'page' + p.charAt(0).toUpperCase() + p.slice(1);
+            const targetPage = document.getElementById(pageId);
+
+            if (targetPage) {
+                targetPage.style.display = 'block';
+                const btn = document.getElementById('btn_' + p);
+                if (btn) btn.classList.add('active');
+
+                // Update Tab Bar naming
+                const pageNames = {
+                    'home': 'front page',
+                    'kyc': 'Real-name authentication',
+                    'users': 'Customer Management',
+                    'deposits': 'Deposit records',
+                    'withdrawals': 'Withdrawal records',
+                    'messages': 'Internal messages'
+                };
+
+                const tabTitle = pageNames[p] || p;
+                document.getElementById('tabContainer').innerHTML = `
+                    <div class="tab-tag active">
+                        ${tabTitle} <i data-lucide="x" size="12" onclick="switchPage('home')"></i>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
         }
 
         function openMsgModal() {
