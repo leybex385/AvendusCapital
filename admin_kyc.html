@@ -476,6 +476,23 @@
             object-fit: contain;
         }
 
+        .kyc-img-remove {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border-radius: 4px;
+            padding: 4px;
+            cursor: pointer;
+            display: none;
+            z-index: 5;
+        }
+
+        .kyc-img-box:hover .kyc-img-remove {
+            display: block;
+        }
+
         .kyc-img-hint {
             font-size: 0.7rem;
             color: #94a3b8;
@@ -1043,7 +1060,13 @@
                         <label
                             style="display:block; margin-bottom:8px; font-weight:500; font-size:0.8rem; color:#64748b;">Front
                             of the document</label>
-                        <div class="kyc-img-box"><img id="ek_front_img" src="" alt="Front Image"></div>
+                        <div class="kyc-img-box" onclick="document.getElementById('ek_front_file').click()">
+                            <img id="ek_front_img" src="" alt="Front Image">
+                            <i data-lucide="x" class="kyc-img-remove"
+                                onclick="event.stopPropagation(); removeKycImg('front')"></i>
+                            <input type="file" id="ek_front_file" hidden accept="image/*"
+                                onchange="uploadKycFile(this, 'front')">
+                        </div>
                         <p class="kyc-img-hint">Supported formats: JPG, PNG, WEBP, GIF, BMP, SVG, ICO, HEIC. Maximum of
                             1 image.</p>
                     </div>
@@ -1051,7 +1074,13 @@
                         <label
                             style="display:block; margin-bottom:8px; font-weight:500; font-size:0.8rem; color:#64748b;">Back
                             of the document</label>
-                        <div class="kyc-img-box"><img id="ek_back_img" src="" alt="Back Image"></div>
+                        <div class="kyc-img-box" onclick="document.getElementById('ek_back_file').click()">
+                            <img id="ek_back_img" src="" alt="Back Image">
+                            <i data-lucide="x" class="kyc-img-remove"
+                                onclick="event.stopPropagation(); removeKycImg('back')"></i>
+                            <input type="file" id="ek_back_file" hidden accept="image/*"
+                                onchange="uploadKycFile(this, 'back')">
+                        </div>
                         <p class="kyc-img-hint">Supported formats: JPG, PNG, WEBP, GIF, BMP, SVG, ICO, HEIC. Maximum of
                             1 image.</p>
                     </div>
@@ -1397,7 +1426,7 @@
 
             document.getElementById('editKycModal').style.display = 'flex';
             showLoader(false);
-            lucide.createIcons();
+            setTimeout(() => lucide.createIcons(), 100);
         }
 
         function closeEditKyc() {
@@ -1415,14 +1444,57 @@
                 kyc: document.getElementById('ek_status').value
             };
 
+            const kycUpdates = {
+                status: updates.kyc,
+                id_front_url: document.getElementById('ek_front_img').src,
+                id_back_url: document.getElementById('ek_back_img').src
+            };
+
+            // Clean URLs (don't save placeholder or data uris if needed, but here we assume URLs)
+            if (kycUpdates.id_front_url.includes('placeholder')) delete kycUpdates.id_front_url;
+            if (kycUpdates.id_back_url.includes('placeholder')) delete kycUpdates.id_back_url;
+
             await client.from('users').update(updates).eq('id', targetKycUser);
 
-            // Also update kyc_submissions if exists
-            await client.from('kyc_submissions').update({ status: updates.kyc }).eq('user_id', targetKycUser);
+            // Check if kyc_submissions exists
+            const { data: existing } = await client.from('kyc_submissions').select('id').eq('user_id', targetKycUser).limit(1);
+            if (existing && existing.length > 0) {
+                await client.from('kyc_submissions').update(kycUpdates).eq('user_id', targetKycUser);
+            } else {
+                await client.from('kyc_submissions').insert({ user_id: targetKycUser, ...kycUpdates });
+            }
 
             alert("Investor KYC details updated successfully!");
             closeEditKyc();
             init();
+        }
+
+        async function uploadKycFile(input, side) {
+            const file = input.files[0];
+            if (!file) return;
+
+            showLoader(true);
+            const client = DB.getClient();
+            const ext = file.name.split('.').pop();
+            const filePath = `kyc/${targetKycUser}_${side}_${Date.now()}.${ext}`;
+
+            try {
+                const { data, error } = await client.storage.from('kyc').upload(filePath, file);
+                if (error) throw error;
+
+                const { data: { publicUrl } } = client.storage.from('kyc').getPublicUrl(filePath);
+                document.getElementById(`ek_${side}_img`).src = publicUrl;
+                alert(`Upload Successful: ${side} side updated.`);
+            } catch (e) {
+                console.error(e);
+                alert("Upload failed. Ensure the 'kyc' bucket exists in Supabase Storage with public access.");
+            } finally {
+                showLoader(false);
+            }
+        }
+
+        function removeKycImg(side) {
+            document.getElementById(`ek_${side}_img`).src = 'https://via.placeholder.com/300?text=Uploaded+Removed';
         }
 
         async function sendMsg() {
