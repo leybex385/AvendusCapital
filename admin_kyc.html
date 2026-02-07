@@ -309,6 +309,11 @@
     </div>
 
     <script>
+        // Security Guard
+        if (sessionStorage.getItem('admin_auth') !== 'true') {
+            window.location.href = 'admin_login.html';
+        }
+
         lucide.createIcons();
         let allUsers = [];
 
