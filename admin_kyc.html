@@ -452,7 +452,7 @@
                 <div class="section-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                         <h3 style="margin:0;">Internal Messaging Center</h3>
-                        <button class="vsl-btn orange">New Message</button>
+                        <button class="vsl-btn orange" onclick="openNewMsgModal()">New Message</button>
                     </div>
                     <div style="display:flex; gap:10px; margin-bottom:20px;">
                         <button class="vsl-btn active" id="msgTabSent" onclick="showMsgSection('sent')">Sent</button>
@@ -460,30 +460,64 @@
                     </div>
 
                     <div id="msgSentView" class="messaging-layout">
-                        <div class="message-list">
-                            <div class="msg-item"><b>System Maintenance</b>
-                                <div class="msg-date">12-01-2026 09:32</div>
-                            </div>
-                            <div class="msg-item"><b>New Feature Alert</b>
-                                <div class="msg-date">06-02-2026 23:08</div>
-                            </div>
+                        <div class="message-list" id="sentMsgList">
+                            <div style="text-align:center; padding:20px; color:#94a3b8;">Loading messages...</div>
                         </div>
-                        <div class="message-content"><i data-lucide="mail-open" size="40"></i>
+                        <div class="message-content" id="msgContentArea">
+                            <i data-lucide="mail-open" size="40"></i>
                             <p>Select a message to view content</p>
                         </div>
                     </div>
 
                     <div id="msgStencilView" style="display:none;">
                         <div class="stencil-grid">
-                            <div class="stencil-card">
+                            <div class="stencil-card" onclick="useStencil('System Announcement')">
                                 <div class="stencil-title"><i data-lucide="megaphone" size="14"></i> Announcement</div>
                                 <p style="font-size:0.7rem; color:#64748b;">Template for general system news...</p>
                             </div>
-                            <div class="stencil-card">
+                            <div class="stencil-card" onclick="useStencil('Reward Notice')">
                                 <div class="stencil-title"><i data-lucide="award" size="14"></i> Reward Notice</div>
                                 <p style="font-size:0.7rem; color:#64748b;">Template for user bonuses...</p>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL: NEW MESSAGE -->
+            <div id="newMsgModal" class="loader" style="background: rgba(0,0,0,0.5); z-index: 2000;">
+                <div class="section-card" style="width: 500px; max-width: 90vw; position: relative;">
+                    <button onclick="closeMsgModal()"
+                        style="position:absolute; top:15px; right:15px; border:none; background:none; cursor:pointer; color:#94a3b8;"><i
+                            data-lucide="x" size="20"></i></button>
+                    <h3 style="margin-top:0; margin-bottom:20px;">Send Internal Message</h3>
+
+                    <div style="margin-bottom:15px;">
+                        <label
+                            style="font-size:0.75rem; font-weight:600; color:#64748b; display:block; margin-bottom:5px;">Select
+                            User</label>
+                        <select id="msgTargetUser"
+                            style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:6px; outline:none;"></select>
+                    </div>
+
+                    <div style="margin-bottom:15px;">
+                        <label
+                            style="font-size:0.75rem; font-weight:600; color:#64748b; display:block; margin-bottom:5px;">Message
+                            Title</label>
+                        <input type="text" id="msgTitle" placeholder="e.g., Important Account Notice"
+                            style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:6px; outline:none; box-sizing:border-box;">
+                    </div>
+
+                    <div style="margin-bottom:20px;">
+                        <label
+                            style="font-size:0.75rem; font-weight:600; color:#64748b; display:block; margin-bottom:5px;">Content</label>
+                        <textarea id="msgBody" rows="5" placeholder="Type your message here..."
+                            style="width:100%; padding:10px; border:1px solid #e2e8f0; border-radius:6px; outline:none; resize:none; font-family:inherit; box-sizing:border-box;"></textarea>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:10px;">
+                        <button class="vsl-btn" onclick="closeMsgModal()">Cancel</button>
+                        <button class="vsl-btn orange" id="sendBtn" onclick="sendMessage()">Send Message</button>
                     </div>
                 </div>
             </div>
@@ -551,6 +585,91 @@
             document.getElementById('msgStencilView').style.display = section === 'stencil' ? 'block' : 'none';
             document.getElementById('msgTabSent').classList.toggle('active', section === 'sent');
             document.getElementById('msgTabStencil').classList.toggle('active', section === 'stencil');
+            if (section === 'sent') fetchMessages();
+        }
+
+        // Messaging Functions
+        function openNewMsgModal() {
+            const select = document.getElementById('msgTargetUser');
+            select.innerHTML = '<option value="all">All Users</option>' +
+                allUsers.map(u => `<option value="${u.id}">${u.mobile} (${u.username})</option>`).join('');
+            document.getElementById('newMsgModal').style.display = 'flex';
+        }
+
+        function closeMsgModal() { document.getElementById('newMsgModal').style.display = 'none'; }
+
+        async function sendMessage() {
+            const userId = document.getElementById('msgTargetUser').value;
+            const title = document.getElementById('msgTitle').value;
+            const body = document.getElementById('msgBody').value;
+
+            if (!title || !body) return alert("Please fill title and content!");
+
+            showLoader(true);
+            const client = DB.getClient();
+
+            const messageData = JSON.stringify({ title, body });
+
+            try {
+                if (userId === 'all') {
+                    const messages = allUsers.map(u => ({ user_id: u.id, message: messageData, sender: 'Admin' }));
+                    await client.from('messages').insert(messages);
+                } else {
+                    await client.from('messages').insert({ user_id: parseInt(userId), message: messageData, sender: 'Admin' });
+                }
+                alert("Message sent successfully!");
+                closeMsgModal();
+                fetchMessages();
+            } catch (e) {
+                alert("Error sending message: " + e.message);
+            }
+            showLoader(false);
+        }
+
+        async function fetchMessages() {
+            const client = DB.getClient();
+            const { data: msgs } = await client.from('messages').select('*, users(mobile)').eq('sender', 'Admin').order('created_at', { ascending: false });
+
+            const list = document.getElementById('sentMsgList');
+            if (!msgs || msgs.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8;">No messages sent.</div>';
+                return;
+            }
+
+            list.innerHTML = msgs.map(m => {
+                const data = JSON.parse(m.message);
+                return `
+                    <div class="msg-item" onclick='viewMessage(${JSON.stringify(m).replace(/'/g, "&apos;")})'>
+                        <b>${data.title}</b>
+                        <div style="font-size:0.7rem; color:#64748b; margin-bottom:5px;">To: ${m.users ? m.users.mobile : 'Unknown'}</div>
+                        <div class="msg-date">${new Date(m.created_at).toLocaleString()}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function viewMessage(m) {
+            const data = JSON.parse(m.message);
+            document.getElementById('msgContentArea').innerHTML = `
+                <div style="text-align:left; width:100%;">
+                    <h2 style="margin-top:0;">${data.title}</h2>
+                    <div style="color:#64748b; font-size:0.8rem; margin-bottom:20px; border-bottom:1px solid #f1f5f9; padding-bottom:10px;">
+                        To: ${m.users ? m.users.mobile : 'All'} | Sent: ${new Date(m.created_at).toLocaleString()}
+                    </div>
+                    <div style="font-size:0.95rem; line-height:1.6; color:#334155; white-space:pre-wrap;">${data.body}</div>
+                </div>
+            `;
+        }
+
+        function useStencil(type) {
+            openNewMsgModal();
+            if (type === 'System Announcement') {
+                document.getElementById('msgTitle').value = "System Maintenance Notice";
+                document.getElementById('msgBody').value = "Dear user, the system will undergo maintenance on [Date] at [Time]. Trading services will be temporarily unavailable.";
+            } else if (type === 'Reward Notice') {
+                document.getElementById('msgTitle').value = "Congratulation! Reward Received";
+                document.getElementById('msgBody').value = "You have received a special bonus of [Amount] in your account. Check your balance now!";
+            }
         }
 
         function toggleSub(id) { document.getElementById(id + 'Sub').classList.toggle('show'); }
