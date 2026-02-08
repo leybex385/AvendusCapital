@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="db.js"></script>
 </head>
 
@@ -724,9 +724,142 @@
             </div>
         </footer>
     </div>
+
+    <!-- Customer Service Modal -->
+    <div id="csModal" class="cs-modal"
+        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 10000;">
+        <div class="cs-content"
+            style="background: #f8fafc; width: 400px; height: 600px; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+            <div class="cs-header"
+                style="background: #1e293b; color: white; padding: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div
+                        style="width: 40px; height: 40px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="headphones" size="20"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 700;">Customer Support</div>
+                        <div style="font-size: 0.75rem; opacity: 0.8;">Online | Active Now</div>
+                    </div>
+                </div>
+                <button onclick="closeCS()" style="background: none; border: none; color: white; cursor: pointer;">
+                    <i data-lucide="x" size="24"></i>
+                </button>
+            </div>
+
+            <div id="chatBox"
+                style="flex: 1; padding: 1.25rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Messages will appear here -->
+            </div>
+
+            <div class="cs-footer"
+                style="padding: 1rem; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 0.75rem;">
+                <input type="text" id="csInput" placeholder="How can we help?"
+                    style="flex: 1; border: 1px solid #e2e8f0; padding: 0.75rem 1rem; border-radius: 12px; outline: none;"
+                    onkeypress="if(event.key === 'Enter') sendCSMessage()">
+                <button onclick="sendCSMessage()"
+                    style="background: #3b82f6; color: white; border: none; width: 44px; height: 44px; border-radius: 12px; cursor: pointer;">
+                    <i data-lucide="send" size="20"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Chat Button -->
+    <button onclick="openCS()"
+        style="position: fixed; bottom: 2rem; right: 2rem; width: 60px; height: 60px; background: #3b82f6; color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); cursor: pointer; z-index: 9999;">
+        <i data-lucide="messages-square" size="28"></i>
+    </button>
     <script src="script.js"></script>
     <script>
         lucide.createIcons();
+
+        let isChatSubscribed = false;
+
+        function openCS() {
+            document.getElementById('csModal').style.display = 'flex';
+            loadCSMessages();
+        }
+
+        function closeCS() {
+            document.getElementById('csModal').style.display = 'none';
+        }
+
+        async function loadCSMessages() {
+            const user = DB.getCurrentUser();
+            if (!user) return;
+
+            const msgs = await DB.getMessages(user.id);
+            const chatBox = document.getElementById('chatBox');
+            if (!chatBox) return;
+
+            chatBox.innerHTML = msgs.filter(m => {
+                try {
+                    const p = JSON.parse(m.message);
+                    return p.title === undefined;
+                } catch (e) { return true; }
+            }).map(m => `
+                <div style="align-self: ${m.sender === 'User' ? 'flex-end' : 'flex-start'}; 
+                            background: ${m.sender === 'User' ? '#3b82f6' : 'white'}; 
+                            color: ${m.sender === 'User' ? 'white' : '#1e293b'}; 
+                            padding: 0.75rem 1rem; 
+                            border-radius: 12px; 
+                            max-width: 80%; 
+                            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                            border: ${m.sender === 'Admin' ? '1px solid #e2e8f0' : 'none'};">
+                    ${m.message}
+                </div>
+            `).join('');
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            if (!isChatSubscribed) {
+                const client = DB.getClient();
+                if (client) {
+                    client.channel('public:messages')
+                        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `user_id=eq.${user.id}` }, payload => {
+                            const m = payload.new;
+                            try { const p = JSON.parse(m.message); if (p.title !== undefined) return; } catch (e) { }
+
+                            const divs = chatBox.querySelectorAll('div');
+                            for (let d of divs) if (d.innerText === m.message) return;
+
+                            const div = document.createElement('div');
+                            div.style.cssText = `align-self: ${m.sender === 'User' ? 'flex-end' : 'flex-start'}; 
+                                                background: ${m.sender === 'User' ? '#3b82f6' : 'white'}; 
+                                                color: ${m.sender === 'User' ? 'white' : '#1e293b'}; 
+                                                padding: 0.75rem 1rem; border-radius: 12px; max-width: 80%; 
+                                                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                                                border: ${m.sender === 'Admin' ? '1px solid #e2e8f0' : 'none'};`;
+                            div.innerText = m.message;
+                            chatBox.appendChild(div);
+                            chatBox.scrollTop = chatBox.scrollHeight;
+                        })
+                        .subscribe();
+                    isChatSubscribed = true;
+                }
+            }
+        }
+
+        async function sendCSMessage() {
+            const input = document.getElementById('csInput');
+            const message = input.value.trim();
+            const user = DB.getCurrentUser();
+            if (!message || !user) return;
+
+            const chatBox = document.getElementById('chatBox');
+            const div = document.createElement('div');
+            div.style.cssText = `align-self: flex-end; background: #3b82f6; color: white; padding: 0.75rem 1rem; border-radius: 12px; max-width: 80%; box-shadow: 0 2px 5px rgba(0,0,0,0.05);`;
+            div.innerText = message;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            input.value = '';
+            const res = await DB.sendMessage(user.id, message, 'User');
+            if (!res.success) {
+                div.style.background = '#ef4444';
+                div.innerText += " (Failed)";
+            }
+        }
 
         // Recommendation Toggle Logic
         const recHeader = document.getElementById('recommendationHeader');
@@ -1667,7 +1800,7 @@
                             <div class="mc-content">
                                 <div class="mc-msg-title">IPO Listed now!</div>
                                 <div class="mc-time">07-01-2026 10:10:04</div>
-                                <div clapati yungh ss="mc-tag">IPO:LIST</div>
+                                <div class="mc-tag">IPO:LIST</div>
                                 <button class="mc-delete-item">Delete</button>
                             </div>
                         </div>

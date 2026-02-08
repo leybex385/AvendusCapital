@@ -458,37 +458,52 @@
         </div>
     </div>
 
+    <script src="db.js"></script>
     <script>
         lucide.createIcons();
 
-        const withdrawData = [
-            { bank: 'SBI', date: '01 Jan 2026 10:41', amount: '₹50,00,000.00', status: 'Rejected' },
-            { bank: 'SBI', date: '24 Dec 2025 13:50', amount: '₹3,00,000.00', status: 'Rejected' },
-            { bank: 'SBI', date: '19 Dec 2025 14:56', amount: '₹50,000.00', status: 'Approved' },
-            { bank: 'SBI', date: '10 Dec 2025 11:49', amount: '₹40,000.00', status: 'Approved' }
-        ];
+        async function initWithdrawals() {
+            const user = DB.getCurrentUser();
+            if (!user) return;
 
-        function renderWithdrawals(filter = 'All') {
+            // Fetch records from Supabase
+            const client = DB.getClient();
+            if (!client) return;
+
+            const { data, error } = await client
+                .from('withdrawals')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                renderWithdrawals(data);
+            }
+        }
+
+        function renderWithdrawals(records, filter = 'All') {
             const list = document.getElementById('withdrawRecords');
+            if (!list) return;
             list.innerHTML = '';
 
             const filtered = filter === 'All'
-                ? withdrawData
-                : withdrawData.filter(r => {
+                ? records
+                : records.filter(r => {
                     if (filter === 'Success') return r.status === 'Approved';
                     return r.status === filter;
                 });
 
             filtered.forEach(record => {
+                const date = new Date(record.created_at).toLocaleString();
                 const item = document.createElement('div');
                 item.className = 'record-item';
                 item.innerHTML = `
                     <div>
-                        <div class="record-bank">${record.bank}</div>
-                        <div class="record-date">${record.date}</div>
+                        <div class="record-bank">${record.bank_name || 'Bank Transfer'}</div>
+                        <div class="record-date">${date}</div>
                     </div>
                     <div style="text-align: right;">
-                        <div class="record-amount">${record.amount}</div>
+                        <div class="record-amount">₹${parseFloat(record.amount).toLocaleString()}</div>
                         <span class="status-badge ${record.status.toLowerCase()}">${record.status}</span>
                     </div>
                 `;
@@ -498,187 +513,20 @@
 
         const pills = document.querySelectorAll('.pill');
         pills.forEach(pill => {
-            pill.addEventListener('click', () => {
+            pill.addEventListener('click', async () => {
                 pills.forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
-                renderWithdrawals(pill.textContent);
+                const user = DB.getCurrentUser();
+                if (user) {
+                    const client = DB.getClient();
+                    const { data } = await client.from('withdrawals').select('*').eq('user_id', user.id);
+                    renderWithdrawals(data || [], pill.textContent);
+                }
             });
         });
 
-        renderWithdrawals();
+        initWithdrawals();
     </script>
 </body>
 
 </html>
-document.getElementById('csModal').style.display = 'flex';
-const chatBody = document.getElementById('csBody');
-if (chatBody.children.length === 0) {
-addCSMessage('service', 'Please don\'t share any sensitive information. Do not transfer funds without my explicit
-permission.', '8:30 AM');
-addCSMessage('user', 'Sharad Madhukar Mali | *******38029', '8:31 AM');
-addCSMessage('service', 'Hello, how can I help you today?', '8:32 AM');
-}
-}
-
-function closeCS() {
-document.getElementById('csModal').style.display = 'none';
-}
-
-function addCSMessage(type, text, time = '') {
-const chatBody = document.getElementById('csBody');
-const msgDiv = document.createElement('div');
-msgDiv.className = `cs-msg ${type}`;
-
-const avatarUrl = type === 'service'
-? 'https://api.dicebear.com/7.x/bottts/svg?seed=Support'
-: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sharad';
-
-// Convert URLs to clickable links
-const urlRegex = /(https?:\/\/[^\s]+)/g;
-const formattedText = text.replace(urlRegex, (url) => {
-return `<a href="${url}" target="_blank" style="color: inherit; text-decoration: underline;">${url}</a>`;
-});
-
-msgDiv.innerHTML = `
-<div class="cs-msg-avatar">
-    <img src="${avatarUrl}" alt="avatar">
-</div>
-<div class="cs-msg-bubble">
-    ${formattedText}
-    ${time ? `<div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">${time}</div>` : ''}
-</div>
-`;
-chatBody.appendChild(msgDiv);
-chatBody.scrollTop = chatBody.scrollHeight;
-lucide.createIcons();
-}
-
-let csAttachment = null;
-function sendCSMessage() {
-const input = document.getElementById('csInput');
-const text = input.value.trim();
-if (!text && !csAttachment) return;
-
-const now = new Date();
-const time = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '' ) + now.getMinutes(); let messageHtml=text; if
-    (csAttachment) { if (csAttachment.type.startsWith('image/')) { messageHtml=`<div>${text}</div><img
-        src="${csAttachment.url}" style="max-width: 100%; border-radius: 8px; margin-top: 8px;">`;
-    } else {
-    messageHtml = `<div>${text}</div>
-    <div
-        style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.05); padding:8px; border-radius:8px; margin-top:8px;">
-        <i data-lucide="file-text" size="20"></i> <span>${csAttachment.name}</span>
-    </div>`;
-    }
-    }
-
-    addCSMessage('user', messageHtml, time);
-    input.value = '';
-    clearAttachment();
-    document.getElementById('csEmojiPicker').style.display = 'none';
-
-    setTimeout(() => {
-    addCSMessage('service', 'Thank you for your message. An agent will be with you shortly.', time);
-    }, 1000);
-    }
-
-    function csTool(action) {
-    if (action === 'emoji') {
-    const picker = document.getElementById('csEmojiPicker');
-    picker.style.display = picker.style.display === 'grid' ? 'none' : 'grid';
-    } else if (action === 'image' || action === 'file' || action === 'video') {
-    document.getElementById('csFileInput').click();
-    }
-    }
-
-    function addEmoji(emoji) {
-    const input = document.getElementById('csInput');
-    input.value += emoji;
-    input.focus();
-    document.getElementById('csEmojiPicker').style.display = 'none';
-    }
-
-    function handleCSFile(input) {
-    if (input.files && input.files[0]) {
-    const file = input.files[0];
-    const reader = new FileReader();
-    reader.onload = function (e) {
-    csAttachment = {
-    name: file.name,
-    type: file.type,
-    url: e.target.result
-    };
-    const preview = document.getElementById('csAttachmentPreview');
-    const previewImg = document.getElementById('csPreviewImg');
-    const fileNameSpan = document.getElementById('csFileName');
-    preview.style.display = 'flex';
-    if (file.type.startsWith('image/')) {
-    previewImg.src = e.target.result;
-    previewImg.style.display = 'block';
-    fileNameSpan.style.display = 'none';
-    } else {
-    previewImg.style.display = 'none';
-    fileNameSpan.innerText = file.name;
-    fileNameSpan.style.display = 'block';
-    }
-    lucide.createIcons();
-    };
-    reader.readAsDataURL(file);
-    }
-    }
-
-    function clearAttachment() {
-    csAttachment = null;
-    document.getElementById('csAttachmentPreview').style.display = 'none';
-    document.getElementById('csFileInput').value = '';
-    }
-
-    const withdrawData = [
-    { bank: 'SBI', date: '01 Jan 2026 10:41', amount: '₹50,0,000.00', status: 'Rejected' },
-    { bank: 'SBI', date: '24 Dec 2025 13:50', amount: '₹3,00,000.00', status: 'Rejected' },
-    { bank: 'SBI', date: '19 Dec 2025 14:56', amount: '₹50,000.00', status: 'Approved' },
-    { bank: 'SBI', date: '10 Dec 2025 11:49', amount: '₹40,000.00', status: 'Approved' }
-    ];
-
-    function renderWithdrawals(filter = 'All') {
-    const list = document.getElementById('withdrawRecords');
-    list.innerHTML = '';
-
-    const filtered = filter === 'All'
-    ? withdrawData
-    : withdrawData.filter(r => {
-    if (filter === 'Success') return r.status === 'Approved';
-    return r.status === filter;
-    });
-
-    filtered.forEach(record => {
-    const item = document.createElement('div');
-    item.className = 'record-item';
-    item.innerHTML = `
-    <div>
-        <div class="record-bank">${record.bank}</div>
-        <div class="record-date">${record.date}</div>
-    </div>
-    <div style="text-align: right;">
-        <div class="record-amount">${record.amount}</div>
-        <span class="status-badge ${record.status.toLowerCase()}">${record.status}</span>
-    </div>
-    `;
-    list.appendChild(item);
-    });
-    }
-
-    const pills = document.querySelectorAll('.pill');
-    pills.forEach(pill => {
-    pill.addEventListener('click', () => {
-    pills.forEach(p => p.classList.remove('active'));
-    pill.classList.add('active');
-    renderWithdrawals(pill.textContent);
-    });
-    });
-
-    renderWithdrawals();
-    </script>
-    </body>
-
-    </html>

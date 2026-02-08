@@ -4,199 +4,518 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - Avendus Capital</title>
+    <title>View KYC</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body {
-            background-color: #0f172a;
-            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5);
+            /* Dimmed background like a modal overlay */
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: 100vh;
             font-family: 'Outfit', sans-serif;
             margin: 0;
         }
 
-        .login-container {
+        .kyc-container {
             width: 100%;
-            max-width: 400px;
-            padding: 20px;
-        }
-
-        .login-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        .logo-area {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .logo-area i {
-            color: #3b82f6;
-            margin-bottom: 10px;
-        }
-
-        .logo-area h1 {
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .logo-area p {
-            color: #94a3b8;
-            font-size: 0.85rem;
-            margin-top: 5px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            color: #94a3b8;
-            font-size: 0.8rem;
-            margin-bottom: 8px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .input-wrapper {
+            max-width: 380px;
+            /* Much smaller, mobile-like width */
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
             position: relative;
         }
 
-        .input-wrapper i {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #475569;
+        .settings-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
         }
 
-        .login-input {
+        .settings-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .settings-close:hover {
+            color: #1e293b;
+        }
+
+        /* Reusing simpler form styles */
+        .kyc-section-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .kyc-form-group {
+            margin-bottom: 0.8rem;
+        }
+
+        .kyc-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 0.3rem;
+        }
+
+        .kyc-input {
             width: 100%;
-            background: #0f172a;
-            border: 1px solid #334155;
-            padding: 12px 12px 12px 42px;
-            border-radius: 12px;
-            color: white;
-            font-size: 1rem;
+            padding: 0.6rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #1e293b;
+            background: #f8fafc;
             outline: none;
-            transition: all 0.2s;
-            box-sizing: border-box;
         }
 
-        .login-input:focus {
+        .kyc-input:focus {
             border-color: #3b82f6;
-            background: #1e293b;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            background: white;
         }
 
-        .btn-login {
+        .kyc-images-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .kyc-image-upload-box {
+            height: 100px;
+            /* Smaller upload box */
+        }
+
+        .kyc-submit-btn {
             width: 100%;
             background: #3b82f6;
             color: white;
+            padding: 0.8rem;
+            border-radius: 8px;
             border: none;
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 700;
+            font-weight: 600;
+            margin-top: 1rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .kyc-notice {
+            font-size: 0.7rem;
+            padding: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        /* CS Modal Styles - Added to fix button display issue */
+        .cs-tool-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .cs-tool-btn:hover {
+            background: #f1f5f9;
+            color: #0ea5e9;
+        }
+
+        .cs-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .cs-tools {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .cs-send-btn {
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
             transition: all 0.2s;
-            margin-top: 10px;
+            flex-shrink: 0;
         }
 
-        .btn-login:hover {
-            background: #2563eb;
-            transform: translateY(-1px);
+        .cs-send-btn:hover {
+            background: #0284c7;
+            transform: scale(1.05);
         }
 
-        .btn-login:active {
-            transform: translateY(0);
+        .cs-input-area {
+            width: 100%;
         }
 
-        #errorMessage {
-            color: #ef4444;
-            font-size: 0.8rem;
-            text-align: center;
-            margin-top: 15px;
-            display: none;
+        .cs-input-row {
+            display: flex;
+            gap: 0.5rem;
         }
     </style>
 </head>
 
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="logo-area">
-                <i data-lucide="shield-check" size="48"></i>
-                <h1>Avendus Capital</h1>
-                <p>Administrative Terminal</p>
-            </div>
 
-            <div class="form-group">
-                <label>Admin Username</label>
-                <div class="input-wrapper">
-                    <i data-lucide="user" size="18"></i>
-                    <input type="text" id="adminUser" class="login-input" placeholder="Enter username">
+    <div class="kyc-container">
+        <div class="settings-header">
+            <h2 style="font-size: 1.2rem; font-weight: 700; color: #1e293b; margin: 0;">View KYC</h2>
+            <button class="settings-close" onclick="window.location.href='market.html'"><i data-lucide="x"
+                    size="24"></i></button>
+        </div>
+
+        <div class="kyc-section-title">Personal Information</div>
+
+        <div class="kyc-form-group">
+            <label class="kyc-label">Full Name</label>
+            <input type="text" id="kycName" class="kyc-input" placeholder="Enter Full Name">
+        </div>
+
+        <div class="kyc-form-group">
+            <label class="kyc-label">ID Card/Doc's Number</label>
+            <input type="text" id="kycID" class="kyc-input" placeholder="Enter ID Number">
+        </div>
+
+        <div class="kyc-form-group">
+            <label class="kyc-label">Mobile No.</label>
+            <input type="text" id="kycMobile" class="kyc-input" placeholder="Enter Mobile Number">
+        </div>
+
+        <div class="kyc-form-group">
+            <label class="kyc-label">Submitted On</label>
+            <input type="text" class="kyc-input" disabled placeholder="">
+        </div>
+
+        <div class="kyc-form-group" style="margin-bottom: 1.5rem;">
+            <label class="kyc-label">Approved On</label>
+            <input type="text" class="kyc-input" disabled placeholder="">
+        </div>
+
+        <div class="kyc-images-row">
+            <div class="kyc-image-block">
+                <label class="kyc-label">Front of ID:</label>
+                <div class="kyc-image-upload-box" onclick="document.getElementById('kycFrontInput').click()">
+                    <i data-lucide="plus" class="kyc-plus-icon" id="kycFrontIcon"></i>
+                    <img id="kycFrontPreview" class="kyc-preview-img" alt="Front ID">
+                    <input type="file" id="kycFrontInput" hidden accept="image/*"
+                        onchange="previewKYCImage(this, 'kycFrontPreview', 'kycFrontIcon')">
                 </div>
             </div>
-
-            <div class="form-group">
-                <label>Access Password</label>
-                <div class="input-wrapper">
-                    <i data-lucide="lock" size="18"></i>
-                    <input type="password" id="adminPass" class="login-input" placeholder="Enter password">
+            <div class="kyc-image-block">
+                <label class="kyc-label">Back of ID:</label>
+                <div class="kyc-image-upload-box" onclick="document.getElementById('kycBackInput').click()">
+                    <i data-lucide="plus" class="kyc-plus-icon" id="kycBackIcon"></i>
+                    <img id="kycBackPreview" class="kyc-preview-img" alt="Back ID">
+                    <input type="file" id="kycBackInput" hidden accept="image/*"
+                        onchange="previewKYCImage(this, 'kycBackPreview', 'kycBackIcon')">
                 </div>
             </div>
+        </div>
 
-            <button class="btn-login" onclick="handleLogin()">Grant Access</button>
-            <div id="errorMessage">Invalid credentials. Access denied.</div>
+        <div class="kyc-notice">
+            <strong>Confidentiality Notice:</strong>
+            Your KYC information is securely stored and will not be shared without consent.
+        </div>
+
+        <button class="kyc-submit-btn" onclick="submitKYC()">Submit</button>
+    </div>
+
+    <!-- Customer Service Modal -->
+    <div id="csModal" class="cs-modal" onclick="if(event.target == this) closeCS()">
+        <div class="cs-content">
+            <!-- Header -->
+            <div class="cs-header">
+                <div class="cs-header-avatar">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Support" alt="Support">
+                </div>
+                <div class="cs-header-info">
+                    <div class="cs-header-title">VSL Customer Service</div>
+                    <div class="cs-header-hours">Service Hours: 8:30 AM - 10:00 PM</div>
+                </div>
+                <button class="cs-minimize" onclick="closeCS()">
+                    <i data-lucide="chevron-down" size="24"></i>
+                </button>
+            </div>
+
+            <!-- Body / Chat History -->
+            <div class="cs-body" id="csBody">
+                <!-- Messages injected via JS -->
+            </div>
+
+            <!-- Footer / Input -->
+            <div class="cs-footer">
+                <div id="csEmojiPicker" class="cs-emoji-picker">
+                    <button class="cs-emoji-btn" onclick="addEmoji('😊')">😊</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('😂')">😂</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🤣')">🤣</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('❤️')">❤️</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('😍')">😍</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('👍')">👍</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🙏')">🙏</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('😭')">😭</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('😘')">😘</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🥰')">🥰</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🙌')">🙌</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('✨')">✨</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🔥')">🔥</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🚀')">🚀</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('😮')">😮</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('😢')">😢</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('😎')">😎</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🤔')">🤔</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('👏')">👏</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🎉')">🎉</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('💪')">💪</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('💯')">💯</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🤑')">🤑</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('💰')">💰</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('📈')">📈</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('📉')">📉</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('💎')">💎</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🤝')">🤝</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('✅')">✅</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('❌')">❌</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🔔')">🔔</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🎁')">🎁</button>
+                </div>
+
+                <div id="csAttachmentPreview" class="cs-attachment-preview">
+                    <img id="csPreviewImg" src="" class="cs-preview-img" style="display:none;">
+                    <span id="csFileName">File name</span>
+                    <i data-lucide="x" class="cs-remove-attachment" onclick="clearAttachment()" size="16"></i>
+                </div>
+
+                <div class="cs-input-area">
+                    <input type="file" id="csFileInput" style="display:none;" onchange="handleCSFile(this)">
+                    <div class="cs-input-row">
+                        <input type="text" id="csInput" class="cs-input" placeholder="Type a message..."
+                            onkeypress="if(event.key === 'Enter') sendCSMessage()">
+                    </div>
+                    <div class="cs-actions">
+                        <div class="cs-tools">
+                            <button class="cs-tool-btn" onclick="csTool('emoji')" title="Emoji">
+                                <i data-lucide="smile" size="20"></i>
+                            </button>
+                            <button class="cs-tool-btn" onclick="csTool('image')" title="Send Image">
+                                <i data-lucide="camera" size="20"></i>
+                            </button>
+                            <button class="cs-tool-btn" onclick="csTool('video')" title="Send Video">
+                                <i data-lucide="video" size="20"></i>
+                            </button>
+                            <button class="cs-tool-btn" onclick="csTool('file')" title="Send File">
+                                <i data-lucide="link" size="20"></i>
+                            </button>
+                        </div>
+                        <button class="cs-send-btn" onclick="sendCSMessage()">
+                            <i data-lucide="send" size="18"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Contact Us Tab -->
+    <div class="cs-floating-tab" onclick="openCS()">
+        <span class="cs-floating-text">Contact us</span>
+        <div class="cs-floating-icon">
+            <i data-lucide="messages-square" size="16"></i>
         </div>
     </div>
 
     <script>
         lucide.createIcons();
 
-        // Default Admin Credentials
-        const ADMIN_CREDENTIALS = {
-            user: "admin",
-            pass: "123456"
-        };
-
-        function handleLogin() {
-            const user = document.getElementById('adminUser').value;
-            const pass = document.getElementById('adminPass').value;
-            const error = document.getElementById('errorMessage');
-
-            if (user === ADMIN_CREDENTIALS.user && pass === ADMIN_CREDENTIALS.pass) {
-                // Set a session flag
-                sessionStorage.setItem('admin_auth', 'true');
-                window.location.href = 'admin_kyc.html';
-            } else {
-                error.style.display = 'block';
-                // Shake effect would be nice here
+        // Customer Service Script Logic
+        function openCS() {
+            document.getElementById('csModal').style.display = 'flex';
+            const chatBody = document.getElementById('csBody');
+            if (chatBody.children.length === 0) {
+                addCSMessage('service', 'Please don\'t share any sensitive information. Do not transfer funds without my explicit permission.', '8:30 AM');
+                addCSMessage('user', 'Sharad Madhukar Mali | *******38029', '8:31 AM');
+                addCSMessage('service', 'Hello, how can I help you today?', '8:32 AM');
             }
         }
 
-        // Allow pressing Enter to login
-        document.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                handleLogin();
+        function closeCS() {
+            document.getElementById('csModal').style.display = 'none';
+        }
+
+        function addCSMessage(type, text, time = '') {
+            const chatBody = document.getElementById('csBody');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `cs-msg ${type}`;
+
+            const avatarUrl = type === 'service'
+                ? 'https://api.dicebear.com/7.x/bottts/svg?seed=Support'
+                : 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sharad';
+
+            // Convert URLs to clickable links
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            const formattedText = text.replace(urlRegex, (url) => {
+                return `<a href="${url}" target="_blank" style="color: inherit; text-decoration: underline;">${url}</a>`;
+            });
+
+            msgDiv.innerHTML = `
+                <div class="cs-msg-avatar">
+                    <img src="${avatarUrl}" alt="avatar">
+                </div>
+                <div class="cs-msg-bubble">
+                    ${formattedText}
+                    ${time ? `<div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">${time}</div>` : ''}
+                </div>
+            `;
+            chatBody.appendChild(msgDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+            lucide.createIcons();
+        }
+
+        let csAttachment = null;
+        function sendCSMessage() {
+            const input = document.getElementById('csInput');
+            const text = input.value.trim();
+            if (!text && !csAttachment) return;
+
+            const now = new Date();
+            const time = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+
+            let messageHtml = text;
+            if (csAttachment) {
+                if (csAttachment.type.startsWith('image/')) {
+                    messageHtml = `<div>${text}</div><img src="${csAttachment.url}" style="max-width: 100%; border-radius: 8px; margin-top: 8px;">`;
+                } else {
+                    messageHtml = `<div>${text}</div><div style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.05); padding:8px; border-radius:8px; margin-top:8px;">
+                        <i data-lucide="file-text" size="20"></i> <span>${csAttachment.name}</span>
+                    </div>`;
+                }
             }
-        });
+
+            addCSMessage('user', messageHtml, time);
+            input.value = '';
+            clearAttachment();
+            document.getElementById('csEmojiPicker').style.display = 'none';
+
+            setTimeout(() => {
+                addCSMessage('service', 'Thank you for your message. An agent will be with you shortly.', time);
+            }, 1000);
+        }
+
+        function csTool(action) {
+            if (action === 'emoji') {
+                const picker = document.getElementById('csEmojiPicker');
+                picker.style.display = picker.style.display === 'grid' ? 'none' : 'grid';
+            } else if (action === 'image' || action === 'file' || action === 'video') {
+                document.getElementById('csFileInput').click();
+            }
+        }
+
+        function addEmoji(emoji) {
+            const input = document.getElementById('csInput');
+            input.value += emoji;
+            input.focus();
+            document.getElementById('csEmojiPicker').style.display = 'none';
+        }
+
+        function handleCSFile(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    csAttachment = {
+                        name: file.name,
+                        type: file.type,
+                        url: e.target.result
+                    };
+                    const preview = document.getElementById('csAttachmentPreview');
+                    const previewImg = document.getElementById('csPreviewImg');
+                    const fileNameSpan = document.getElementById('csFileName');
+                    preview.style.display = 'flex';
+                    if (file.type.startsWith('image/')) {
+                        previewImg.src = e.target.result;
+                        previewImg.style.display = 'block';
+                        fileNameSpan.style.display = 'none';
+                    } else {
+                        previewImg.style.display = 'none';
+                        fileNameSpan.innerText = file.name;
+                        fileNameSpan.style.display = 'block';
+                    }
+                    lucide.createIcons();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearAttachment() {
+            csAttachment = null;
+            document.getElementById('csAttachmentPreview').style.display = 'none';
+            document.getElementById('csFileInput').value = '';
+        }
+
+        function previewKYCImage(input, previewId, iconId) {
+            const preview = document.getElementById(previewId);
+            const icon = document.getElementById(iconId);
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    icon.style.display = 'none';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function submitKYC() {
+            const name = document.getElementById('kycName').value;
+            const idDoc = document.getElementById('kycID').value;
+            const mobile = document.getElementById('kycMobile').value;
+
+            if (!name || !idDoc || !mobile) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            const btn = document.querySelector('.kyc-submit-btn');
+            btn.innerText = 'Submitting...';
+            btn.style.opacity = '0.7';
+
+            setTimeout(() => {
+                alert('KYC Document Submitted Successfully!');
+                btn.innerText = 'Submit';
+                btn.style.opacity = '1';
+                window.location.href = 'market.html';
+            }, 1000);
+        }
     </script>
 </body>
 

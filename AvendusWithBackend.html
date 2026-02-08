@@ -792,10 +792,10 @@
                 </div>
             </div>
 
-            <!-- Page: Live Chat Support -->
+            <!-- Page: Live Chat -->
             <div id="pageLivechat" class="vsl-page" style="display:none;">
                 <div class="section-card" style="display: flex; flex-direction: column;">
-                    <h2 style="font-size:1.1rem; margin:0 0 15px 0;">Customer Service Support</h2>
+                    <h2 style="font-size:1.1rem; margin:0 0 15px 0;">Live Chat Support</h2>
                     <div class="msg-layout" style="height: calc(100vh - 250px);">
                         <div class="msg-list-pane" style="width: 300px;">
                             <div class="msg-search-box">
@@ -1363,7 +1363,7 @@
             'deposits': 'Deposit records', 'withdrawals': 'Withdrawal records', 'loans': 'Loan records',
             'rewards': 'Bonus Points Record', 'stock': 'Stock trading', 'bulk': 'Large transactions',
             'ipo': 'IPO', 'fund': 'Fund trading', 'quant': 'Quantitative Trading', 'messages': 'Internal messages',
-            'livechat': 'Customer Service Support'
+            'livechat': 'Live Chat Support'
         };
         let openTabs = ['home'];
         let allUsers = [];
@@ -1572,11 +1572,11 @@
             const filtered = msgs.filter(x => {
                 try {
                     const p = JSON.parse(x.message);
-                    return p.title !== undefined;
+                    return p.title !== undefined; // It's a structured notification
                 } catch (e) { return false; }
             });
 
-            if (!filtered.length) { list.innerHTML = '<p style="text-align:center; padding:40px; color:#94a3b8;">No internal messages found.</p>'; return; }
+            if (!filtered.length) { list.innerHTML = '<p style="text-align:center; padding:40px; color:#94a3b8;">No internal messages sent yet.</p>'; return; }
 
             list.innerHTML = filtered.map(x => {
                 let p = JSON.parse(x.message);
@@ -1661,132 +1661,6 @@
             const btn = document.getElementById('btn_' + p); if (btn) btn.classList.add('active');
             renderTabs();
             lucide.createIcons();
-
-            if (p === 'livechat') initLiveChat();
-        }
-
-        // Live Chat Logic
-        let currentChatUser = null;
-        let chatUsers = [];
-        let isAdminChatSubscribed = false;
-
-        async function initLiveChat() {
-            const client = DB.getClient();
-            if (!client) return;
-
-            // Fetch users with messages
-            const { data: msgs } = await client.from('messages').select('user_id, created_at').order('created_at', { ascending: false }).limit(500);
-            const uids = [...new Set(msgs.map(m => m.user_id))];
-            chatUsers = allUsers.filter(u => uids.includes(u.id));
-            renderChatUserList();
-
-            if (!isAdminChatSubscribed) {
-                // Unique channel name to avoid conflicts
-                const chatChannel = client.channel('admin-chat-broadcaster')
-                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-                        const newMsg = payload.new;
-                        console.log("New message received in backend:", newMsg);
-
-                        // If user is currently selected, show the message
-                        if (currentChatUser && String(newMsg.user_id) === String(currentChatUser.id)) {
-                            // Avoid duplicates
-                            const history = document.getElementById('chatHistory');
-                            const alreadyShown = Array.from(history.querySelectorAll('div')).some(d => d.innerText.includes(newMsg.message));
-                            if (!alreadyShown) {
-                                appendChatMessage(newMsg);
-                            }
-                        }
-                        updateChatUserList(newMsg);
-                    })
-                    .subscribe((status) => {
-                        console.log("Chat Channel Status:", status);
-                    });
-                isAdminChatSubscribed = true;
-            }
-        }
-
-        function renderChatUserList() {
-            const list = document.getElementById('chatUserList');
-            if (!list) return;
-            list.innerHTML = chatUsers.map(u => `
-                <div class="msg-row ${currentChatUser && currentChatUser.id === u.id ? 'active' : ''}" onclick="openChat('${u.id}')">
-                    <div class="msg-row-top"><span class="msg-row-title">${u.mobile}</span></div>
-                    <div class="msg-row-preview">${u.username || 'Investor'}</div>
-                </div>
-            `).join('');
-        }
-
-        async function openChat(uid) {
-            const user = allUsers.find(u => u.id == uid);
-            if (!user) return;
-            currentChatUser = user;
-            document.getElementById('chatInputArea').style.display = 'flex';
-            renderChatUserList();
-            const msgs = await DB.getMessages(uid);
-            renderChatHistory(msgs);
-        }
-
-        function renderChatHistory(msgs) {
-            const hist = document.getElementById('chatHistory');
-            hist.innerHTML = msgs.filter(m => {
-                try { JSON.parse(m.message); return false; } catch (e) { return true; }
-            }).map(m => `
-                <div style="align-self: ${m.sender === 'Admin' ? 'flex-end' : 'flex-start'}; 
-                            background: ${m.sender === 'Admin' ? 'var(--primary-orange)' : 'white'}; 
-                            color: ${m.sender === 'Admin' ? 'white' : '#1e293b'}; 
-                            padding: 10px 15px; border-radius: 12px; max-width: 70%; 
-                            box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: ${m.sender === 'User' ? '1px solid #e2e8f0' : 'none'};">
-                    <div style="font-size: 0.85rem;">${m.message}</div>
-                    <div style="font-size: 0.65rem; margin-top: 5px; opacity: 0.7; text-align: right;">${new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                </div>
-            `).join('');
-            hist.scrollTop = hist.scrollHeight;
-        }
-
-        function appendChatMessage(m) {
-            try { JSON.parse(m.message); return; } catch (e) { }
-            const hist = document.getElementById('chatHistory');
-            const div = document.createElement('div');
-            div.style.cssText = `align-self: ${m.sender === 'Admin' ? 'flex-end' : 'flex-start'}; 
-                                background: ${m.sender === 'Admin' ? 'var(--primary-orange)' : 'white'}; 
-                                color: ${m.sender === 'Admin' ? 'white' : '#1e293b'}; padding: 10px 15px; border-radius: 12px; max-width: 70%; 
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: ${m.sender === 'User' ? '1px solid #e2e8f0' : 'none'};`;
-            div.innerHTML = `<div style="font-size: 0.85rem;">${m.message}</div>
-                             <div style="font-size: 0.65rem; margin-top: 5px; opacity: 0.7; text-align: right;">${new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>`;
-            hist.appendChild(div);
-            hist.scrollTop = hist.scrollHeight;
-        }
-
-        function updateChatUserList(m) {
-            const uid = m.user_id;
-            const idx = chatUsers.findIndex(u => u.id === uid);
-            if (idx > -1) { const u = chatUsers.splice(idx, 1)[0]; chatUsers.unshift(u); }
-            else { const u = allUsers.find(u => u.id === uid); if (u) chatUsers.unshift(u); }
-            renderChatUserList();
-        }
-
-        async function sendAdminChat() {
-            const input = document.getElementById('adminChatInput');
-            const msg = input.value.trim();
-            if (!msg || !currentChatUser) return;
-
-            // Immediate local feedback
-            const localMsg = { message: msg, sender: 'Admin', created_at: new Date().toISOString(), user_id: currentChatUser.id };
-            appendChatMessage(localMsg);
-
-            input.value = '';
-            await DB.sendMessage(currentChatUser.id, msg, 'Admin');
-        }
-
-        function filterChatUsers() {
-            const q = document.getElementById('chatSearch').value.toLowerCase();
-            const filtered = chatUsers.filter(u => u.mobile.includes(q));
-            document.getElementById('chatUserList').innerHTML = filtered.map(u => `
-                <div class="msg-row ${currentChatUser && currentChatUser.id === u.id ? 'active' : ''}" onclick="openChat('${u.id}')">
-                    <div class="msg-row-top"><span class="msg-row-title">${u.mobile}</span></div>
-                    <div class="msg-row-preview">${u.username || 'Investor'}</div>
-                </div>
-            `).join('');
         }
 
         function renderTabs() {
@@ -1933,6 +1807,147 @@
             document.getElementById(`ek_${side}_img`).src = '';
             document.getElementById(`ek_${side}_img`).style.display = 'none';
             document.getElementById(`ek_${side}_plus`).style.display = 'block';
+        }
+
+        // Live Chat Logic
+        let currentChatUser = null;
+        let chatUsers = [];
+
+        async function initLiveChat() {
+            const client = DB.getClient();
+            if (!client) return;
+
+            // Fetch all users who have messages
+            const { data: msgs } = await client.from('messages').select('user_id, created_at').order('created_at', { ascending: false });
+
+            // Get unique user IDs
+            const uids = [...new Set(msgs.map(m => m.user_id))];
+            chatUsers = allUsers.filter(u => uids.includes(u.id));
+
+            renderChatUserList();
+
+            // Real-time listener for new messages
+            client.channel('public:messages')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                    const newMsg = payload.new;
+                    if (currentChatUser && newMsg.user_id === currentChatUser.id) {
+                        appendMessage(newMsg);
+                    }
+                    updateChatUserList(newMsg);
+                })
+                .subscribe();
+        }
+
+        function renderChatUserList() {
+            const list = document.getElementById('chatUserList');
+            if (!list) return;
+
+            list.innerHTML = chatUsers.map(u => `
+                <div class="msg-row ${currentChatUser && currentChatUser.id === u.id ? 'active' : ''}" onclick="openChat('${u.id}')">
+                    <div class="msg-row-top">
+                        <span class="msg-row-title">${u.mobile}</span>
+                    </div>
+                    <div class="msg-row-preview">${u.username || 'Investor'}</div>
+                </div>
+            `).join('');
+        }
+
+        async function openChat(uid) {
+            const user = allUsers.find(u => u.id == uid);
+            if (!user) return;
+            currentChatUser = user;
+
+            document.getElementById('chatInputArea').style.display = 'flex';
+            renderChatUserList();
+
+            const msgs = await DB.getMessages(uid);
+            renderChatHistory(msgs);
+        }
+
+        function renderChatHistory(msgs) {
+            const hist = document.getElementById('chatHistory');
+            hist.innerHTML = msgs.filter(m => {
+                // Filter out notification-style JSON messages if they are meant for internal messages only
+                try { JSON.parse(m.message); return false; } catch (e) { return true; }
+            }).map(m => `
+                <div style="align-self: ${m.sender === 'Admin' ? 'flex-end' : 'flex-start'}; 
+                            background: ${m.sender === 'Admin' ? 'var(--primary-orange)' : 'white'}; 
+                            color: ${m.sender === 'Admin' ? 'white' : '#1e293b'}; 
+                            padding: 10px 15px; border-radius: 12px; max-width: 70%; 
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: ${m.sender === 'User' ? '1px solid #e2e8f0' : 'none'};">
+                    <div style="font-size: 0.85rem;">${m.message}</div>
+                    <div style="font-size: 0.65rem; margin-top: 5px; opacity: 0.7; text-align: right;">${new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                </div>
+            `).join('');
+            hist.scrollTop = hist.scrollHeight;
+        }
+
+        function appendMessage(m) {
+            // Only append if it's not a notification-style JSON
+            try { JSON.parse(m.message); return; } catch (e) { }
+
+            const hist = document.getElementById('chatHistory');
+            const div = document.createElement('div');
+            div.style.cssText = `align-self: ${m.sender === 'Admin' ? 'flex-end' : 'flex-start'}; 
+                                background: ${m.sender === 'Admin' ? 'var(--primary-orange)' : 'white'}; 
+                                color: ${m.sender === 'Admin' ? 'white' : '#1e293b'}; 
+                                padding: 10px 15px; border-radius: 12px; max-width: 70%; 
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: ${m.sender === 'User' ? '1px solid #e2e8f0' : 'none'};`;
+            div.innerHTML = `
+                <div style="font-size: 0.85rem;">${m.message}</div>
+                <div style="font-size: 0.65rem; margin-top: 5px; opacity: 0.7; text-align: right;">${new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+            `;
+            hist.appendChild(div);
+            hist.scrollTop = hist.scrollHeight;
+        }
+
+        function updateChatUserList(m) {
+            // Logic to move user to top or add if new
+            const uid = m.user_id;
+            const idx = chatUsers.findIndex(u => u.id === uid);
+            if (idx > -1) {
+                const u = chatUsers.splice(idx, 1)[0];
+                chatUsers.unshift(u);
+            } else {
+                const u = allUsers.find(u => u.id === uid);
+                if (u) chatUsers.unshift(u);
+            }
+            renderChatUserList();
+        }
+
+        async function sendAdminChat() {
+            const input = document.getElementById('adminChatInput');
+            const msg = input.value.trim();
+            if (!msg || !currentChatUser) return;
+
+            input.value = '';
+            const res = await DB.sendMessage(currentChatUser.id, msg, 'Admin');
+            if (!res.success) alert("Failed to send message.");
+        }
+
+        function filterChatUsers() {
+            const q = document.getElementById('chatSearch').value.toLowerCase();
+            const filtered = chatUsers.filter(u => u.mobile.includes(q));
+            const list = document.getElementById('chatUserList');
+            list.innerHTML = filtered.map(u => `
+                <div class="msg-row ${currentChatUser && currentChatUser.id === u.id ? 'active' : ''}" onclick="openChat('${u.id}')">
+                    <div class="msg-row-top">
+                        <span class="msg-row-title">${u.mobile}</span>
+                    </div>
+                    <div class="msg-row-preview">${u.username || 'Investor'}</div>
+                </div>
+            `).join('');
+        }
+
+        function switchPage(pageId) {
+            document.querySelectorAll('.vsl-page').forEach(p => p.style.display = 'none');
+            document.getElementById('page' + pageId.charAt(0).toUpperCase() + pageId.slice(1)).style.display = 'block';
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            document.getElementById('btn_' + pageId).classList.add('active');
+
+            if (pageId === 'livechat') {
+                initLiveChat();
+            }
         }
 
         async function sendMsg() {

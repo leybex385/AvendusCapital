@@ -285,47 +285,47 @@
         </aside>
     </main>
 
+    <script src="db.js"></script>
     <script>
         lucide.createIcons();
 
-        // Data from the user's screenshot
-        const depositData = [
-            { date: '01 Jan 2026 10:23', amount: '₹37,74,250.00', status: 'Approved' },
-            { date: '26 Dec 2025 14:37', amount: '₹8,000.00', status: 'Approved' },
-            { date: '26 Dec 2025 14:20', amount: '₹5,00,000.00', status: 'Approved' },
-            { date: '26 Dec 2025 10:17', amount: '₹6,000.00', status: 'Approved' },
-            { date: '24 Dec 2025 13:51', amount: '₹3,00,000.00', status: 'Approved' },
-            { date: '15 Dec 2025 20:48', amount: '₹2,00,000.00', status: 'Approved' },
-            { date: '11 Dec 2025 21:21', amount: '₹2,50,000.00', status: 'Approved' },
-            { date: '11 Dec 2025 19:39', amount: '₹2,50,000.00', status: 'Approved' },
-            { date: '09 Dec 2025 20:23', amount: '₹2,00,000.00', status: 'Approved' },
-            { date: '09 Dec 2025 19:34', amount: '₹1.00', status: 'Approved' },
-            { date: '02 Feb 2026 09:15', amount: '₹1,50,000.00', status: 'Pending' },
-            { date: '01 Feb 2026 16:40', amount: '₹45,000.00', status: 'Pending' },
-            { date: '31 Jan 2026 11:10', amount: '₹5,00,000.00', status: 'Pending' },
-            { date: '28 Jan 2026 08:30', amount: '₹1,20,000.00', status: 'Rejected' },
-            { date: '25 Jan 2026 12:45', amount: '₹2,500.00', status: 'Rejected' },
-            { date: '20 Jan 2026 15:20', amount: '₹75,000.00', status: 'Rejected' }
-        ];
+        async function initDeposits() {
+            const user = DB.getCurrentUser();
+            if (!user) return;
 
-        function renderRecords(filter = 'All') {
+            const client = DB.getClient();
+            if (!client) return;
+
+            const { data, error } = await client
+                .from('deposits')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (!error && data) {
+                renderRecords(data);
+            }
+        }
+
+        function renderRecords(records, filter = 'All') {
             const list = document.getElementById('recordsList');
+            if (!list) return;
             list.innerHTML = '';
 
-            // If filter is 'Success' or 'Approved', show all Approved records
             const filtered = filter === 'All'
-                ? depositData
-                : depositData.filter(r => (filter === 'Success' || filter === 'Approved') ? r.status === 'Approved' : r.status === filter);
+                ? records
+                : records.filter(r => (filter === 'Success' || filter === 'Approved') ? r.status === 'Approved' : r.status === filter);
 
             filtered.forEach(record => {
+                const date = new Date(record.created_at).toLocaleString();
                 const item = document.createElement('div');
                 item.className = 'record-item';
                 item.innerHTML = `
                     <div class="record-meta">
-                        <span class="record-date">${record.date}</span>
+                        <span class="record-date">${date}</span>
                     </div>
                     <div class="record-amount-cell">
-                        <span class="record-amount">${record.amount}</span>
+                        <span class="record-amount">₹${parseFloat(record.amount).toLocaleString()}</span>
                         <span class="status-badge ${record.status.toLowerCase()}">${record.status}</span>
                     </div>
                 `;
@@ -333,18 +333,21 @@
             });
         }
 
-        // Pill Filtering Logic
         const pills = document.querySelectorAll('.pill');
         pills.forEach(pill => {
-            pill.addEventListener('click', () => {
+            pill.addEventListener('click', async () => {
                 pills.forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
-                renderRecords(pill.textContent);
+                const user = DB.getCurrentUser();
+                if (user) {
+                    const client = DB.getClient();
+                    const { data } = await client.from('deposits').select('*').eq('user_id', user.id);
+                    renderRecords(data || [], pill.textContent);
+                }
             });
         });
 
-        // Initial Render
-        renderRecords();
+        initDeposits();
     </script>
 </body>
 

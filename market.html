@@ -3598,20 +3598,81 @@
         renderFundRecords('all');
 
         // Customer Service Logic
+        let isChatSubscribed = false;
+
         function openCS() {
             if (typeof closeSettings === 'function') closeSettings();
             document.getElementById('csModal').style.display = 'flex';
-
-            const chatBody = document.getElementById('csBody');
-            if (chatBody.children.length === 0) {
-                addCSMessage('service', 'Please don\'t share any sensitive information. Do not transfer funds without my explicit permission.', '8:30 AM');
-                addCSMessage('user', 'Sharad Madhukar Mali | *******38029', '8:31 AM');
-                addCSMessage('service', 'Hello, how can I help you today?', '8:32 AM');
-            }
+            loadCSMessages();
         }
 
         function closeCS() {
             document.getElementById('csModal').style.display = 'none';
+        }
+
+        async function loadCSMessages() {
+            const user = DB.getCurrentUser();
+            if (!user) return;
+
+            const msgs = await DB.getMessages(user.id);
+            const chatBody = document.getElementById('csBody');
+            if (!chatBody) return;
+
+            // Filter out internal notification messages (JSON formatted buttons/stencils)
+            chatBody.innerHTML = msgs.filter(m => {
+                try {
+                    const p = JSON.parse(m.message);
+                    return p.title === undefined;
+                } catch (e) { return true; }
+            }).map(m => {
+                const type = m.sender === 'User' ? 'user' : 'service';
+                const avatarUrl = type === 'service'
+                    ? 'https://api.dicebear.com/7.x/bottts/svg?seed=Support'
+                    : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + user.username;
+
+                const timeStr = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                return `
+                    <div class="cs-msg ${type}">
+                        <div class="cs-msg-avatar">
+                            <img src="${avatarUrl}" alt="avatar">
+                        </div>
+                        <div class="cs-msg-bubble">
+                            ${m.message}
+                            <div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">${timeStr}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            if (!isChatSubscribed) {
+                const client = DB.getClient();
+                if (client) {
+                    client.channel('public:messages')
+                        .on('postgres_changes', {
+                            event: 'INSERT',
+                            schema: 'public',
+                            table: 'messages',
+                            filter: `user_id=eq.${user.id}`
+                        }, payload => {
+                            const m = payload.new;
+                            // Ignore structured messages (stencils)
+                            try { const p = JSON.parse(m.message); if (p.title !== undefined) return; } catch (e) { }
+
+                            // Prevent duplicates
+                            const items = chatBody.querySelectorAll('.cs-msg-bubble');
+                            for (let item of items) {
+                                if (item.innerText.includes(m.message)) return;
+                            }
+
+                            addCSMessage(m.sender === 'User' ? 'user' : 'service', m.message,
+                                new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+                        })
+                        .subscribe();
+                    isChatSubscribed = true;
+                }
+            }
         }
 
         function addCSMessage(type, text, time = '') {
@@ -3619,22 +3680,17 @@
             const msgDiv = document.createElement('div');
             msgDiv.className = `cs-msg ${type}`;
 
+            const user = DB.getCurrentUser();
             const avatarUrl = type === 'service'
                 ? 'https://api.dicebear.com/7.x/bottts/svg?seed=Support'
-                : 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sharad';
-
-            // Convert URLs to clickable links
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            const formattedText = text.replace(urlRegex, (url) => {
-                return `<a href="${url}" target="_blank" style="color: inherit; text-decoration: underline;">${url}</a>`;
-            });
+                : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (user ? user.username : 'Sharad');
 
             msgDiv.innerHTML = `
                 <div class="cs-msg-avatar">
                     <img src="${avatarUrl}" alt="avatar">
                 </div>
                 <div class="cs-msg-bubble">
-                    ${formattedText}
+                    ${text}
                     ${time ? `<div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">${time}</div>` : ''}
                 </div>
             `;
@@ -3644,33 +3700,24 @@
 
         let csAttachment = null;
 
-        function sendCSMessage() {
+        async function sendCSMessage() {
             const input = document.getElementById('csInput');
             const text = input.value.trim();
-            if (!text && !csAttachment) return;
+            const user = DB.getCurrentUser();
+            if ((!text && !csAttachment) || !user) return;
 
-            const now = new Date();
-            const time = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            let messageHtml = text;
-            if (csAttachment) {
-                if (csAttachment.type.startsWith('image/')) {
-                    messageHtml = `<div>${text}</div><img src="${csAttachment.url}" style="max-width: 100%; border-radius: 8px; margin-top: 8px;">`;
-                } else {
-                    messageHtml = `<div>${text}</div><div style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.05); padding:8px; border-radius:8px; margin-top:8px;">
-                        <i data-lucide="file-text" size="20"></i> <span>${csAttachment.name}</span>
-                    </div>`;
-                }
-            }
-
-            addCSMessage('user', messageHtml, time);
+            // Optimistic UI update
+            addCSMessage('user', text, time);
             input.value = '';
-            clearAttachment();
             document.getElementById('csEmojiPicker').style.display = 'none';
 
-            setTimeout(() => {
-                addCSMessage('service', 'Attachment received. Our team will review it shortly.', time);
-            }, 1000);
+            const res = await DB.sendMessage(user.id, text, 'User');
+            if (!res.success) {
+                console.error("Failed to send message:", res.error);
+                // Could show a "Failed" badge here
+            }
         }
 
         function csTool(action) {
