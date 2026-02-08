@@ -1146,6 +1146,40 @@
 
         syncUserData();
     </script>
+    <style>
+        .kyc-input:focus {
+            border-color: var(--primary-orange);
+        }
+
+        /* Floating CS Button */
+        .floating-cs-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            cursor: pointer;
+            z-index: 2000;
+            transition: all 0.3s ease;
+        }
+
+        .floating-cs-btn:hover {
+            transform: scale(1.1);
+            background: #2563eb;
+        }
+
+        .floating-cs-btn i {
+            width: 28px;
+            height: 28px;
+        }
+    </style>
 
     <!-- Settings Modal -->
     <div id="settingsModal" class="settings-modal" onclick="if(event.target == this) closeSettings()">
@@ -1299,6 +1333,12 @@
         </div>
     </div>
     <div id="messageCenterOverlay" class="message-center-overlay" onclick="toggleMessageCenter()"></div>
+
+    <!-- Floating CS Button -->
+    <div class="floating-cs-btn" onclick="openCS()" title="Customer Service">
+        <i data-lucide="headset"></i>
+    </div>
+
     <div id="messageCenter" class="message-center-modal">
         <div class="mc-header">
             <div class="mc-title-row">
