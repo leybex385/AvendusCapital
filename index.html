@@ -774,97 +774,14 @@
     <script>
         lucide.createIcons();
 
-        let isChatSubscribed = false;
 
-        function openCS() {
-            document.getElementById('csModal').style.display = 'flex';
-            loadCSMessages();
-        }
+
 
         function closeCS() {
             document.getElementById('csModal').style.display = 'none';
         }
 
-        async function loadCSMessages() {
-            const user = DB.getCurrentUser();
-            if (!user) return;
 
-            const msgs = await DB.getMessages(user.id);
-            const chatBox = document.getElementById('chatBox');
-            if (!chatBox) return;
-
-            chatBox.innerHTML = msgs.filter(m => {
-                try {
-                    const p = JSON.parse(m.message);
-                    return p.title === undefined;
-                } catch (e) { return true; }
-            }).map(m => `
-                <div style="align-self: ${m.sender === 'User' ? 'flex-end' : 'flex-start'}; 
-                            background: ${m.sender === 'User' ? '#3b82f6' : 'white'}; 
-                            color: ${m.sender === 'User' ? 'white' : '#1e293b'}; 
-                            padding: 0.75rem 1rem; 
-                            border-radius: 12px; 
-                            max-width: 80%; 
-                            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                            border: ${m.sender === 'Admin' ? '1px solid #e2e8f0' : 'none'};">
-                    ${m.message}
-                </div>
-            `).join('');
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            if (!isChatSubscribed) {
-                const client = DB.getClient();
-                if (client) {
-                    client.channel('public:messages')
-                        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `user_id=eq.${user.id}` }, payload => {
-                            const m = payload.new;
-                            try { const p = JSON.parse(m.message); if (p.title !== undefined) return; } catch (e) { }
-
-                            const divs = chatBox.querySelectorAll('div');
-                            for (let d of divs) if (d.innerText === m.message) return;
-
-                            const div = document.createElement('div');
-                            div.style.cssText = `align-self: ${m.sender === 'User' ? 'flex-end' : 'flex-start'}; 
-                                                background: ${m.sender === 'User' ? '#3b82f6' : 'white'}; 
-                                                color: ${m.sender === 'User' ? 'white' : '#1e293b'}; 
-                                                padding: 0.75rem 1rem; border-radius: 12px; max-width: 80%; 
-                                                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                                                border: ${m.sender === 'Admin' ? '1px solid #e2e8f0' : 'none'};`;
-                            div.innerText = m.message;
-                            chatBox.appendChild(div);
-                            chatBox.scrollTop = chatBox.scrollHeight;
-                        })
-                        .subscribe();
-                    isChatSubscribed = true;
-                }
-            }
-        }
-
-        async function sendCSMessage() {
-            const input = document.getElementById('csInput');
-            const message = input.value.trim();
-            const user = DB.getCurrentUser();
-            if (!message || !user) return;
-
-            const chatBox = document.getElementById('chatBox');
-            const div = document.createElement('div');
-            div.style.cssText = `align-self: flex-end; background: #3b82f6; color: white; padding: 0.75rem 1rem; border-radius: 12px; max-width: 80%; box-shadow: 0 2px 5px rgba(0,0,0,0.05);`;
-            div.innerText = message;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            input.value = '';
-            const res = await DB.sendMessage(user.id, message, 'User');
-            if (!res.success) {
-                div.style.background = '#ef4444';
-                div.innerText += " (Failed)";
-            }
-        }
-
-        // Recommendation Toggle Logic
-        const recHeader = document.getElementById('recommendationHeader');
-        const recList = document.getElementById('recommendationList');
-        const recChevron = document.getElementById('recommendationChevron');
 
         if (recHeader && recList) {
             recHeader.addEventListener('click', () => {
@@ -931,18 +848,17 @@
 
         // Initial Auth State Check
         const urlParams = new URLSearchParams(window.location.search);
-        const user = DB.getCurrentUser();
+        const user = typeof DB !== 'undefined' ? DB.getCurrentUser() : null;
         const isLoggedIn = user || urlParams.get('logged_in') === 'true';
 
+        const loggedOutBanner = document.getElementById('loggedOutBanner');
+        const marketAuthPrompt = document.getElementById('marketAuthPrompt');
+        const portfolioBar = document.getElementById('portfolioBar');
+
         if (isLoggedIn) {
-            const promoActions = document.getElementById('promoActions');
-            if (promoActions) promoActions.style.display = 'none';
-
-            const loggedOutBanner = document.getElementById('loggedOutBanner');
             if (loggedOutBanner) loggedOutBanner.style.display = 'none';
-
-            document.getElementById('marketAuthPrompt').style.display = 'none';
-            document.getElementById('portfolioBar').style.display = 'flex';
+            if (marketAuthPrompt) marketAuthPrompt.style.display = 'none';
+            if (portfolioBar) portfolioBar.style.display = 'flex';
         } else {
             const promoActions = document.getElementById('promoActions');
             if (promoActions) promoActions.style.display = 'flex';
@@ -1134,53 +1050,84 @@
             }
         }
 
-        function loadCSMessages() {
+        let isChatSubscribed = false;
+        async function loadCSMessages() {
             const user = DB.getCurrentUser();
             if (!user) return;
 
-            fetch(`api.php?action=getMessages`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: user.id })
-            })
-                .then(res => res.json())
-                .then(msgs => {
-                    const chatBox = document.getElementById('chatBox');
-                    if (!chatBox) return;
-                    chatBox.innerHTML = msgs.map(m => `
-                    <div style="align-self: ${m.sender === 'User' ? 'flex-end' : 'flex-start'}; 
-                                background: ${m.sender === 'User' ? '#3b82f6' : 'white'}; 
-                                color: ${m.sender === 'User' ? 'white' : '#1e293b'}; 
-                                padding: 0.75rem 1rem; 
-                                border-radius: 12px; 
-                                max-width: 80%; 
-                                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                                border: ${m.sender === 'Admin' ? '1px solid #e2e8f0' : 'none'};">
-                        ${m.message}
+            const msgs = await DB.getMessages(user.id);
+            const chatBody = document.getElementById('csBody');
+            if (!chatBody) return;
+
+            // Filter out internal notification messages (JSON formatted buttons/stencils)
+            chatBody.innerHTML = msgs.filter(m => {
+                try {
+                    const p = JSON.parse(m.message);
+                    return p.title === undefined;
+                } catch (e) { return true; }
+            }).map(m => {
+                const type = m.sender === 'User' ? 'user' : 'service';
+                const avatarUrl = type === 'service'
+                    ? 'https://api.dicebear.com/7.x/bottts/svg?seed=Support'
+                    : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (user.full_name || user.mobile);
+
+                const timeStr = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                return `
+                    <div class="cs-msg ${type}">
+                        <div class="cs-msg-avatar">
+                            <img src="${avatarUrl}" alt="avatar">
+                        </div>
+                        <div class="cs-msg-bubble">
+                            ${m.message}
+                            <div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">${timeStr}</div>
+                        </div>
                     </div>
-                `).join('');
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                });
+                `;
+            }).join('');
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            if (!isChatSubscribed) {
+                const client = DB.getClient();
+                if (client) {
+                    client.channel('public:messages')
+                        .on('postgres_changes', {
+                            event: 'INSERT',
+                            schema: 'public',
+                            table: 'messages',
+                            filter: `user_id=eq.${user.id}`
+                        }, payload => {
+                            const m = payload.new;
+                            // Ignore structured messages
+                            try { const p = JSON.parse(m.message); if (p.title !== undefined) return; } catch (e) { }
+
+                            // Prevent duplicates
+                            const items = chatBody.querySelectorAll('.cs-msg-bubble');
+                            for (let item of items) {
+                                if (item.innerText.includes(m.message)) return;
+                            }
+
+                            addCSMessage(m.sender === 'User' ? 'user' : 'service', m.message,
+                                new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+                        })
+                        .subscribe();
+                    isChatSubscribed = true;
+                }
+            }
         }
 
-        function sendCSMessage() {
+        async function sendCSMessage() {
             const input = document.getElementById('csInput');
-            const message = input.value;
+            const message = input.value.trim();
             const user = DB.getCurrentUser();
             if (!message || !user) return;
 
-            fetch('api.php?action=sendMessage', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: user.id, message: message })
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        input.value = '';
-                        loadCSMessages();
-                    }
-                });
+            // Optimistic UI
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            addCSMessage('user', message, timeStr);
+            input.value = '';
+
+            await DB.sendMessage(user.id, message, 'User');
         }
 
         // Settings Modal Logic
@@ -1325,23 +1272,61 @@
             }, 1500);
         }
 
-        function syncUserData() {
+        async function syncUserData() {
             const user = DB.getCurrentUser();
             if (!user) return;
 
+            // Update Header/Settings fields
             const setPhone = document.querySelector('.settings-phone');
             if (setPhone) setPhone.textContent = user.mobile;
 
-            const setCredit = document.querySelector('.s-badge.credit');
-            if (setCredit) setCredit.innerHTML = `<i data-lucide="crown" size="18"></i> Credit Score: ${user.creditScore}`;
+            // If full_name is available, use it, otherwise use mobile
+            const greetingName = document.querySelector('.user-text h3');
+            if (greetingName) greetingName.textContent = user.full_name || user.mobile;
 
-            const setVip = document.querySelector('.s-badge.vip');
-            if (setVip) setVip.innerHTML = `<i data-lucide="shield-check" size="18"></i> VIP: ${user.vip}`;
+            const avatarBadge = document.querySelector('.avatar-circle');
+            if (avatarBadge) avatarBadge.textContent = (user.mobile || '91').substring(0, 2);
+
+            const userAvatar = document.querySelector('.user-avatar');
+            if (userAvatar) userAvatar.textContent = (user.mobile || '91').substring(0, 2);
+
+            // Fetch latest balance from DB
+            const client = DB.getClient();
+            if (client) {
+                const { data: dbUser } = await client
+                    .from('users')
+                    .select('balance, invested, full_name, kyc')
+                    .eq('id', user.id)
+                    .single();
+
+                if (dbUser) {
+                    // Format currency
+                    const fmt = (val) => new Intl.NumberFormat('en-IN', {
+                        style: 'currency',
+                        currency: 'INR'
+                    }).format(val || 0);
+
+                    const balanceEls = document.querySelectorAll('.stat-value.green');
+                    // Usually the first one is portfolio value (balance + invested?)
+                    if (balanceEls.length > 0) balanceEls[0].textContent = fmt(dbUser.balance + dbUser.invested);
+
+                    const investedEls = document.querySelectorAll('.stat-value.blue');
+                    if (investedEls.length > 0) investedEls[0].textContent = fmt(dbUser.invested);
+
+                    // If full_name was updated in DB, sync it locally
+                    if (dbUser.full_name && dbUser.full_name !== user.full_name) {
+                        user.full_name = dbUser.full_name;
+                        localStorage.setItem(DB.CURRENT_USER_KEY, JSON.stringify(user));
+                        if (greetingName) greetingName.textContent = dbUser.full_name;
+                    }
+                }
+            }
 
             lucide.createIcons();
         }
 
-        syncUserData();
+        // Initialize user data on load
+        window.addEventListener('load', syncUserData);
 
         // Customer Service Logic
         function openCS() {
