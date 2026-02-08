@@ -12,8 +12,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>const supabasejs = window.supabase;</script>
     <script src="db.js"></script>
 </head>
 
@@ -128,8 +126,8 @@
                             <span class="stock-name">SENSEX</span>
                             <span class="stock-ticker">ININ</span>
                         </div>
-                        <div class="stock-value">83,340.35</div>
-                        <div class="stock-change negative">-477.34 (-0.57%)</div>
+                        <div class="stock-value">83,580.40</div>
+                        <div class="stock-change green">+266.47 (+0.32%)</div>
                     </div>
                     <div class="stock-card">
                         <div class="stock-info">
@@ -714,7 +712,8 @@
         <!-- Footer -->
         <footer class="footer">
             <div class="footer-left">
-                © 2025. Reserved.
+                © 2025. Reserved. | <a href="admin_auto.html"
+                    style="color: var(--text-muted); text-decoration: none;">Admin Access (Auto)</a>
             </div>
             <div class="footer-right">
                 <span class="timezone">
@@ -880,83 +879,8 @@
             } else {
                 mc.classList.add('active');
                 overlay.classList.add('active');
-                loadInternalMessages();
                 lucide.createIcons();
             }
-        }
-
-        async function loadInternalMessages() {
-            const user = DB.getCurrentUser();
-            if (!user) return;
-
-            const mcList = document.getElementById('mcList');
-            const msgCount = document.getElementById('msgCount');
-
-            mcList.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 2rem; font-size: 0.85rem;">Loading messages...</div>';
-
-            const client = DB.getClient();
-            if (!client) return;
-
-            const { data: msgs, error } = await client
-                .from('messages')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false });
-
-            if (error || !msgs || msgs.length === 0) {
-                mcList.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 2rem; font-size: 0.85rem;">No messages</div>';
-                if (msgCount) msgCount.innerText = '0 Messages';
-                return;
-            }
-
-            if (msgCount) msgCount.innerText = `${msgs.length} Messages`;
-
-            mcList.innerHTML = msgs.map(m => {
-                let content = m.message;
-                let title = "Message";
-                let tag = m.sender === 'Admin' ? 'ADMIN' : 'CS';
-
-                try {
-                    const pj = JSON.parse(m.message);
-                    if (pj.title) {
-                        title = pj.title;
-                        content = pj.body;
-                    }
-                } catch (e) { }
-
-                return `
-                    <div class="mc-item ${m.is_read ? '' : 'unread-bg'}" onclick="viewUserMessage(${m.id}, '${title.replace(/'/g, "\\'")}', '${content.replace(/'/g, "\\'").replace(/\n/g, "<br>")}')">
-                        <div class="mc-dot ${m.is_read ? '' : 'unread'}"></div>
-                        <div class="mc-content">
-                            <div class="mc-msg-title">${title}</div>
-                            <div class="mc-time">${new Date(m.created_at).toLocaleString()}</div>
-                            <div class="mc-tag">${tag}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function viewUserMessage(id, title, body) {
-            // Mark as read in DB logic can be added here
-            const container = document.getElementById('mcList');
-            container.innerHTML = `
-                <div style="padding: 1.5rem;">
-                    <button onclick="loadInternalMessages()" style="background: none; border: none; color: #3b82f6; cursor: pointer; display: flex; align-items: center; gap: 5px; font-weight: 600; margin-bottom: 1.5rem; padding: 0;">
-                        <i data-lucide="arrow-left" size="18"></i> Back to list
-                    </button>
-                    <h2 style="font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">${title}</h2>
-                    <div style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 1.5rem;">Received: ${new Date().toLocaleString()}</div>
-                    <div style="font-size: 0.95rem; line-height: 1.6; color: #334155; border-top: 1px solid #f1f5f9; padding-top: 1.5rem;">
-                        ${body}
-                    </div>
-                </div>
-            `;
-            lucide.createIcons();
-
-            // Mark as read in background
-            const client = DB.getClient();
-            if (client) client.from('messages').update({ is_read: true }).eq('id', id);
         }
 
         function deleteAllMessages() {
@@ -997,99 +921,133 @@
 
         // Customer Service Logic
         function openCS() {
-            closeSettings();
+            if (typeof closeSettings === 'function') closeSettings();
             document.getElementById('csModal').style.display = 'flex';
-            loadCSMessages();
+
+            // Add initial messages if chatbox is empty
+            const chatBody = document.getElementById('csBody');
+            if (chatBody.children.length === 0) {
+                addCSMessage('service', 'Please don\'t share any sensitive information. Do not transfer funds without my explicit permission.', '8:30 AM');
+                addCSMessage('user', 'Sharad Madhukar Mali | *******38029', '8:31 AM');
+                addCSMessage('service', 'Hello, how can I help you today?', '8:32 AM');
+            }
         }
 
         function closeCS() {
             document.getElementById('csModal').style.display = 'none';
         }
 
-        let isChatSubscribed = false;
+        function addCSMessage(type, text, time = '') {
+            const chatBody = document.getElementById('csBody');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `cs-msg ${type}`;
 
-        async function loadCSMessages() {
-            const user = DB.getCurrentUser();
-            if (!user) { console.warn("Chat: No user logged in."); return; }
+            const avatarUrl = type === 'service'
+                ? 'https://api.dicebear.com/7.x/bottts/svg?seed=Support'
+                : 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sharad';
 
-            const msgs = await DB.getMessages(user.id);
-            const chatBox = document.getElementById('chatBox');
-            if (!chatBox) return;
+            // Convert URLs to clickable links
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            const formattedText = text.replace(urlRegex, (url) => {
+                return `<a href="${url}" target="_blank" style="color: inherit; text-decoration: underline;">${url}</a>`;
+            });
 
-            chatBox.innerHTML = msgs.filter(m => {
-                try {
-                    const p = JSON.parse(m.message);
-                    return p.title === undefined; // Keep if it's NOT a structured notification
-                } catch (e) { return true; } // Keep if not JSON
-            }).map(m => `
-                <div style="align-self: ${m.sender === 'User' ? 'flex-end' : 'flex-start'}; 
-                            background: ${m.sender === 'User' ? '#3b82f6' : 'white'}; 
-                            color: ${m.sender === 'User' ? 'white' : '#1e293b'}; 
-                            padding: 0.75rem 1rem; 
-                            border-radius: 12px; 
-                            max-width: 80%; 
-                            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                            border: ${m.sender === 'Admin' ? '1px solid #e2e8f0' : 'none'};">
-                    ${m.message}
+            msgDiv.innerHTML = `
+                <div class="cs-msg-avatar">
+                    <img src="${avatarUrl}" alt="avatar">
                 </div>
-            `).join('');
-            chatBox.scrollTop = chatBox.scrollHeight;
+                <div class="cs-msg-bubble">
+                    ${formattedText}
+                    ${time ? `<div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">${time}</div>` : ''}
+                </div>
+            `;
+            chatBody.appendChild(msgDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
 
-            // Subscribe to real-time updates if not already done
-            if (!isChatSubscribed) {
-                const client = DB.getClient();
-                if (client) {
-                    client.channel('public:messages')
-                        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `user_id=eq.${user.id}` }, payload => {
-                            const m = payload.new;
-                            // Check if it's an internal notification (has JSON title)
-                            try {
-                                const p = JSON.parse(m.message);
-                                if (p.title !== undefined) return;
-                            } catch (e) { }
+        function sendCSMessage() {
+            const input = document.getElementById('csInput');
+            const text = input.value.trim();
+            if (!text) return;
 
-                            // Don't append if it's already there (e.g. sent by this user)
-                            // We use a simple check for now
-                            const divs = chatBox.querySelectorAll('div');
-                            for (let d of divs) if (d.innerText === m.message) return;
+            const now = new Date();
+            const time = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
 
-                            const div = document.createElement('div');
-                            div.style.cssText = `align-self: ${m.sender === 'User' ? 'flex-end' : 'flex-start'}; 
-                                                background: ${m.sender === 'User' ? '#3b82f6' : 'white'}; 
-                                                color: ${m.sender === 'User' ? 'white' : '#1e293b'}; 
-                                                padding: 0.75rem 1rem; border-radius: 12px; max-width: 80%; 
-                                                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                                                border: ${m.sender === 'Admin' ? '1px solid #e2e8f0' : 'none'};`;
-                            div.innerText = m.message;
-                            chatBox.appendChild(div);
-                            chatBox.scrollTop = chatBox.scrollHeight;
-                        })
-                        .subscribe();
-                    isChatSubscribed = true;
+            addCSMessage('user', text, time);
+            input.value = '';
+
+            // Simulate support response
+            setTimeout(() => {
+                addCSMessage('service', 'Thank you for your message. An agent will be with you shortly.', time);
+            }, 1000);
+        }
+
+        // Tool functions
+        function csTool(action) {
+            const input = document.getElementById('csInput');
+            if (action === 'emoji') {
+                input.value += '😊';
+                input.focus();
+            } else if (action === 'image') {
+                alert('Image upload functionality coming soon!');
+            } else if (action === 'video') {
+                alert('Video sharing functionality coming soon!');
+            } else if (action === 'link') {
+                const url = prompt('Enter the link URL:');
+                if (url) {
+                    input.value += ` ${url} `;
+                    input.focus();
                 }
             }
         }
 
-        async function sendCSMessage() {
+        function loadCSMessages() {
+            const user = DB.getCurrentUser();
+            if (!user) return;
+
+            fetch(`api.php?action=getMessages`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.id })
+            })
+                .then(res => res.json())
+                .then(msgs => {
+                    const chatBox = document.getElementById('chatBox');
+                    if (!chatBox) return;
+                    chatBox.innerHTML = msgs.map(m => `
+                    <div style="align-self: ${m.sender === 'User' ? 'flex-end' : 'flex-start'}; 
+                                background: ${m.sender === 'User' ? '#3b82f6' : 'white'}; 
+                                color: ${m.sender === 'User' ? 'white' : '#1e293b'}; 
+                                padding: 0.75rem 1rem; 
+                                border-radius: 12px; 
+                                max-width: 80%; 
+                                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                                border: ${m.sender === 'Admin' ? '1px solid #e2e8f0' : 'none'};">
+                        ${m.message}
+                    </div>
+                `).join('');
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                });
+        }
+
+        function sendCSMessage() {
             const input = document.getElementById('csInput');
-            const message = input.value.trim();
+            const message = input.value;
             const user = DB.getCurrentUser();
             if (!message || !user) return;
 
-            // Immediate local feedback
-            const chatBox = document.getElementById('chatBox');
-            const div = document.createElement('div');
-            div.style.cssText = `align-self: flex-end; background: #3b82f6; color: white; padding: 0.75rem 1rem; border-radius: 12px; max-width: 80%; box-shadow: 0 2px 5px rgba(0,0,0,0.05);`;
-            div.innerText = message;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            input.value = '';
-            const res = await DB.sendMessage(user.id, message, 'User');
-            if (!res.success) {
-                div.style.background = '#ef4444';
-                div.innerText += " (Failed to send)";
-            }
+            fetch('api.php?action=sendMessage', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.id, message: message })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        input.value = '';
+                        loadCSMessages();
+                    }
+                });
         }
 
         // Settings Modal Logic
@@ -1100,6 +1058,86 @@
 
         function closeSettings() {
             document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        function toggleSettingsAccordion(element, id) {
+            const subMenu = document.getElementById(id);
+            const chevron = element.querySelector('.settings-chevron');
+
+            if (!subMenu) return;
+
+            // Toggle active class
+            subMenu.classList.toggle('active');
+
+            // Dynamic max-height for smooth animation
+            if (subMenu.classList.contains('active')) {
+                subMenu.style.maxHeight = subMenu.scrollHeight + "px";
+            } else {
+                subMenu.style.maxHeight = null;
+            }
+
+            // Toggle rotation class on chevron
+            if (chevron) {
+                chevron.classList.toggle('rotated');
+            }
+        }
+
+        // Update Avatar Logic
+        function openUpdateAvatar() {
+            document.getElementById('updateAvatarModal').style.display = 'flex';
+            lucide.createIcons();
+        }
+
+        function closeUpdateAvatar() {
+            document.getElementById('updateAvatarModal').style.display = 'none';
+        }
+
+        let currentAvatarData = null;
+
+        function previewAvatar(input) {
+            const previewCircle = document.getElementById('avatarPreviewCircle');
+            const uploadBtn = document.getElementById('uploadAvatarBtn');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    currentAvatarData = e.target.result;
+                    previewCircle.innerHTML = `<img src="${e.target.result}" alt="Avatar Preview">`;
+                    uploadBtn.classList.add('active');
+                    uploadBtn.removeAttribute('disabled');
+                    uploadBtn.style.backgroundColor = '#6366f1';
+                    uploadBtn.style.cursor = 'pointer';
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function uploadAvatar() {
+            const btn = document.getElementById('uploadAvatarBtn');
+            if (!btn.classList.contains('active')) return;
+
+            btn.innerText = 'Uploading...';
+
+            setTimeout(() => {
+                // Update avatar in settings modal
+                const settingsAvatars = document.querySelectorAll('.avatar-circle');
+                settingsAvatars.forEach(av => {
+                    av.innerHTML = `<img src="${currentAvatarData}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                });
+
+                // Also update any other user-avatar elements if present
+                const otherAvatars = document.querySelectorAll('.user-avatar');
+                otherAvatars.forEach(av => {
+                    av.innerHTML = `<img src="${currentAvatarData}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                });
+
+                alert('Avatar updated successfully!');
+                btn.innerText = 'Upload Avatar';
+                closeUpdateAvatar();
+                openSettings(); // Re-open settings to show the updated avatar
+            }, 1000);
         }
 
         // Internal Reset Password Logic
@@ -1171,41 +1209,138 @@
         }
 
         syncUserData();
+
+        // Customer Service Logic
+        function openCS() {
+            if (typeof closeSettings === 'function') closeSettings();
+            document.getElementById('csModal').style.display = 'flex';
+
+            const chatBody = document.getElementById('csBody');
+            if (chatBody.children.length === 0) {
+                addCSMessage('service', 'Please don\'t share any sensitive information. Do not transfer funds without my explicit permission.', '8:30 AM');
+                addCSMessage('user', 'Sharad Madhukar Mali | *******38029', '8:31 AM');
+                addCSMessage('service', 'Hello, how can I help you today?', '8:32 AM');
+            }
+        }
+
+        function closeCS() {
+            document.getElementById('csModal').style.display = 'none';
+        }
+
+        function addCSMessage(type, text, time = '') {
+            const chatBody = document.getElementById('csBody');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `cs-msg ${type}`;
+
+            const avatarUrl = type === 'service'
+                ? 'https://api.dicebear.com/7.x/bottts/svg?seed=Support'
+                : 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sharad';
+
+            // Convert URLs to clickable links
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            const formattedText = text.replace(urlRegex, (url) => {
+                return `<a href="${url}" target="_blank" style="color: inherit; text-decoration: underline;">${url}</a>`;
+            });
+
+            msgDiv.innerHTML = `
+                <div class="cs-msg-avatar">
+                    <img src="${avatarUrl}" alt="avatar">
+                </div>
+                <div class="cs-msg-bubble">
+                    ${formattedText}
+                    ${time ? `<div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">${time}</div>` : ''}
+                </div>
+            `;
+            chatBody.appendChild(msgDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        let csAttachment = null;
+
+        function sendCSMessage() {
+            const input = document.getElementById('csInput');
+            const text = input.value.trim();
+            if (!text && !csAttachment) return;
+
+            const now = new Date();
+            const time = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+
+            let messageHtml = text;
+            if (csAttachment) {
+                if (csAttachment.type.startsWith('image/')) {
+                    messageHtml = `<div>${text}</div><img src="${csAttachment.url}" style="max-width: 100%; border-radius: 8px; margin-top: 8px;">`;
+                } else {
+                    messageHtml = `<div>${text}</div><div style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.05); padding:8px; border-radius:8px; margin-top:8px;">
+                        <i data-lucide="file-text" size="20"></i> <span>${csAttachment.name}</span>
+                    </div>`;
+                }
+            }
+
+            addCSMessage('user', messageHtml, time);
+            input.value = '';
+            clearAttachment();
+            document.getElementById('csEmojiPicker').style.display = 'none';
+
+            setTimeout(() => {
+                addCSMessage('service', 'Attachment received. Our team will review it shortly.', time);
+            }, 1000);
+        }
+
+        function csTool(action) {
+            if (action === 'emoji') {
+                const picker = document.getElementById('csEmojiPicker');
+                picker.style.display = picker.style.display === 'grid' ? 'none' : 'grid';
+            } else if (action === 'image' || action === 'file' || action === 'video') {
+                document.getElementById('csFileInput').click();
+            }
+        }
+
+        function addEmoji(emoji) {
+            const input = document.getElementById('csInput');
+            input.value += emoji;
+            input.focus();
+            document.getElementById('csEmojiPicker').style.display = 'none';
+        }
+
+        function handleCSFile(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    csAttachment = {
+                        name: file.name,
+                        type: file.type,
+                        url: e.target.result
+                    };
+
+                    const preview = document.getElementById('csAttachmentPreview');
+                    const previewImg = document.getElementById('csPreviewImg');
+                    const fileNameSpan = document.getElementById('csFileName');
+
+                    preview.style.display = 'flex';
+                    if (file.type.startsWith('image/')) {
+                        previewImg.src = e.target.result;
+                        previewImg.style.display = 'block';
+                        fileNameSpan.style.display = 'none';
+                    } else {
+                        previewImg.style.display = 'none';
+                        fileNameSpan.innerText = file.name;
+                        fileNameSpan.style.display = 'block';
+                    }
+                    lucide.createIcons();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearAttachment() {
+            csAttachment = null;
+            document.getElementById('csAttachmentPreview').style.display = 'none';
+            document.getElementById('csFileInput').value = '';
+        }
     </script>
-    <style>
-        .kyc-input:focus {
-            border-color: var(--primary-orange);
-        }
 
-        /* Floating CS Button */
-        .floating-cs-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background: #3b82f6;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-            cursor: pointer;
-            z-index: 2000;
-            transition: all 0.3s ease;
-        }
 
-        .floating-cs-btn:hover {
-            transform: scale(1.1);
-            background: #2563eb;
-        }
-
-        .floating-cs-btn i {
-            width: 28px;
-            height: 28px;
-        }
-    </style>
 
     <!-- Settings Modal -->
     <div id="settingsModal" class="settings-modal" onclick="if(event.target == this) closeSettings()">
@@ -1221,7 +1356,7 @@
             </div>
 
             <div class="settings-list">
-                <div class="settings-item">
+                <div class="settings-item" onclick="toggleSettingsAccordion(this, 'userProfileSub')">
                     <div class="settings-item-icon"><i data-lucide="user" size="20"></i></div>
                     <div class="settings-item-info">
                         <div class="settings-item-title">User Profile</div>
@@ -1229,7 +1364,16 @@
                     </div>
                     <i data-lucide="chevron-right" class="settings-chevron" size="18"></i>
                 </div>
-                <div class="settings-item" onclick="openResetPassword()">
+                <div id="userProfileSub" class="sub-menu">
+                    <div class="sub-item" onclick="openUpdateAvatar()">
+                        <i data-lucide="user-circle" size="18"></i> Update Avatar
+                    </div>
+                    <div class="sub-item" onclick="location.href='admin_login.html?action=kyc'">
+                        <i data-lucide="contact" size="18"></i> View KYC
+                    </div>
+                </div>
+
+                <div class="settings-item" onclick="toggleSettingsAccordion(this, 'securitySub')">
                     <div class="settings-item-icon"><i data-lucide="lock" size="20"></i></div>
                     <div class="settings-item-info">
                         <div class="settings-item-title">Security</div>
@@ -1237,7 +1381,15 @@
                     </div>
                     <i data-lucide="chevron-right" class="settings-chevron" size="18"></i>
                 </div>
-                <div class="settings-item">
+                <div id="securitySub" class="sub-menu">
+                    <div class="sub-item">
+                        <i data-lucide="shield-check" size="18"></i> Withdrawal PIN
+                    </div>
+                    <div class="sub-item" onclick="openResetPassword()">
+                        <i data-lucide="key" size="18"></i> Change Login Password
+                    </div>
+                </div>
+                <div class="settings-item" onclick="location.href='bank_accounts.html'">
                     <div class="settings-item-icon"><i data-lucide="landmark" size="20"></i></div>
                     <div class="settings-item-info">
                         <div class="settings-item-title">Bank Accounts</div>
@@ -1251,136 +1403,293 @@
                         <div class="settings-item-desc">Contact customer service</div>
                     </div>
                 </div>
-                <div class="settings-item" onclick="window.location.href='kyc.html'">
-                    <div class="settings-item-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;"><i
-                            data-lucide="shield-check" size="20"></i></div>
-                    <div class="settings-item-info">
-                        <div class="settings-item-title">KYC Verification</div>
-                        <div class="settings-item-desc">Secure your account identity</div>
-                    </div>
-                </div>
                 <div class="settings-item">
                     <div class="settings-item-icon"><i data-lucide="search" size="20"></i></div>
                     <div class="settings-item-info">
                         <div class="settings-item-title">Test Connection</div>
-                        <div class="settings-item-desc">Test and Diagnosis</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="logout-btn-container">
-                <button class="logout-btn" onclick="DB.logout()">Logout</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Reset Password Modal (Logged-In) -->
-    <div id="resetPasswordModal" class="settings-modal" onclick="if(event.target == this) closeResetPassword()">
-        <div class="settings-content" style="max-width: 450px;">
-            <button class="settings-close" onclick="closeResetPassword()"><i data-lucide="x" size="24"></i></button>
-            <div class="settings-header" style="margin-bottom: 1.5rem;">
-                <h2 style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">Reset Password</h2>
-            </div>
-
-            <div style="padding: 1rem 0;">
-                <div class="reg-input-group" style="margin-bottom: 1.5rem;">
-                    <label
-                        style="display: block; font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Current
-                        Password</label>
-                    <div class="reg-password-wrapper" style="position: relative;">
-                        <input type="password" id="currentPass" class="reg-input"
-                            style="width: 100%; padding: 0.8rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
-                        <i data-lucide="eye-off"
-                            style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer;"
-                            onclick="toggleInternalPass('currentPass', this)"></i>
+                        <div class="logout-btn-container">
+                            <button class="logout-btn" onclick="DB.logout()">Logout</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="reg-input-group" style="margin-bottom: 1.5rem;">
-                    <label
-                        style="display: block; font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">New
-                        Password</label>
-                    <div class="reg-password-wrapper" style="position: relative;">
-                        <input type="password" id="newPassInternal" class="reg-input"
-                            style="width: 100%; padding: 0.8rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
-                        <i data-lucide="eye-off"
-                            style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer;"
-                            onclick="toggleInternalPass('newPassInternal', this)"></i>
+                <!-- Update Avatar Modal -->
+                <div id="updateAvatarModal" class="settings-modal"
+                    onclick="if(event.target == this) closeUpdateAvatar()">
+                    <div class="settings-content" style="max-width: 500px;">
+                        <button class="settings-close" onclick="closeUpdateAvatar()"><i data-lucide="x"
+                                size="24"></i></button>
+                        <div class="settings-header" style="margin-bottom: 2rem;">
+                            <h2 style="font-size: 1.2rem; font-weight: 700; color: #1e293b;">Update Avatar</h2>
+                        </div>
+
+                        <div class="avatar-upload-container"
+                            style="flex-direction: row; justify-content: space-around; width: 100%;">
+
+                            <div class="file-input-wrapper">
+                                <button class="btn-choose-file">Choose File</button>
+                                <input type="file" id="avatarInput" class="file-input-actual" accept="image/*"
+                                    onchange="previewAvatar(this)">
+                            </div>
+
+                            <div class="avatar-preview-area">
+                                <span class="avatar-preview-label">Avatar Preview</span>
+                                <div class="avatar-preview-circle" id="avatarPreviewCircle">
+                                    <span class="avatar-preview-placeholder">Avatar<br>Preview</span>
+                                </div>
+                            </div>
+
+                            <button id="uploadAvatarBtn" class="btn-upload-avatar" onclick="uploadAvatar()">Upload
+                                Avatar</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="reg-input-group" style="margin-bottom: 2rem;">
-                    <label
-                        style="display: block; font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Confirm
-                        New Password</label>
-                    <div class="reg-password-wrapper" style="position: relative;">
-                        <input type="password" id="confirmPassInternal" class="reg-input"
-                            style="width: 100%; padding: 0.8rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
-                        <i data-lucide="eye-off"
-                            style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer;"
-                            onclick="toggleInternalPass('confirmPassInternal', this)"></i>
+                <!-- Reset Password Modal (Logged-In) -->
+                <div id="resetPasswordModal" class="settings-modal"
+                    onclick="if(event.target == this) closeResetPassword()">
+                    <div class="settings-content" style="max-width: 450px;">
+                        <button class="settings-close" onclick="closeResetPassword()"><i data-lucide="x"
+                                size="24"></i></button>
+                        <div class="settings-header" style="margin-bottom: 1.5rem;">
+                            <h2 style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">Reset Password</h2>
+                        </div>
+
+                        <div style="padding: 1rem 0;">
+                            <div class="reg-input-group" style="margin-bottom: 1.5rem;">
+                                <label
+                                    style="display: block; font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Current
+                                    Password</label>
+                                <div class="reg-password-wrapper" style="position: relative;">
+                                    <input type="password" id="currentPass" class="reg-input"
+                                        style="width: 100%; padding: 0.8rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
+                                    <i data-lucide="eye-off"
+                                        style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer;"
+                                        onclick="toggleInternalPass('currentPass', this)"></i>
+                                </div>
+                            </div>
+
+                            <div class="reg-input-group" style="margin-bottom: 1.5rem;">
+                                <label
+                                    style="display: block; font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">New
+                                    Password</label>
+                                <div class="reg-password-wrapper" style="position: relative;">
+                                    <input type="password" id="newPassInternal" class="reg-input"
+                                        style="width: 100%; padding: 0.8rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
+                                    <i data-lucide="eye-off"
+                                        style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer;"
+                                        onclick="toggleInternalPass('newPassInternal', this)"></i>
+                                </div>
+                            </div>
+
+                            <div class="reg-input-group" style="margin-bottom: 2rem;">
+                                <label
+                                    style="display: block; font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Confirm
+                                    New Password</label>
+                                <div class="reg-password-wrapper" style="position: relative;">
+                                    <input type="password" id="confirmPassInternal" class="reg-input"
+                                        style="width: 100%; padding: 0.8rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
+                                    <i data-lucide="eye-off"
+                                        style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer;"
+                                        onclick="toggleInternalPass('confirmPassInternal', this)"></i>
+                                </div>
+                            </div>
+
+                            <button class="logout-btn" style="background: #3b82f6;"
+                                onclick="handleInternalReset()">Update
+                                Password</button>
+                            <button class="logout-btn" style="background: #f1f5f9; color: #64748b; margin-top: 1rem;"
+                                onclick="closeResetPassword()">Cancel</button>
+                        </div>
                     </div>
                 </div>
 
-                <button class="logout-btn" style="background: #3b82f6;" onclick="handleInternalReset()">Update
-                    Password</button>
-                <button class="logout-btn" style="background: #f1f5f9; color: #64748b; margin-top: 1rem;"
-                    onclick="closeResetPassword()">Cancel</button>
-            </div>
-        </div>
-    </div>
+                <!-- Customer Service Modal -->
+                <div id="csModal" class="cs-modal" onclick="if(event.target == this) closeCS()">
+                    <div class="cs-content">
+                        <!-- Header -->
+                        <div class="cs-header">
+                            <div class="cs-header-avatar">
+                                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Support" alt="Support">
+                            </div>
+                            <div class="cs-header-info">
+                                <div class="cs-header-title">VSL Customer Service</div>
+                                <div class="cs-header-hours">Service Hours: 8:30 AM - 10:00 PM</div>
+                            </div>
+                            <button class="cs-minimize" onclick="closeCS()">
+                                <i data-lucide="chevron-down" size="24"></i>
+                            </button>
+                        </div>
 
-    <!-- Customer Service Modal -->
-    <div id="csModal" class="settings-modal" onclick="if(event.target == this) closeCS()">
-        <div class="settings-content" style="max-width: 500px; height: 600px; display: flex; flex-direction: column;">
-            <button class="settings-close" onclick="closeCS()"><i data-lucide="x" size="24"></i></button>
-            <div class="settings-header" style="margin-bottom: 1rem;">
-                <h2 style="font-size: 1.5rem; font-weight: 700;">Customer Service</h2>
-            </div>
+                        <!-- Body / Chat History -->
+                        <div class="cs-body" id="csBody">
+                            <!-- Messages injected via JS -->
+                        </div>
 
-            <div id="chatBox"
-                style="flex: 1; overflow-y: auto; padding: 1rem; background: #f8fafc; border-radius: 12px; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
-                <!-- Messages will appear here -->
-            </div>
+                        <!-- Footer / Input -->
+                        <div class="cs-footer">
+                            <div id="csEmojiPicker" class="cs-emoji-picker">
+                                <button class="cs-emoji-btn" onclick="addEmoji('😊')">😊</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('😂')">😂</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('🤣')">🤣</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('❤️')">❤️</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('😍')">😍</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('👍')">👍</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('🙏')">🙏</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('😭')">😭</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('😘')">😘</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('🥰')">🥰</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('🙌')">🙌</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('✨')">✨</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('🔥')">🔥</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('🚀')">🚀</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('😮')">😮</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('😢')">😢</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('😎')">😎</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('🤔')">🤔</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('👏')">👏</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('🎉')">🎉</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('💪')">💪</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('💯')">💯</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('🤑')">🤑</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('💰')">💰</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('📈')">📈</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('📉')">📉</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('💎')">💎</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('🤝')">🤝</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('✅')">✅</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('❌')">❌</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('🔔')">🔔</button>
+                                <button class="cs-emoji-btn" onclick="addEmoji('🎁')">🎁</button>
+                            </div>
 
-            <div style="display: flex; gap: 0.5rem;">
-                <input type="text" id="csInput" placeholder="Type a message..."
-                    style="flex: 1; padding: 0.8rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
-                <button onclick="sendCSMessage()"
-                    style="background: #3b82f6; color: white; border: none; padding: 0 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer;">Send</button>
-            </div>
-        </div>
-    </div>
-    <div id="topAlertContainer" class="top-alert-container">
-        <div class="top-alert">
-            <i data-lucide="alert-circle"></i>
-            <span>Please sign in to continue.</span>
-            <i data-lucide="x" class="close-alert" onclick="closeAlert()"></i>
-        </div>
-    </div>
-    <div id="messageCenterOverlay" class="message-center-overlay" onclick="toggleMessageCenter()"></div>
+                            <div id="csAttachmentPreview" class="cs-attachment-preview">
+                                <img id="csPreviewImg" src="" class="cs-preview-img" style="display:none;">
+                                <span id="csFileName">File name</span>
+                                <i data-lucide="x" class="cs-remove-attachment" onclick="clearAttachment()"
+                                    size="16"></i>
+                            </div>
 
-    <!-- Floating CS Button -->
-    <div class="floating-cs-btn" onclick="openCS()" title="Customer Service">
-        <i data-lucide="headset"></i>
-    </div>
-
-    <div id="messageCenter" class="message-center-modal">
-        <div class="mc-header">
-            <div class="mc-title-row">
-                <span class="mc-title">Message Center</span>
-                <span class="mc-subtitle" id="msgCount">10 Messages</span>
-            </div>
-            <button class="mc-close" onclick="toggleMessageCenter()"><i data-lucide="x" size="24"></i></button>
-        </div>
-        <div class="mc-actions">
-            <button class="mc-btn" onclick="makeAllRead()">Make all read</button>
-            <button class="mc-btn delete-all" onclick="deleteAllMessages()">Delete all</button>
-        </div>
-        <div class="mc-list" id="mcList">
-            <div style="text-align: center; color: #94a3b8; padding: 2rem; font-size: 0.85rem;">No messages</div>
-        </div>
-    </div>
+                            <div class="cs-input-area">
+                                <input type="file" id="csFileInput" style="display:none;" onchange="handleCSFile(this)">
+                                <div class="cs-input-row">
+                                    <input type="text" id="csInput" class="cs-input" placeholder="Type a message..."
+                                        onkeypress="if(event.key === 'Enter') sendCSMessage()">
+                                </div>
+                                <div class="cs-actions">
+                                    <div class="cs-tools">
+                                        <button class="cs-tool-btn" onclick="csTool('emoji')" title="Emoji">
+                                            <i data-lucide="smile" size="20"></i>
+                                        </button>
+                                        <button class="cs-tool-btn" onclick="csTool('image')" title="Send Image">
+                                            <i data-lucide="camera" size="20"></i>
+                                        </button>
+                                        <button class="cs-tool-btn" onclick="csTool('video')" title="Send Video">
+                                            <i data-lucide="video" size="20"></i>
+                                        </button>
+                                        <button class="cs-tool-btn" onclick="csTool('file')" title="Send File">
+                                            <i data-lucide="link" size="20"></i>
+                                        </button>
+                                    </div>
+                                    <button class="cs-send-btn" onclick="sendCSMessage()">
+                                        <i data-lucide="send" size="18"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="topAlertContainer" class="top-alert-container">
+                    <div class="top-alert">
+                        <i data-lucide="alert-circle"></i>
+                        <span>Please sign in to continue.</span>
+                        <i data-lucide="x" class="close-alert" onclick="closeAlert()"></i>
+                    </div>
+                </div>
+                <div id="messageCenterOverlay" class="message-center-overlay" onclick="toggleMessageCenter()"></div>
+                <div id="messageCenter" class="message-center-modal">
+                    <div class="mc-header">
+                        <div class="mc-title-row">
+                            <span class="mc-title">Message Center</span>
+                            <span class="mc-subtitle" id="msgCount">10 Messages</span>
+                        </div>
+                        <button class="mc-close" onclick="toggleMessageCenter()"><i data-lucide="x"
+                                size="24"></i></button>
+                    </div>
+                    <div class="mc-actions">
+                        <button class="mc-btn" onclick="makeAllRead()">Make all read</button>
+                        <button class="mc-btn delete-all" onclick="deleteAllMessages()">Delete all</button>
+                    </div>
+                    <div class="mc-list" id="mcList">
+                        <!-- Item 1 -->
+                        <div class="mc-item">
+                            <div class="mc-dot unread"></div>
+                            <div class="mc-content">
+                                <div class="mc-msg-title">IPO Announcement – Armour Security IPO（QIB）</div>
+                                <div class="mc-time">14-01-2026 15:10:23</div>
+                                <div class="mc-tag">IPO:NEW</div>
+                                <button class="mc-delete-item" onclick="deleteMessage(this)">Delete</button>
+                            </div>
+                        </div>
+                        <!-- Item 2 -->
+                        <div class="mc-item">
+                            <div class="mc-dot unread"></div>
+                            <div class="mc-content">
+                                <div class="mc-msg-title">Important Notice</div>
+                                <div class="mc-time">12-01-2026 09:32:02</div>
+                                <div class="mc-tag">TEXT</div>
+                                <button class="mc-delete-item" onclick="deleteMessage(this)">Delete</button>
+                            </div>
+                        </div>
+                        <!-- Item 3 -->
+                        <div class="mc-item">
+                            <div class="mc-dot unread"></div>
+                            <div class="mc-content">
+                                <div class="mc-msg-title">IPO Listed now!</div>
+                                <div class="mc-time">07-01-2026 10:10:05</div>
+                                <div class="mc-tag">IPO:LIST</div>
+                                <button class="mc-delete-item" onclick="deleteMessage(this)">Delete</button>
+                            </div>
+                        </div>
+                        <!-- Item 4 -->
+                        <div class="mc-item">
+                            <div class="mc-dot"></div>
+                            <div class="mc-content">
+                                <div class="mc-msg-title">IPO Listed now!</div>
+                                <div class="mc-time">07-01-2026 10:10:04</div>
+                                <div class="mc-tag">IPO:LIST</div>
+                                <button class="mc-delete-item">Delete</button>
+                            </div>
+                        </div>
+                        <!-- Item 5 -->
+                        <div class="mc-item">
+                            <div class="mc-dot"></div>
+                            <div class="mc-content">
+                                <div class="mc-msg-title">IPO Listed now!</div>
+                                <div class="mc-time">07-01-2026 10:10:04</div>
+                                <div clapati yungh ss="mc-tag">IPO:LIST</div>
+                                <button class="mc-delete-item">Delete</button>
+                            </div>
+                        </div>
+                        <!-- Item 6 -->
+                        <div class="mc-item">
+                            <div class="mc-dot"></div>
+                            <div class="mc-content">
+                                <div class="mc-msg-title">IPO Listed now!</div>
+                                <div class="mc-time">07-01-2026 10:10:04</div>
+                                <div class="mc-tag">IPO:LIST</div>
+                                <button class="mc-delete-item">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Floating Contact Us Tab -->
+                <div class="cs-floating-tab" onclick="openCS()">
+                    <span class="cs-floating-text">Contact us</span>
+                    <div class="cs-floating-icon">
+                        <i data-lucide="messages-square" size="16"></i>
+                    </div>
+                </div>
 </body>
 
 </html>
