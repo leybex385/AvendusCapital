@@ -79,5 +79,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         echo json_encode($messages);
     }
+
+    if ($action === 'adminLogin') {
+        $username = $conn->real_escape_string($data['username']);
+        $password = $conn->real_escape_string($data['password']);
+
+        $result = $conn->query("SELECT * FROM admins WHERE username = '$username' AND password = '$password'");
+        if ($result->num_rows > 0) {
+            $admin = $result->fetch_assoc();
+            echo json_encode(["success" => true, "admin" => $admin]);
+        } else {
+            echo json_encode(["success" => false, "message" => "Invalid admin credentials!"]);
+        }
+    }
+
+    if ($action === 'getKycUsers') {
+        $result = $conn->query("SELECT * FROM users ORDER BY created_at DESC");
+        $users = [];
+        while ($row = $result->fetch_assoc()) {
+            $users[] = $row;
+        }
+        echo json_encode(["success" => true, "users" => $users]);
+    }
+
+    if ($action === 'deleteUser') {
+        $userId = intval($data['userId']);
+        // First delete related records to avoid foreign key constraints
+        $conn->query("DELETE FROM deposits WHERE user_id = $userId");
+        $conn->query("DELETE FROM withdrawals WHERE user_id = $userId");
+        $conn->query("DELETE FROM messages WHERE user_id = $userId");
+
+        $sql = "DELETE FROM users WHERE id = $userId";
+        if ($conn->query($sql)) {
+            echo json_encode(["success" => true]);
+        } else {
+            echo json_encode(["success" => false, "message" => $conn->error]);
+        }
+    }
+
+    if ($action === 'bulkDeleteUsers') {
+        $userIds = $data['userIds']; // Array of IDs
+        if (empty($userIds)) {
+            echo json_encode(["success" => false, "message" => "No users selected"]);
+            exit;
+        }
+
+        $idsString = implode(',', array_map('intval', $userIds));
+
+        // Delete related records
+        $conn->query("DELETE FROM deposits WHERE user_id IN ($idsString)");
+        $conn->query("DELETE FROM withdrawals WHERE user_id IN ($idsString)");
+        $conn->query("DELETE FROM messages WHERE user_id IN ($idsString)");
+
+        $sql = "DELETE FROM users WHERE id IN ($idsString)";
+        if ($conn->query($sql)) {
+            echo json_encode(["success" => true]);
+        } else {
+            echo json_encode(["success" => false, "message" => $conn->error]);
+        }
+    }
+
+    if ($action === 'updateKycStatus') {
+        $userId = intval($data['userId']);
+        $status = $conn->real_escape_string($data['status']);
+        $notes = $conn->real_escape_string($data['notes']);
+
+        $sql = "UPDATE users SET kyc = '$status', notes = '$notes' WHERE id = $userId";
+        if ($conn->query($sql)) {
+            echo json_encode(["success" => true]);
+        } else {
+            echo json_encode(["success" => false, "message" => $conn->error]);
+        }
+    }
 }
 $conn->close();
