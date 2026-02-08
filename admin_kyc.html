@@ -1668,23 +1668,37 @@
         // Live Chat Logic
         let currentChatUser = null;
         let chatUsers = [];
+        let isAdminChatSubscribed = false;
 
         async function initLiveChat() {
             const client = DB.getClient();
             if (!client) return;
 
-            const { data: msgs } = await client.from('messages').select('user_id, created_at').order('created_at', { ascending: false });
+            // Fetch users with messages (limit to 100 recent to avoid crash)
+            const { data: msgs } = await client.from('messages').select('user_id, created_at').order('created_at', { ascending: false }).limit(500);
             const uids = [...new Set(msgs.map(m => m.user_id))];
             chatUsers = allUsers.filter(u => uids.includes(u.id));
             renderChatUserList();
 
-            client.channel('public:messages')
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-                    const newMsg = payload.new;
-                    if (currentChatUser && newMsg.user_id === currentChatUser.id) appendChatMessage(newMsg);
-                    updateChatUserList(newMsg);
-                })
-                .subscribe();
+            if (!isAdminChatSubscribed) {
+                client.channel('public:messages')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                        const newMsg = payload.new;
+                        // Skip if it's a notification
+                        try { if (JSON.parse(newMsg.message).title !== undefined) return; } catch (e) { }
+
+                        if (currentChatUser && newMsg.user_id == currentChatUser.id) {
+                            // Don't append if already local (sent by us)
+                            const bubbles = document.querySelectorAll('#chatHistory > div');
+                            let exists = false;
+                            bubbles.forEach(b => { if (b.innerText.includes(newMsg.message)) exists = true; });
+                            if (!exists) appendChatMessage(newMsg);
+                        }
+                        updateChatUserList(newMsg);
+                    })
+                    .subscribe();
+                isAdminChatSubscribed = true;
+            }
         }
 
         function renderChatUserList() {
@@ -1751,6 +1765,11 @@
             const input = document.getElementById('adminChatInput');
             const msg = input.value.trim();
             if (!msg || !currentChatUser) return;
+
+            // Immediate local feedback
+            const localMsg = { message: msg, sender: 'Admin', created_at: new Date().toISOString(), user_id: currentChatUser.id };
+            appendChatMessage(localMsg);
+
             input.value = '';
             await DB.sendMessage(currentChatUser.id, msg, 'Admin');
         }
