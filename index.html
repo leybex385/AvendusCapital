@@ -73,9 +73,9 @@
         <!-- Portfolio Summary (shown when logged in) -->
         <div class="portfolio-summary-bar" id="portfolioBar" style="display: none;">
             <div class="user-greeting">
-                <div class="user-avatar">91</div>
+                <div class="user-avatar" id="topAvatar">91</div>
                 <div class="user-text">
-                    <h3>Sharad Madhukar Mali</h3>
+                    <h3 id="topGreeting">User</h3>
                     <p>Good afternoon — keep going.</p>
                 </div>
                 <button class="view-toggle"><i data-lucide="eye"></i></button>
@@ -84,11 +84,11 @@
             <div class="portfolio-stats">
                 <div class="stat-item">
                     <span class="stat-label">Current Portfolio Value</span>
-                    <span class="stat-value green">₹4,64,10,128.48</span>
+                    <span class="stat-value green">₹0.00</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Invested Value</span>
-                    <span class="stat-value blue">₹1,18,14,664.99</span>
+                    <span class="stat-value blue">₹0.00</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Today</span>
@@ -121,63 +121,27 @@
                 <div class="market-cards-grid">
                     <div class="stock-card">
                         <div class="stock-info">
-                            <img src="https://flagcdn.com/w40/in.png" srcset="https://flagcdn.com/w80/in.png 2x"
-                                width="20" alt="India" class="flag-icon">
+                            <img src="https://flagcdn.com/w40/in.png" width="20" alt="India" class="flag-icon">
                             <span class="stock-name">SENSEX</span>
-                            <span class="stock-ticker">ININ</span>
                         </div>
                         <div class="stock-value">83,580.40</div>
                         <div class="stock-change green">+266.47 (+0.32%)</div>
                     </div>
                     <div class="stock-card">
                         <div class="stock-info">
-                            <img src="https://flagcdn.com/w40/in.png" srcset="https://flagcdn.com/w80/in.png 2x"
-                                width="20" alt="India" class="flag-icon">
+                            <img src="https://flagcdn.com/w40/in.png" width="20" alt="India" class="flag-icon">
                             <span class="stock-name">NIFTY 50</span>
-                            <span class="stock-ticker">ININ</span>
                         </div>
                         <div class="stock-value">25,627.1</div>
                         <div class="stock-change negative">-148.9 (-0.58%)</div>
                     </div>
                     <div class="stock-card">
                         <div class="stock-info">
-                            <img src="https://flagcdn.com/w40/in.png" srcset="https://flagcdn.com/w80/in.png 2x"
-                                width="20" alt="India" class="flag-icon">
+                            <img src="https://flagcdn.com/w40/in.png" width="20" alt="India" class="flag-icon">
                             <span class="stock-name">NIFTY BANK</span>
-                            <span class="stock-ticker">ININ</span>
                         </div>
                         <div class="stock-value">60,023.4</div>
                         <div class="stock-change negative">-214.75 (-0.36%)</div>
-                    </div>
-                    <div class="stock-card">
-                        <div class="stock-info">
-                            <img src="https://flagcdn.com/w40/in.png" srcset="https://flagcdn.com/w80/in.png 2x"
-                                width="20" alt="India" class="flag-icon">
-                            <span class="stock-name">NIFTY SMLCAP</span>
-                            <span class="stock-ticker">ININ</span>
-                        </div>
-                        <div class="stock-value">16,949.3</div>
-                        <div class="stock-change negative">-255.8 (-1.49%)</div>
-                    </div>
-                    <div class="stock-card">
-                        <div class="stock-info">
-                            <img src="https://flagcdn.com/w40/in.png" srcset="https://flagcdn.com/w80/in.png 2x"
-                                width="20" alt="India" class="flag-icon">
-                            <span class="stock-name">NIFTY MIDCAP</span>
-                            <span class="stock-ticker">ININ</span>
-                        </div>
-                        <div class="stock-value">59,324.05</div>
-                        <div class="stock-change negative">-359.55 (-0.6%)</div>
-                    </div>
-                    <div class="stock-card">
-                        <div class="stock-info">
-                            <img src="https://flagcdn.com/w40/in.png" srcset="https://flagcdn.com/w80/in.png 2x"
-                                width="20" alt="India" class="flag-icon">
-                            <span class="stock-name">VIX</span>
-                            <span class="stock-ticker">ININ</span>
-                        </div>
-                        <div class="stock-value">15.1</div>
-                        <div class="stock-change positive">+1.46 (+10.73%)</div>
                     </div>
                 </div>
             </section>
@@ -190,91 +154,15 @@
                 </div>
                 <div class="about-content" style="padding: 1.5rem; color: #64748b; line-height: 1.6;">
                     <p>Avendus Capital is a leading financial institution dedicated to providing premium trading and
-                        investment solutions. With a focus on innovation and client success, we offer a comprehensive
-                        suite of tools and services designed to empower traders in the global markets. Our platform
-                        combines advanced technology with institutional-grade security to ensure your trading journey is
-                        seamless and successful.</p>
+                        investment solutions. We offer a comprehensive suite of tools designed to empower traders
+                        globally.</p>
                 </div>
             </section>
 
-            <!-- Exclusive Offers Section -->
-            <section class="exclusive-offers-section">
-                <div class="card-header"
-                    style="padding-left: 0.5rem; background: transparent; border: none; margin-bottom: 0.5rem;">
-                    <div class="header-icon blue" style="background: #e0f2fe; color: #0ea5e9;">
-                        <i data-lucide="sparkles"></i>
-                    </div>
-                    <h2 style="font-size: 1.3rem; font-weight: 800; color: #1e293b; letter-spacing: -0.5px;">Exclusive
-                        Offers</h2>
-                </div>
-                <div class="offers-grid">
-                    <div class="offer-card">
-                        <div class="offer-img-wrapper">
-                            <img src="https://images.pexels.com/photos/6770610/pexels-photo-6770610.jpeg?auto=compress&cs=tinysrgb&w=600"
-                                alt="Equity Trading">
-                        </div>
-                        <div class="offer-info">
-                            <h3>Equity Trading</h3>
-                            <p>Invest in leading companies and grow with the stock market.</p>
-                        </div>
-                    </div>
-                    <div class="offer-card">
-                        <div class="offer-img-wrapper">
-                            <img src="https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=600"
-                                alt="Robo Advisory">
-                        </div>
-                        <div class="offer-info">
-                            <h3>Robo Advisory</h3>
-                            <p>AI-powered, personalised investment strategies made simple.</p>
-                        </div>
-                    </div>
-                    <div class="offer-card">
-                        <div class="offer-img-wrapper">
-                            <img src="https://images.pexels.com/photos/164501/pexels-photo-164501.jpeg?auto=compress&cs=tinysrgb&w=600"
-                                alt="Mutual Funds">
-                        </div>
-                        <div class="offer-info">
-                            <h3>Mutual Funds</h3>
-                            <p>Diversify your portfolio with professionally managed fund options.</p>
-                        </div>
-                    </div>
-                    <div class="offer-card">
-                        <div class="offer-img-wrapper">
-                            <img src="https://images.pexels.com/photos/6801874/pexels-photo-6801874.jpeg?auto=compress&cs=tinysrgb&w=600"
-                                alt="Online Trading Experience">
-                        </div>
-                        <div class="offer-info">
-                            <h3>Online Trading Experience</h3>
-                            <p>Online Trading Experience</p>
-                        </div>
-                    </div>
-                    <div class="offer-card">
-                        <div class="offer-img-wrapper">
-                            <img src="https://images.pexels.com/photos/6780824/pexels-photo-6780824.jpeg?auto=compress&cs=tinysrgb&w=600"
-                                alt="Exchange Traded Funds">
-                        </div>
-                        <div class="offer-info">
-                            <h3>Exchange Traded Funds</h3>
-                            <p>Trade diversified baskets of assets at low cost.</p>
-                        </div>
-                    </div>
-                    <div class="offer-card">
-                        <div class="offer-img-wrapper">
-                            <img src="https://images.pexels.com/photos/7788009/pexels-photo-7788009.jpeg?auto=compress&cs=tinysrgb&w=600"
-                                alt="Bonds & Debt">
-                        </div>
-                        <div class="offer-info">
-                            <h3>Bonds & Debt</h3>
-                            <p>Earn stable returns with safe, fixed-income instruments.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Recommendation Alert -->
+            <!-- Recommendation Alert (for guests) -->
             <div class="market-auth-prompt" id="marketAuthPrompt">
-                <p>Please log in to view more</p>
-                <a href="login.html" class="login-btn-small">Please log in to continue</a>
+                <p>Please log in to view more premium insights</p>
+                <a href="login.html" class="login-btn-small">Login to Continue</a>
             </div>
 
             <!-- Right Column: News & Recommendation -->
@@ -285,425 +173,41 @@
                         <h2>Breaking News</h2>
                     </div>
                     <div class="news-carousel" id="newsCarousel">
-                        <!-- Slide 1 -->
-                        <div class="news-slide active"
-                            data-url="news-detail.html?title=Palantir%20Technologies%20Inc.%20%24PLTR%20is%20IQ%20EQ%20FUND%20MANAGEMENT%20IRELAND%20Ltd%27s%204th%20Largest%20Position&author=Sarita%20Garza&date=Feb%206%2C%202026%2C%2010%3A46%20PM&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1551288049-bebda4e38f71%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200&content=IQ%20EQ%20FUND%20MANAGEMENT%20IRELAND%20Ltd%20boosted%20its%20position%20in%20shares%20of%20Palantir%20Technologies%20Inc.%20(NASDAQ%3APLTR)%20by%2095.8%25%20during%20the%20third%20quarter%2C%20according%20to%20its%20most%20recent%20Form%2013F%20filing%20with%20the%20Securities%20and%20Exchange%20Commission%20(SEC).%20The%20firm%20owned%20204%2C471%20shares%20of%20the%20company%27s%20stock%20after%20purchasing%20an%20additional%20100%2C042%20shares%20during%20the%20period.%20Palantir%20Technologies%20makes%20up%202.5%25%20of%20IQ%20EQ%20FUND%20MANAGEMENT%20IRELAND%20Ltd%27s%20holdings%2C%20making%20the%20stock%20its%204th%20biggest%20holding.%20The%20holdings%20were%20worth%20%2437%2C300%2C000%20at%20the%20end%20of%20the%20most%20recent%20quarter.%20Several%20other%20hedge%20funds%20have%20also%20made%20changes%20to%20their%20positions.%20Briaud%20Financial%20Planning%20Inc%20acquired%20a%20new%20position%20in%20shares%20of%20Palantir%20Technologies%20in%20the%202nd%20quarter%20valued%20at%20%2427%2C000.%20LFA%20Lugano%20Financial%20Advisors%20SA%20purchased%20a%20new%20stake%20valued%20at%20%2427%2C000.%20Frazier%20Financial%20Advisors%20LLC%20acquired%20a%20new%20position%20valued%20at%20about%20%2428%2C000.%20Delos%20Wealth%20Advisors%20LLC%20acquired%20a%20new%20stake%20worth%20about%20%2429%2C000.%20Zeit%20Capital%20LLC%20acquired%20a%20new%20position%20valued%20at%20approximately%20%2430%2C000.%20Hedge%20funds%20and%20other%20institutional%20investors%20own%2045.65%25%20of%20the%20company%27s%20stock.">
+                        <div class="news-slide active">
                             <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800"
-                                alt="Palantir">
+                                alt="News">
                             <div class="news-slide-overlay">
-                                <span class="news-time">8m ago</span>
-                                <h3>Palantir Technologies Inc. $PLTR is IQ EQ FUND MANAGEMENT IRELAND Ltd's 4th Largest
-                                    Position</h3>
-                            </div>
-                        </div>
-                        <!-- Slide 2 -->
-                        <div class="news-slide"
-                            data-url="news-detail.html?title=SENSEX%20Hits%20Record%20High%20of%2084%2C000%20Points%20Amid%20Strong%20FII%20Inflows&author=Rajesh%20Kumar&date=Feb%206%2C%202026%2C%209%3A30%20PM&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1590283603385-17ffb3a7f29f%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200&content=The%20BSE%20SENSEX%20index%20surged%20to%20an%20all-time%20high%20of%2084%2C000%20points%20today%2C%20driven%20by%20strong%20foreign%20institutional%20investor%20(FII)%20inflows%20and%20positive%20global%20cues.%20Banking%20and%20IT%20stocks%20led%20the%20rally%2C%20with%20HDFC%20Bank%20and%20Infosys%20gaining%20over%203%25%20each.%20Market%20analysts%20attribute%20the%20bullish%20sentiment%20to%20expectations%20of%20a%20rate%20cut%20by%20the%20Reserve%20Bank%20of%20India%20in%20its%20upcoming%20monetary%20policy%20meeting.%20The%20NIFTY%2050%20also%20touched%20a%20new%20peak%20of%2025%2C800%20points%2C%20with%20broad-based%20buying%20across%20all%20sectors.%20The%20market%20capitalization%20of%20BSE-listed%20companies%20crossed%20%E2%82%B9450%20lakh%20crore%20for%20the%20first%20time.%20Foreign%20portfolio%20investors%20(FPIs)%20have%20pumped%20in%20over%20%E2%82%B925%2C000%20crore%20in%20the%20last%20month%20alone%2C%20making%20it%20one%20of%20the%20strongest%20FII%20buying%20periods%20in%20recent%20history.%20Domestic%20institutional%20investors%20(DIIs)%20also%20continued%20their%20buying%20spree%2C%20adding%20%E2%82%B98%2C500%20crore%20worth%20of%20equities.%20Investors%20are%20advised%20to%20maintain%20a%20diversified%20portfolio%20given%20the%20current%20market%20volatility%20and%20global%20geopolitical%20uncertainties.">
-                            <img src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=800"
-                                alt="SENSEX">
-                            <div class="news-slide-overlay">
-                                <span class="news-time">1h ago</span>
-                                <h3>SENSEX Hits Record High of 84,000 Points Amid Strong FII Inflows</h3>
-                            </div>
-                        </div>
-                        <!-- Slide 3 -->
-                        <div class="news-slide"
-                            data-url="news-detail.html?title=Federal%20Reserve%20Signals%20Potential%20Rate%20Cuts%20in%20Q2%202026&author=Michael%20Chen&date=Feb%206%2C%202026%2C%208%3A15%20PM&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1611974765270-ca1258634369%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200&content=The%20Federal%20Reserve%20maintained%20its%20benchmark%20interest%20rate%20unchanged%20at%204.5%25-4.75%25%20but%20signaled%20potential%20rate%20cuts%20in%20the%20second%20quarter%20of%202026.%20Fed%20Chair%20Jerome%20Powell%20stated%20that%20inflation%20has%20shown%20consistent%20progress%20toward%20the%202%25%20target%2C%20with%20core%20PCE%20declining%20to%202.3%25.%20The%20decision%20was%20unanimous%20among%20all%20voting%20members%20of%20the%20Federal%20Open%20Market%20Committee%20(FOMC).%20Bond%20markets%20reacted%20positively%2C%20with%20the%2010-year%20Treasury%20yield%20falling%20to%203.8%25%20from%204.1%25.%20Equity%20markets%20rallied%20on%20the%20dovish%20tone%2C%20with%20the%20S%26P%20500%20gaining%201.5%25%20and%20the%20Nasdaq%20Composite%20rising%202.1%25%20in%20after-hours%20trading.%20Powell%20emphasized%20that%20the%20labor%20market%20remains%20strong%20with%20unemployment%20at%203.7%25%2C%20while%20wage%20growth%20has%20moderated%20to%20sustainable%20levels.%20The%20Fed%27s%20updated%20dot%20plot%20suggests%20three%20rate%20cuts%20in%202026%2C%20totaling%2075%20basis%20points.%20Market%20participants%20now%20expect%20the%20first%20cut%20in%20April%202026%2C%20with%20a%2078%25%20probability%20priced%20into%20futures%20markets.">
-                            <img src="https://images.unsplash.com/photo-1611974765270-ca1258634369?auto=format&fit=crop&q=80&w=800"
-                                alt="Fed">
-                            <div class="news-slide-overlay">
-                                <span class="news-time">2h ago</span>
-                                <h3>Federal Reserve Signals Potential Rate Cuts in Q2 2026</h3>
-                            </div>
-                        </div>
-                        <!-- Slide 4 -->
-                        <div class="news-slide"
-                            data-url="news-detail.html?title=Bitcoin%20Surges%20Past%20%24105%2C000%20as%20Major%20Banks%20Announce%20Crypto%20Custody%20Services&author=Elena%20Rodriguez&date=Feb%206%2C%202026%2C%206%3A45%20PM&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1518546305927-5a555bb7020d%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200&content=Bitcoin%20reached%20a%20new%20all-time%20high%20of%20%24105%2C000%20today%20after%20JPMorgan%20Chase%20and%20Goldman%20Sachs%20announced%20the%20launch%20of%20cryptocurrency%20custody%20services%20for%20institutional%20clients.%20The%20move%20marks%20a%20significant%20shift%20in%20Wall%20Street%27s%20approach%20to%20digital%20assets%2C%20signaling%20mainstream%20acceptance%20of%20cryptocurrencies%20as%20a%20legitimate%20asset%20class.%20Ethereum%20also%20gained%208%25%2C%20trading%20at%20%245%2C200%2C%20while%20other%20major%20altcoins%20including%20Solana%20and%20Cardano%20saw%20double-digit%20gains.%20The%20total%20cryptocurrency%20market%20cap%20now%20exceeds%20%244%20trillion%20for%20the%20first%20time%20in%20history.%20BlackRock%27s%20Bitcoin%20ETF%20(IBIT)%20recorded%20its%20largest%20single-day%20inflow%20of%20%241.2%20billion%2C%20bringing%20total%20assets%20under%20management%20to%20over%20%2445%20billion.%20Analysts%20predict%20continued%20institutional%20adoption%20will%20drive%20prices%20higher%2C%20with%20some%20forecasting%20Bitcoin%20at%20%24150%2C000%20by%20year-end.%20The%20approval%20of%20spot%20Ethereum%20ETFs%20is%20also%20expected%20within%20the%20next%20quarter%2C%20which%20could%20further%20boost%20the%20crypto%20market.">
-                            <img src="https://images.unsplash.com/photo-1518546305927-5a555bb7020d?auto=format&fit=crop&q=80&w=800"
-                                alt="Bitcoin">
-                            <div class="news-slide-overlay">
-                                <span class="news-time">4h ago</span>
-                                <h3>Bitcoin Surges Past $105,000 as Major Banks Announce Crypto Custody</h3>
-                            </div>
-                        </div>
-                        <!-- Slide 5 -->
-                        <div class="news-slide"
-                            data-url="news-detail.html?title=NIFTY%20Bank%20Index%20Outperforms%20as%20RBI%20Eases%20Liquidity%20Norms&author=Priya%20Sharma&date=Feb%206%2C%202026%2C%205%3A30%20PM&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1560472354-b33ff0c44a43%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200&content=The%20NIFTY%20Bank%20index%20jumped%204.2%25%20today%20after%20the%20Reserve%20Bank%20of%20India%20announced%20relaxed%20liquidity%20coverage%20ratio%20(LCR)%20requirements%20for%20commercial%20banks.%20The%20move%20is%20expected%20to%20free%20up%20approximately%20%E2%82%B93%20lakh%20crore%20in%20lending%20capacity%20for%20the%20banking%20sector.%20HDFC%20Bank%2C%20ICICI%20Bank%2C%20and%20State%20Bank%20of%20India%20led%20the%20gains%2C%20each%20rising%20over%205%25%20during%20the%20trading%20session.%20The%20RBI%20also%20announced%20a%2025%20basis%20point%20cut%20in%20the%20Cash%20Reserve%20Ratio%20(CRR)%2C%20injecting%20additional%20liquidity%20into%20the%20system.%20Banking%20analysts%20view%20this%20as%20a%20positive%20step%20to%20boost%20credit%20growth%20and%20support%20economic%20expansion.%20The%20policy%20changes%20will%20take%20effect%20from%20April%201%2C%202026.%20Private%20sector%20banks%20are%20expected%20to%20benefit%20the%20most%20from%20these%20changes%2C%20with%20improved%20net%20interest%20margins%20and%20higher%20loan%20disbursements.%20Kotak%20Mahindra%20Bank%20and%20Axis%20Bank%20also%20gained%20over%204%25%20each.%20The%20banking%20sector%20is%20now%20up%2018%25%20year-to-date%2C%20outperforming%20the%20broader%20market%20by%20a%20significant%20margin.">
-                            <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&q=80&w=800"
-                                alt="NIFTY Bank">
-                            <div class="news-slide-overlay">
-                                <span class="news-time">5h ago</span>
-                                <h3>NIFTY Bank Index Outperforms as RBI Eases Liquidity Norms</h3>
+                                <span class="news-time">Just Now</span>
+                                <h3>Market Hits New Milestone Amid Global Optimism</h3>
                             </div>
                         </div>
                         <!-- Arrow Controls -->
-                        <button class="carousel-arrow carousel-prev" onclick="changeSlide(-1)"><i
+                        <button class="carousel-prev" onclick="changeSlide(-1)"><i
                                 data-lucide="chevron-left"></i></button>
-                        <button class="carousel-arrow carousel-next" onclick="changeSlide(1)"><i
+                        <button class="carousel-next" onclick="changeSlide(1)"><i
                                 data-lucide="chevron-right"></i></button>
-                        <!-- Dots -->
-                        <div class="carousel-dots">
-                            <span class="carousel-dot active" onclick="goToSlide(0)"></span>
-                            <span class="carousel-dot" onclick="goToSlide(1)"></span>
-                            <span class="carousel-dot" onclick="goToSlide(2)"></span>
-                            <span class="carousel-dot" onclick="goToSlide(3)"></span>
-                            <span class="carousel-dot" onclick="goToSlide(4)"></span>
-                        </div>
                     </div>
                 </section>
 
                 <section class="card recommendation">
-                    <div class="card-header" id="recommendationHeader"
-                        style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="card-header" id="recommendationHeader" style="cursor: pointer;">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <div class="header-icon blue"><i data-lucide="thumbs-up"></i></div>
                             <h2>Recommendation</h2>
                         </div>
-                        <i data-lucide="chevron-down" id="recommendationChevron"
-                            style="transition: transform 0.3s ease;"></i>
+                        <i data-lucide="chevron-down" id="recommendationChevron"></i>
                     </div>
                     <div class="recommendation-list" id="recommendationList"
-                        style="display: none; max-height: 0; overflow: hidden; transition: max-height 0.5s ease-out;">
-                        <!-- Item 1: Market Trends -->
-                        <a href="news-detail.html?title=Global%20Market%20Trends%3A%202026%20Outlook&author=Sarah%20Jenkins&date=Feb%206%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1460925895917-afdab827c52f%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=200"
-                                    alt="Market">
-                                <div class="rec-content">
-                                    <h3>Global Market Trends: 2026 Outlook</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Sarah Jenkins</span>
-                                        <span class="date">Feb 6, 2026</span>
-                                    </div>
-                                </div>
+                        style="display: none; max-height: 0; overflow: hidden;">
+                        <div class="rec-item">
+                            <img class="rec-thumb"
+                                src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=200"
+                                alt="Rec">
+                            <div class="rec-content">
+                                <h3>2026 Financial Outlook</h3>
+                                <p>Latest trends and predictions.</p>
                             </div>
-                        </a>
-                        <!-- Item 2: Trading App -->
-                        <a href="news-detail.html?title=Trading%20Apps%20Revolutionize%20retail%20investing&author=Mike%20Ross&date=Feb%206%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1590283603385-17ffb3a7f29f%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=200"
-                                    alt="Trading Platform">
-                                <div class="rec-content">
-                                    <h3>Trading Apps Revolutionize retail investing</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Mike Ross</span>
-                                        <span class="date">Feb 6, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 3: Crypto -->
-                        <a href="news-detail.html?title=Crypto%20Regulation%3A%20What%20Investors%20Need%20to%20Know&author=Elena%20Fisher&date=Feb%205%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1518546305927-5a555bb7020d%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1518546305927-5a555bb7020d?auto=format&fit=crop&q=80&w=200"
-                                    alt="Crypto">
-                                <div class="rec-content">
-                                    <h3>Crypto Regulation: What Investors Need to Know</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Elena Fisher</span>
-                                        <span class="date">Feb 5, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 4: Green Bonds -->
-                        <a href="news-detail.html?title=Sustainable%20Investing%3A%20The%20Green%20Bond%20Boom&author=David%20Chen&date=Feb%205%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1532601224476-15c79f2f7a51%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1532601224476-15c79f2f7a51?auto=format&fit=crop&q=80&w=200"
-                                    alt="Green Bonds">
-                                <div class="rec-content">
-                                    <h3>Sustainable Investing: The Green Bond Boom</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">David Chen</span>
-                                        <span class="date">Feb 5, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 5: Oil Prices -->
-                        <a href="news-detail.html?title=Oil%20Prices%20Volatile%20Amid%20Geopolitical%20Tensions&author=Amanda%20Waller&date=Feb%204%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1518546305927-5a555bb7020d%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1518546305927-5a555bb7020d?auto=format&fit=crop&q=80&w=200"
-                                    alt="Oil Trading">
-                                <div class="rec-content">
-                                    <h3>Oil Prices Volatile Amid Geopolitical Tensions</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Amanda Waller</span>
-                                        <span class="date">Feb 4, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 6: Fintech -->
-                        <a href="news-detail.html?title=Fintech%20Innovation%3A%20The%20End%20of%20Traditional%20Banking%3F&author=James%20Holden&date=Feb%204%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1620714223084-8fcacc6dfd8d%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?auto=format&fit=crop&q=80&w=200"
-                                    alt="Fintech Trading">
-                                <div class="rec-content">
-                                    <h3>Fintech Innovation: The End of Traditional Banking?</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">James Holden</span>
-                                        <span class="date">Feb 4, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 7: IPO -->
-                        <a href="news-detail.html?title=Top%205%20IPOs%20to%20Watch%20in%20Q1%202026&author=Priya%20Patel&date=Feb%203%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1559589689-577aabd1db4f%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1559589689-577aabd1db4f?auto=format&fit=crop&q=80&w=200"
-                                    alt="IPO">
-                                <div class="rec-content">
-                                    <h3>Top 5 IPOs to Watch in Q1 2026</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Priya Patel</span>
-                                        <span class="date">Feb 3, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 8: Real Estate -->
-                        <a href="news-detail.html?title=Real%20Estate%20Market%3A%20Commercial%20vs%20Residential&author=Robert%20Stark&date=Feb%203%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1582407947304-fd86f028f716%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&q=80&w=200"
-                                    alt="Real Estate">
-                                <div class="rec-content">
-                                    <h3>Real Estate Market: Commercial vs Residential</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Robert Stark</span>
-                                        <span class="date">Feb 3, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 9: Central Bank -->
-                        <a href="news-detail.html?title=Central%20Banks%20Signal%20Interest%20Rate%20Cuts&author=Maria%20Gonzalez&date=Feb%202%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1552664730-d307ca884978%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=200"
-                                    alt="Central Bank">
-                                <div class="rec-content">
-                                    <h3>Central Banks Signal Interest Rate Cuts</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Maria Gonzalez</span>
-                                        <span class="date">Feb 2, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 10: Forex -->
-                        <a href="news-detail.html?title=Forex%20Trading%20Strategies%20for%20Beginners&author=Kenji%20Sato&date=Feb%202%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1580519542036-c47de6196ba5%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1580519542036-c47de6196ba5?auto=format&fit=crop&q=80&w=200"
-                                    alt="Forex">
-                                <div class="rec-content">
-                                    <h3>Forex Trading Strategies for Beginners</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Kenji Sato</span>
-                                        <span class="date">Feb 2, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 11: Emerging Markets -->
-                        <a href="news-detail.html?title=Emerging%20Markets%3A%20High%20Risk%2C%20High%20Reward%3F&author=Lara%20Croft&date=Feb%201%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1480714378408-67cf0d13bc1b%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&q=80&w=200"
-                                    alt="Emerging Markets">
-                                <div class="rec-content">
-                                    <h3>Emerging Markets: High Risk, High Reward?</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Lara Croft</span>
-                                        <span class="date">Feb 1, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 12: Blue Chip -->
-                        <a href="news-detail.html?title=Blue%20Chip%20Dividends%3A%20Safe%20Havens&author=Bruce%20Wayne&date=Feb%201%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1590283603385-17ffb3a7f29f%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=200"
-                                    alt="Blue Chip Trading">
-                                <div class="rec-content">
-                                    <h3>Blue Chip Dividends: Safe Havens</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Bruce Wayne</span>
-                                        <span class="date">Feb 1, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 13: Tech Sector -->
-                        <a href="news-detail.html?title=ETF%20Performance%20Review%3A%20Tech%20Sector%20Dominates&author=Clark%20Kent&date=Jan%2031%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1519389950473-47ba0277781c%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=200"
-                                    alt="Tech Sector">
-                                <div class="rec-content">
-                                    <h3>ETF Performance Review: Tech Sector Dominates</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Clark Kent</span>
-                                        <span class="date">Jan 31, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 14: Corporate Mergers -->
-                        <a href="news-detail.html?title=Corporate%20Mergers%3A%20What%20It%20Means%20for%20Shareholders&author=Pepper%20Potts&date=Jan%2030%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1560518883-ce09059eeffa%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=200"
-                                    alt="Mergers">
-                                <div class="rec-content">
-                                    <h3>Corporate Mergers: What It Means for Shareholders</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Pepper Potts</span>
-                                        <span class="date">Jan 30, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 15: Inflation Data -->
-                        <a href="news-detail.html?title=Inflation%20Data%3A%20Analyzing%20the%20CPI%20Report&author=Tony%20Stark&date=Jan%2029%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1554224155-6726b3ff858f%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=200"
-                                    alt="Inflation Analysis">
-                                <div class="rec-content">
-                                    <h3>Inflation Data: Analyzing the CPI Report</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Tony Stark</span>
-                                        <span class="date">Jan 29, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 16: Supply Chain -->
-                        <a href="news-detail.html?title=Supply%20Chain%20Resilience%20in%20a%20Post-Pandemic%20World&author=Natasha%20Romanoff&date=Jan%2028%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1460925895917-afdab827c52f%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=200"
-                                    alt="Supply Chain">
-                                <div class="rec-content">
-                                    <h3>Supply Chain Resilience in a Post-Pandemic World</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Natasha Romanoff</span>
-                                        <span class="date">Jan 28, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 17: DeFi -->
-                        <a href="news-detail.html?title=The%20Rise%20of%20Decentralized%20Finance%20(DeFi)&author=Steve%20Rogers&date=Jan%2027%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1559526324-4b87b5e36e44%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&q=80&w=200"
-                                    alt="DeFi">
-                                <div class="rec-content">
-                                    <h3>The Rise of Decentralized Finance (DeFi)</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Steve Rogers</span>
-                                        <span class="date">Jan 27, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 18: Green Energy -->
-                        <a href="news-detail.html?title=Green%20Energy%20Stocks%3A%20A%20Bright%20Future%3F&author=Bruce%20Banner&date=Jan%2026%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1473341304170-971dccb5ac1e%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&q=80&w=200"
-                                    alt="Green Energy">
-                                <div class="rec-content">
-                                    <h3>Green Energy Stocks: A Bright Future?</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Bruce Banner</span>
-                                        <span class="date">Jan 26, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 19: Consumer Sentiment -->
-                        <a href="news-detail.html?title=Consumer%20Sentiment%20Index%20Drops%20to%20Low&author=Clint%20Barton&date=Jan%2025%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1573855619003-97b4799dcd8b%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1573855619003-97b4799dcd8b?auto=format&fit=crop&q=80&w=200"
-                                    alt="Consumer Sentiment">
-                                <div class="rec-content">
-                                    <h3>Consumer Sentiment Index Drops to Low</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Clint Barton</span>
-                                        <span class="date">Jan 25, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Item 20: Hedging -->
-                        <a href="news-detail.html?title=Hedging%20Strategies%20for%20Volatile%20Markets&author=Wanda%20Maximoff&date=Jan%2024%2C%202026&img=https%3A%2F%2Fimages.unsplash.com%2Fphoto-1590283603385-17ffb3a7f29f%3Fauto%3Dformat%26fit%3Dcrop%26q%3D80%26w%3D1200"
-                            class="rec-item-link">
-                            <div class="rec-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&q=80&w=200"
-                                    alt="Hedging">
-                                <div class="rec-content">
-                                    <h3>Hedging Strategies for Volatile Markets</h3>
-                                    <div class="rec-meta">
-                                        <span class="category">Business</span>
-                                        <span class="author">Wanda Maximoff</span>
-                                        <span class="date">Jan 24, 2026</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
+                        </div>
                     </div>
                 </section>
             </div>
@@ -712,1102 +216,237 @@
         <!-- Footer -->
         <footer class="footer">
             <div class="footer-left">
-                © 2025. Reserved. | <a href="admin_auto.html"
-                    style="color: var(--text-muted); text-decoration: none;">Admin Access (Auto)</a>
+                © 2025. Reserved. | <a href="admin_auto.html">Admin</a>
             </div>
             <div class="footer-right">
-                <span class="timezone">
-                    <img src="https://flagcdn.com/w40/in.png" width="20" alt="India" class="flag-icon"> 12:51:09
-                    GMT+5:30
-                </span>
-                <a href="#" class="cookie-pref">Cookie Preference</a>
+                <span class="timezone">GMT+5:30</span>
             </div>
         </footer>
     </div>
 
-    <!-- Customer Service Modal -->
-    <div id="csModal" class="cs-modal"
-        style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 10000;">
-        <div class="cs-content"
-            style="background: #f8fafc; width: 400px; height: 600px; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
-            <div class="cs-header"
-                style="background: #1e293b; color: white; padding: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <div
-                        style="width: 40px; height: 40px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                        <i data-lucide="headphones" size="20"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight: 700;">Customer Support</div>
-                        <div style="font-size: 0.75rem; opacity: 0.8;">Online | Active Now</div>
-                    </div>
+    <!-- Consolidated Modals -->
+    <div id="settingsModal" class="settings-modal" onclick="if(event.target == this) closeSettings()">
+        <div class="settings-content">
+            <button class="settings-close" onclick="closeSettings()"><i data-lucide="x"></i></button>
+            <div class="settings-header">
+                <div class="avatar-circle" id="settingsAvatar">91</div>
+                <div class="settings-phone" id="settingsPhone">User Access</div>
+            </div>
+            <div class="settings-list">
+                <div class="settings-item" onclick="toggleSettingsAccordion(this, 'userProfileSub')">
+                    <i data-lucide="user"></i> User Profile
                 </div>
-                <button onclick="closeCS()" style="background: none; border: none; color: white; cursor: pointer;">
-                    <i data-lucide="x" size="24"></i>
-                </button>
-            </div>
-
-            <div id="chatBox"
-                style="flex: 1; padding: 1.25rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem;">
-                <!-- Messages will appear here -->
-            </div>
-
-            <div class="cs-footer"
-                style="padding: 1rem; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 0.75rem;">
-                <input type="text" id="csInput" placeholder="How can we help?"
-                    style="flex: 1; border: 1px solid #e2e8f0; padding: 0.75rem 1rem; border-radius: 12px; outline: none;"
-                    onkeypress="if(event.key === 'Enter') sendCSMessage()">
-                <button onclick="sendCSMessage()"
-                    style="background: #3b82f6; color: white; border: none; width: 44px; height: 44px; border-radius: 12px; cursor: pointer;">
-                    <i data-lucide="send" size="20"></i>
-                </button>
+                <div id="userProfileSub" class="sub-menu">
+                    <div class="sub-item" onclick="openUpdateAvatar()">Update Avatar</div>
+                    <div class="sub-item" onclick="location.href='admin_login.html?action=kyc'">View KYC</div>
+                </div>
+                <div class="settings-item" onclick="openResetPassword()"><i data-lucide="key"></i> Change Password</div>
+                <div class="settings-item" onclick="openCS()"><i data-lucide="headset"></i> Support</div>
+                <div class="settings-item" onclick="DB.logout()"><i data-lucide="log-out"></i> Logout</div>
             </div>
         </div>
     </div>
 
-    <!-- Floating Chat Button -->
-    <button onclick="openCS()"
-        style="position: fixed; bottom: 2rem; right: 2rem; width: 60px; height: 60px; background: #3b82f6; color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); cursor: pointer; z-index: 9999;">
-        <i data-lucide="messages-square" size="28"></i>
-    </button>
+    <div id="csModal" class="cs-modal" onclick="if(event.target == this) closeCS()">
+        <div class="cs-content">
+            <div class="cs-header">
+                <h3>Customer Support</h3>
+                <button onclick="closeCS()"><i data-lucide="x"></i></button>
+            </div>
+            <div class="cs-body" id="csBody"></div>
+            <div class="cs-footer">
+                <input type="text" id="csInput" placeholder="Message..."
+                    onkeypress="if(event.key === 'Enter') sendCSMessage()">
+                <button onclick="sendCSMessage()"><i data-lucide="send"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="messageCenterOverlay" class="message-center-overlay" onclick="toggleMessageCenter()"></div>
+    <div id="messageCenter" class="message-center-modal">
+        <div class="mc-header">
+            <h3>Notifications</h3>
+            <button onclick="toggleMessageCenter()"><i data-lucide="x"></i></button>
+        </div>
+        <div id="mcList" class="mc-list" style="padding:2rem; text-align:center; color:#64748b;">No new notifications
+        </div>
+    </div>
+
+    <div id="resetPasswordModal" class="settings-modal" onclick="if(event.target == this) closeResetPassword()">
+        <div class="settings-content" style="max-width: 400px;">
+            <button class="settings-close" onclick="closeResetPassword()"><i data-lucide="x"></i></button>
+            <h2>Reset Password</h2>
+            <div style="display: flex; flex-direction: column; gap:1rem; margin-top:1rem;">
+                <input type="password" id="newPassInternal" placeholder="New Password"
+                    style="padding:0.8rem; border:1px solid #ccc; border-radius:8px;">
+                <input type="password" id="confirmPassInternal" placeholder="Confirm Password"
+                    style="padding:0.8rem; border:1px solid #ccc; border-radius:8px;">
+                <button onclick="handleInternalReset()"
+                    style="background:#3b82f6; color:white; border:none; padding:0.8rem; border-radius:8px;">Update
+                    Password</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="topAlertContainer" class="top-alert-container">
+        Please login to access this feature.
+    </div>
+
+    <!-- Floating Contact -->
+    <div class="cs-floating-tab" onclick="openCS()"
+        style="position:fixed; bottom:2rem; right:2rem; background:#3b82f6; color:white; padding:1rem; border-radius:50px; cursor:pointer; z-index:999; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+        <i data-lucide="message-circle"></i> Support
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script src="script.js"></script>
     <script>
         lucide.createIcons();
 
+        // Global State
+        let isChatSubscribed = false;
+        const currentUser = typeof DB !== 'undefined' ? DB.getCurrentUser() : null;
 
+        // UI Initialization
+        window.addEventListener('load', () => {
+            const pb = document.getElementById('portfolioBar');
+            const map = document.getElementById('marketAuthPrompt');
+            const pa = document.getElementById('promoActions');
 
-
-        function closeCS() {
-            document.getElementById('csModal').style.display = 'none';
-        }
-
-
-
-        if (recHeader && recList) {
-            recHeader.addEventListener('click', () => {
-                const isHidden = recList.style.display === 'none';
-                if (isHidden) {
-                    recList.style.display = 'block';
-                    // Allow some time for display:block to take effect before measuring/transitioning
-                    setTimeout(() => {
-                        recList.style.maxHeight = '2000px'; // Large enough value
-                        recChevron.style.transform = 'rotate(180deg)';
-                    }, 10);
-                } else {
-                    recList.style.maxHeight = '0';
-                    recChevron.style.transform = 'rotate(0deg)';
-                    setTimeout(() => {
-                        recList.style.display = 'none';
-                    }, 500); // Wait for transition
-                }
-            });
-        }
-
-        // --- CAROUSEL FUNCTIONS ---
-        let currentSlide = 0;
-        const slides = document.querySelectorAll('.news-slide');
-        const dots = document.querySelectorAll('.carousel-dot');
-        const totalSlides = slides.length;
-
-        function changeSlide(direction) {
-            currentSlide += direction;
-            if (currentSlide >= totalSlides) currentSlide = 0;
-            if (currentSlide < 0) currentSlide = totalSlides - 1;
-            updateCarousel();
-        }
-
-        function goToSlide(index) {
-            currentSlide = index;
-            updateCarousel();
-        }
-
-        function updateCarousel() {
-            slides.forEach((slide, i) => {
-                slide.classList.remove('active');
-                if (i === currentSlide) slide.classList.add('active');
-            });
-            dots.forEach((dot, i) => {
-                dot.classList.remove('active');
-                if (i === currentSlide) dot.classList.add('active');
-            });
-        }
-
-        // Click on slide to go to detail page
-        slides.forEach(slide => {
-            slide.addEventListener('click', function (e) {
-                // Only navigate if not clicking on arrow
-                if (!e.target.closest('.carousel-arrow')) {
-                    const url = this.getAttribute('data-url');
-                    if (url) window.location.href = url;
-                }
-            });
+            if (currentUser) {
+                if (pb) pb.style.display = 'flex';
+                if (map) map.style.display = 'none';
+                if (pa) pa.style.display = 'none';
+                syncUserData();
+            } else {
+                if (pb) pb.style.display = 'none';
+                if (pa) pa.style.display = 'flex';
+            }
         });
 
+        async function syncUserData() {
+            if (!currentUser) return;
 
+            // Local UI Sync
+            const greet = document.getElementById('topGreeting');
+            if (greet) greet.textContent = currentUser.full_name || currentUser.mobile;
+            const phone = document.getElementById('settingsPhone');
+            if (phone) phone.textContent = currentUser.mobile;
 
-
-        // Initial Auth State Check
-        const urlParams = new URLSearchParams(window.location.search);
-        const user = typeof DB !== 'undefined' ? DB.getCurrentUser() : null;
-        const isLoggedIn = user || urlParams.get('logged_in') === 'true';
-
-        const loggedOutBanner = document.getElementById('loggedOutBanner');
-        const marketAuthPrompt = document.getElementById('marketAuthPrompt');
-        const portfolioBar = document.getElementById('portfolioBar');
-
-        if (isLoggedIn) {
-            if (loggedOutBanner) loggedOutBanner.style.display = 'none';
-            if (marketAuthPrompt) marketAuthPrompt.style.display = 'none';
-            if (portfolioBar) portfolioBar.style.display = 'flex';
-        } else {
-            const promoActions = document.getElementById('promoActions');
-            if (promoActions) promoActions.style.display = 'flex';
-
-            const loggedOutBanner = document.getElementById('loggedOutBanner');
-            if (loggedOutBanner) loggedOutBanner.style.display = 'flex';
-
-            document.getElementById('marketAuthPrompt').style.display = 'block';
-            document.getElementById('portfolioBar').style.display = 'none';
-
-            // Show the red alert on initial load if guest (optional, based on screenshot)
-            setTimeout(() => showAlert(), 500);
-        }
-
-        // Guest Interaction Logic
-        function setActiveNav(element) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            element.classList.add('active');
-        }
-
-        function handleGuestClick(targetUrl) {
-            if (isLoggedIn) {
-                if (targetUrl !== '#') window.location.href = targetUrl;
-            } else {
-                showAlert();
-            }
-        }
-
-        function showAlert() {
-            const container = document.getElementById('topAlertContainer');
-            container.style.display = 'block';
-            lucide.createIcons();
-
-            // Auto-hide after 5 seconds
-            setTimeout(() => closeAlert(), 5000);
-        }
-
-        function closeAlert() {
-            document.getElementById('topAlertContainer').style.display = 'none';
-        }
-
-        function showToast(message) {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerHTML = `
-                <i data-lucide="alert-circle"></i>
-                <span>${message}</span>
-                <i data-lucide="x" class="toast-close" onclick="this.parentElement.remove()"></i>
-            `;
-            container.appendChild(toast);
-            lucide.createIcons();
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
-
-        // Message Center Toggle
-        function toggleMessageCenter() {
-            const mc = document.getElementById('messageCenter');
-            const overlay = document.getElementById('messageCenterOverlay');
-            if (mc.classList.contains('active')) {
-                mc.classList.remove('active');
-                overlay.classList.remove('active');
-            } else {
-                mc.classList.add('active');
-                overlay.classList.add('active');
-                lucide.createIcons();
-            }
-        }
-
-        function deleteAllMessages() {
-            const mcList = document.getElementById('mcList');
-            const msgCount = document.getElementById('msgCount');
-            if (mcList) {
-                mcList.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 2rem; font-size: 0.85rem;">No messages</div>';
-            }
-            if (msgCount) {
-                msgCount.innerText = '0 Messages';
-            }
-        }
-
-        function deleteMessage(btn) {
-            const item = btn.closest('.mc-item');
-            if (item) {
-                item.remove();
-                updateMessageCount();
-            }
-        }
-
-        function updateMessageCount() {
-            const mcList = document.getElementById('mcList');
-            const msgCount = document.getElementById('msgCount');
-            const items = mcList.querySelectorAll('.mc-item');
-            if (msgCount) {
-                msgCount.innerText = `${items.length} Messages`;
-            }
-            if (items.length === 0) {
-                mcList.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 2rem; font-size: 0.85rem;">No messages</div>';
-            }
-        }
-
-        function makeAllRead() {
-            const dots = document.querySelectorAll('.mc-dot.unread');
-            dots.forEach(dot => dot.classList.remove('unread'));
-        }
-
-        // Customer Service Logic
-        function openCS() {
-            if (typeof closeSettings === 'function') closeSettings();
-            document.getElementById('csModal').style.display = 'flex';
-
-            // Add initial messages if chatbox is empty
-            const chatBody = document.getElementById('csBody');
-            if (chatBody.children.length === 0) {
-                addCSMessage('service', 'Please don\'t share any sensitive information. Do not transfer funds without my explicit permission.', '8:30 AM');
-                addCSMessage('user', 'Sharad Madhukar Mali | *******38029', '8:31 AM');
-                addCSMessage('service', 'Hello, how can I help you today?', '8:32 AM');
-            }
-        }
-
-        function closeCS() {
-            document.getElementById('csModal').style.display = 'none';
-        }
-
-        function addCSMessage(type, text, time = '') {
-            const chatBody = document.getElementById('csBody');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `cs-msg ${type}`;
-
-            const avatarUrl = type === 'service'
-                ? 'https://api.dicebear.com/7.x/bottts/svg?seed=Support'
-                : 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sharad';
-
-            // Convert URLs to clickable links
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            const formattedText = text.replace(urlRegex, (url) => {
-                return `<a href="${url}" target="_blank" style="color: inherit; text-decoration: underline;">${url}</a>`;
-            });
-
-            msgDiv.innerHTML = `
-                <div class="cs-msg-avatar">
-                    <img src="${avatarUrl}" alt="avatar">
-                </div>
-                <div class="cs-msg-bubble">
-                    ${formattedText}
-                    ${time ? `<div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">${time}</div>` : ''}
-                </div>
-            `;
-            chatBody.appendChild(msgDiv);
-            chatBody.scrollTop = chatBody.scrollHeight;
-        }
-
-        function sendCSMessage() {
-            const input = document.getElementById('csInput');
-            const text = input.value.trim();
-            if (!text) return;
-
-            const now = new Date();
-            const time = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
-
-            addCSMessage('user', text, time);
-            input.value = '';
-
-            // Simulate support response
-            setTimeout(() => {
-                addCSMessage('service', 'Thank you for your message. An agent will be with you shortly.', time);
-            }, 1000);
-        }
-
-        // Tool functions
-        function csTool(action) {
-            const input = document.getElementById('csInput');
-            if (action === 'emoji') {
-                input.value += '😊';
-                input.focus();
-            } else if (action === 'image') {
-                alert('Image upload functionality coming soon!');
-            } else if (action === 'video') {
-                alert('Video sharing functionality coming soon!');
-            } else if (action === 'link') {
-                const url = prompt('Enter the link URL:');
-                if (url) {
-                    input.value += ` ${url} `;
-                    input.focus();
+            // Remote DB sync
+            const client = DB.getClient();
+            if (client) {
+                const { data: dbUser } = await client.from('users').select('*').eq('id', currentUser.id).single();
+                if (dbUser) {
+                    const fmt = (v) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(v || 0);
+                    const bEls = document.querySelectorAll('.stat-value.green');
+                    if (bEls.length) bEls[0].textContent = fmt(dbUser.balance + dbUser.invested);
+                    const iEls = document.querySelectorAll('.stat-value.blue');
+                    if (iEls.length) iEls[0].textContent = fmt(dbUser.invested);
                 }
             }
         }
 
-        let isChatSubscribed = false;
+        // Customer Support & Chat
+        function openCS() {
+            document.getElementById('csModal').style.display = 'flex';
+            loadCSMessages();
+        }
+        function closeCS() { document.getElementById('csModal').style.display = 'none'; }
+
         async function loadCSMessages() {
-            const user = DB.getCurrentUser();
-            if (!user) return;
-
-            const msgs = await DB.getMessages(user.id);
+            if (!currentUser) return;
             const chatBody = document.getElementById('csBody');
-            if (!chatBody) return;
+            const msgs = await DB.getMessages(currentUser.id);
 
-            // Filter out internal notification messages (JSON formatted buttons/stencils)
             chatBody.innerHTML = msgs.filter(m => {
-                try {
-                    const p = JSON.parse(m.message);
-                    return p.title === undefined;
-                } catch (e) { return true; }
+                try { const p = JSON.parse(m.message); return !p.title; } catch (e) { return true; }
             }).map(m => {
                 const type = m.sender === 'User' ? 'user' : 'service';
-                const avatarUrl = type === 'service'
-                    ? 'https://api.dicebear.com/7.x/bottts/svg?seed=Support'
-                    : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (user.full_name || user.mobile);
-
-                const timeStr = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-                return `
-                    <div class="cs-msg ${type}">
-                        <div class="cs-msg-avatar">
-                            <img src="${avatarUrl}" alt="avatar">
-                        </div>
-                        <div class="cs-msg-bubble">
-                            ${m.message}
-                            <div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">${timeStr}</div>
-                        </div>
-                    </div>
-                `;
+                const time = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                return `<div class="cs-msg ${type}"><div class="cs-msg-bubble">${m.message}<div style="font-size:0.6rem; opacity:0.6; text-align:right;">${time}</div></div></div>`;
             }).join('');
             chatBody.scrollTop = chatBody.scrollHeight;
 
             if (!isChatSubscribed) {
                 const client = DB.getClient();
-                if (client) {
-                    client.channel('public:messages')
-                        .on('postgres_changes', {
-                            event: 'INSERT',
-                            schema: 'public',
-                            table: 'messages',
-                            filter: `user_id=eq.${user.id}`
-                        }, payload => {
-                            const m = payload.new;
-                            // Ignore structured messages
-                            try { const p = JSON.parse(m.message); if (p.title !== undefined) return; } catch (e) { }
-
-                            // Prevent duplicates
-                            const items = chatBody.querySelectorAll('.cs-msg-bubble');
-                            for (let item of items) {
-                                if (item.innerText.includes(m.message)) return;
-                            }
-
-                            addCSMessage(m.sender === 'User' ? 'user' : 'service', m.message,
-                                new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-                        })
-                        .subscribe();
-                    isChatSubscribed = true;
-                }
+                client.channel('public:messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `user_id=eq.${currentUser.id}` }, payload => {
+                    const m = payload.new;
+                    addCSMessage(m.sender === 'User' ? 'user' : 'service', m.message);
+                }).subscribe();
+                isChatSubscribed = true;
             }
+        }
+
+        function addCSMessage(type, text) {
+            const chatBody = document.getElementById('csBody');
+            const msg = document.createElement('div');
+            msg.className = `cs-msg ${type}`;
+            msg.innerHTML = `<div class="cs-msg-bubble">${text}</div>`;
+            chatBody.appendChild(msg);
+            chatBody.scrollTop = chatBody.scrollHeight;
         }
 
         async function sendCSMessage() {
             const input = document.getElementById('csInput');
-            const message = input.value.trim();
-            const user = DB.getCurrentUser();
-            if (!message || !user) return;
-
-            // Optimistic UI
-            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            addCSMessage('user', message, timeStr);
+            const msg = input.value.trim();
+            if (!msg || !currentUser) return;
+            addCSMessage('user', msg);
             input.value = '';
-
-            await DB.sendMessage(user.id, message, 'User');
+            await DB.sendMessage(currentUser.id, msg, 'User');
         }
 
-        // Settings Modal Logic
-        function openSettings() {
-            document.getElementById('settingsModal').style.display = 'flex';
-            lucide.createIcons();
-        }
-
-        function closeSettings() {
-            document.getElementById('settingsModal').style.display = 'none';
-        }
-
-        function toggleSettingsAccordion(element, id) {
-            const subMenu = document.getElementById(id);
-            const chevron = element.querySelector('.settings-chevron');
-
-            if (!subMenu) return;
-
-            // Toggle active class
-            subMenu.classList.toggle('active');
-
-            // Dynamic max-height for smooth animation
-            if (subMenu.classList.contains('active')) {
-                subMenu.style.maxHeight = subMenu.scrollHeight + "px";
-            } else {
-                subMenu.style.maxHeight = null;
-            }
-
-            // Toggle rotation class on chevron
-            if (chevron) {
-                chevron.classList.toggle('rotated');
-            }
-        }
-
-        // Update Avatar Logic
-        function openUpdateAvatar() {
-            document.getElementById('updateAvatarModal').style.display = 'flex';
-            lucide.createIcons();
-        }
-
-        function closeUpdateAvatar() {
-            document.getElementById('updateAvatarModal').style.display = 'none';
-        }
-
-        let currentAvatarData = null;
-
-        function previewAvatar(input) {
-            const previewCircle = document.getElementById('avatarPreviewCircle');
-            const uploadBtn = document.getElementById('uploadAvatarBtn');
-
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-
-                reader.onload = function (e) {
-                    currentAvatarData = e.target.result;
-                    previewCircle.innerHTML = `<img src="${e.target.result}" alt="Avatar Preview">`;
-                    uploadBtn.classList.add('active');
-                    uploadBtn.removeAttribute('disabled');
-                    uploadBtn.style.backgroundColor = '#6366f1';
-                    uploadBtn.style.cursor = 'pointer';
-                }
-
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function uploadAvatar() {
-            const btn = document.getElementById('uploadAvatarBtn');
-            if (!btn.classList.contains('active')) return;
-
-            btn.innerText = 'Uploading...';
-
-            setTimeout(() => {
-                // Update avatar in settings modal
-                const settingsAvatars = document.querySelectorAll('.avatar-circle');
-                settingsAvatars.forEach(av => {
-                    av.innerHTML = `<img src="${currentAvatarData}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
-                });
-
-                // Also update any other user-avatar elements if present
-                const otherAvatars = document.querySelectorAll('.user-avatar');
-                otherAvatars.forEach(av => {
-                    av.innerHTML = `<img src="${currentAvatarData}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
-                });
-
-                alert('Avatar updated successfully!');
-                btn.innerText = 'Upload Avatar';
-                closeUpdateAvatar();
-                openSettings(); // Re-open settings to show the updated avatar
-            }, 1000);
-        }
-
-        // Internal Reset Password Logic
-        function openResetPassword() {
-            closeSettings();
-            document.getElementById('resetPasswordModal').style.display = 'flex';
-            lucide.createIcons();
-        }
-
-        function closeResetPassword() {
-            document.getElementById('resetPasswordModal').style.display = 'none';
-        }
-
-        function toggleInternalPass(id, icon) {
-            const input = document.getElementById(id);
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.setAttribute('data-lucide', 'eye');
-            } else {
-                input.type = 'password';
-                icon.setAttribute('data-lucide', 'eye-off');
-            }
-            lucide.createIcons();
-        }
+        // Settings & Account
+        function openSettings() { document.getElementById('settingsModal').style.display = 'flex'; }
+        function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
+        function openResetPassword() { document.getElementById('resetPasswordModal').style.display = 'flex'; }
+        function closeResetPassword() { document.getElementById('resetPasswordModal').style.display = 'none'; }
 
         async function handleInternalReset() {
-            const newPass = document.getElementById('newPassInternal').value;
-            const confirmPass = document.getElementById('confirmPassInternal').value;
-
-            if (newPass !== confirmPass) {
-                alert('Passwords do not match!');
-                return;
-            }
-
-            const user = DB.getCurrentUser();
-            const res = await DB.resetPassword(user.mobile, newPass);
-
-            if (!res.success) {
-                alert(res.message);
-                return;
-            }
-
-            const btn = event.target;
-            btn.textContent = 'Processing...';
-            btn.style.opacity = '0.7';
-
-            setTimeout(() => {
-                alert('Your password has been changed successfully!');
-                closeResetPassword();
-                btn.textContent = 'Update Password';
-                btn.style.opacity = '1';
-            }, 1500);
+            const p1 = document.getElementById('newPassInternal').value;
+            const p2 = document.getElementById('confirmPassInternal').value;
+            if (!p1 || p1 !== p2) return alert('Passwords mismatch!');
+            const res = await DB.resetPassword(currentUser.mobile, p1);
+            if (res.success) { alert('Success!'); closeResetPassword(); } else alert('Error: ' + res.message);
         }
 
-        async function syncUserData() {
-            const user = DB.getCurrentUser();
-            if (!user) return;
+        function toggleSettingsAccordion(el, id) {
+            const sub = document.getElementById(id);
+            sub.classList.toggle('active');
+        }
 
-            // Update Header/Settings fields
-            const setPhone = document.querySelector('.settings-phone');
-            if (setPhone) setPhone.textContent = user.mobile;
-
-            // If full_name is available, use it, otherwise use mobile
-            const greetingName = document.querySelector('.user-text h3');
-            if (greetingName) greetingName.textContent = user.full_name || user.mobile;
-
-            const avatarBadge = document.querySelector('.avatar-circle');
-            if (avatarBadge) avatarBadge.textContent = (user.mobile || '91').substring(0, 2);
-
-            const userAvatar = document.querySelector('.user-avatar');
-            if (userAvatar) userAvatar.textContent = (user.mobile || '91').substring(0, 2);
-
-            // Fetch latest balance from DB
-            const client = DB.getClient();
-            if (client) {
-                const { data: dbUser } = await client
-                    .from('users')
-                    .select('balance, invested, full_name, kyc')
-                    .eq('id', user.id)
-                    .single();
-
-                if (dbUser) {
-                    // Format currency
-                    const fmt = (val) => new Intl.NumberFormat('en-IN', {
-                        style: 'currency',
-                        currency: 'INR'
-                    }).format(val || 0);
-
-                    const balanceEls = document.querySelectorAll('.stat-value.green');
-                    // Usually the first one is portfolio value (balance + invested?)
-                    if (balanceEls.length > 0) balanceEls[0].textContent = fmt(dbUser.balance + dbUser.invested);
-
-                    const investedEls = document.querySelectorAll('.stat-value.blue');
-                    if (investedEls.length > 0) investedEls[0].textContent = fmt(dbUser.invested);
-
-                    // If full_name was updated in DB, sync it locally
-                    if (dbUser.full_name && dbUser.full_name !== user.full_name) {
-                        user.full_name = dbUser.full_name;
-                        localStorage.setItem(DB.CURRENT_USER_KEY, JSON.stringify(user));
-                        if (greetingName) greetingName.textContent = dbUser.full_name;
-                    }
+        // Navigation
+        function handleGuestClick(url) {
+            if (!currentUser) {
+                const alert = document.getElementById('topAlertContainer');
+                if (alert) {
+                    alert.style.display = 'block';
+                    setTimeout(() => alert.style.display = 'none', 3000);
                 }
-            }
-
-            lucide.createIcons();
-        }
-
-        // Initialize user data on load
-        window.addEventListener('load', syncUserData);
-
-        // Customer Service Logic
-        function openCS() {
-            if (typeof closeSettings === 'function') closeSettings();
-            document.getElementById('csModal').style.display = 'flex';
-
-            const chatBody = document.getElementById('csBody');
-            if (chatBody.children.length === 0) {
-                addCSMessage('service', 'Please don\'t share any sensitive information. Do not transfer funds without my explicit permission.', '8:30 AM');
-                addCSMessage('user', 'Sharad Madhukar Mali | *******38029', '8:31 AM');
-                addCSMessage('service', 'Hello, how can I help you today?', '8:32 AM');
+            } else if (url !== '#') {
+                window.location.href = url;
             }
         }
 
-        function closeCS() {
-            document.getElementById('csModal').style.display = 'none';
-        }
-
-        function addCSMessage(type, text, time = '') {
-            const chatBody = document.getElementById('csBody');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `cs-msg ${type}`;
-
-            const avatarUrl = type === 'service'
-                ? 'https://api.dicebear.com/7.x/bottts/svg?seed=Support'
-                : 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sharad';
-
-            // Convert URLs to clickable links
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            const formattedText = text.replace(urlRegex, (url) => {
-                return `<a href="${url}" target="_blank" style="color: inherit; text-decoration: underline;">${url}</a>`;
+        // Recommendation Toggle
+        const recHeader = document.getElementById('recommendationHeader');
+        if (recHeader) {
+            recHeader.addEventListener('click', () => {
+                const list = document.getElementById('recommendationList');
+                const chevron = document.getElementById('recommendationChevron');
+                const isHidden = list.style.display === 'none';
+                list.style.display = isHidden ? 'block' : 'none';
+                list.style.maxHeight = isHidden ? '500px' : '0';
+                chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
             });
-
-            msgDiv.innerHTML = `
-                <div class="cs-msg-avatar">
-                    <img src="${avatarUrl}" alt="avatar">
-                </div>
-                <div class="cs-msg-bubble">
-                    ${formattedText}
-                    ${time ? `<div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">${time}</div>` : ''}
-                </div>
-            `;
-            chatBody.appendChild(msgDiv);
-            chatBody.scrollTop = chatBody.scrollHeight;
         }
 
-        let csAttachment = null;
-
-        function sendCSMessage() {
-            const input = document.getElementById('csInput');
-            const text = input.value.trim();
-            if (!text && !csAttachment) return;
-
-            const now = new Date();
-            const time = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
-
-            let messageHtml = text;
-            if (csAttachment) {
-                if (csAttachment.type.startsWith('image/')) {
-                    messageHtml = `<div>${text}</div><img src="${csAttachment.url}" style="max-width: 100%; border-radius: 8px; margin-top: 8px;">`;
-                } else {
-                    messageHtml = `<div>${text}</div><div style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.05); padding:8px; border-radius:8px; margin-top:8px;">
-                        <i data-lucide="file-text" size="20"></i> <span>${csAttachment.name}</span>
-                    </div>`;
-                }
-            }
-
-            addCSMessage('user', messageHtml, time);
-            input.value = '';
-            clearAttachment();
-            document.getElementById('csEmojiPicker').style.display = 'none';
-
-            setTimeout(() => {
-                addCSMessage('service', 'Attachment received. Our team will review it shortly.', time);
-            }, 1000);
-        }
-
-        function csTool(action) {
-            if (action === 'emoji') {
-                const picker = document.getElementById('csEmojiPicker');
-                picker.style.display = picker.style.display === 'grid' ? 'none' : 'grid';
-            } else if (action === 'image' || action === 'file' || action === 'video') {
-                document.getElementById('csFileInput').click();
-            }
-        }
-
-        function addEmoji(emoji) {
-            const input = document.getElementById('csInput');
-            input.value += emoji;
-            input.focus();
-            document.getElementById('csEmojiPicker').style.display = 'none';
-        }
-
-        function handleCSFile(input) {
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    csAttachment = {
-                        name: file.name,
-                        type: file.type,
-                        url: e.target.result
-                    };
-
-                    const preview = document.getElementById('csAttachmentPreview');
-                    const previewImg = document.getElementById('csPreviewImg');
-                    const fileNameSpan = document.getElementById('csFileName');
-
-                    preview.style.display = 'flex';
-                    if (file.type.startsWith('image/')) {
-                        previewImg.src = e.target.result;
-                        previewImg.style.display = 'block';
-                        fileNameSpan.style.display = 'none';
-                    } else {
-                        previewImg.style.display = 'none';
-                        fileNameSpan.innerText = file.name;
-                        fileNameSpan.style.display = 'block';
-                    }
-                    lucide.createIcons();
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function clearAttachment() {
-            csAttachment = null;
-            document.getElementById('csAttachmentPreview').style.display = 'none';
-            document.getElementById('csFileInput').value = '';
+        function toggleMessageCenter() {
+            document.getElementById('messageCenter').classList.toggle('active');
+            document.getElementById('messageCenterOverlay').classList.toggle('active');
         }
     </script>
-
-
-
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="settings-modal" onclick="if(event.target == this) closeSettings()">
-        <div class="settings-content">
-            <button class="settings-close" onclick="closeSettings()"><i data-lucide="x" size="24"></i></button>
-            <div class="settings-header">
-                <div class="avatar-circle">9</div>
-                <div class="settings-phone">918108038029</div>
-                <div class="badge-row">
-                    <div class="s-badge vip"><i data-lucide="shield-check" size="18"></i> VIP: 0</div>
-                    <div class="s-badge credit"><i data-lucide="crown" size="18"></i> Credit Score: 100</div>
-                </div>
-            </div>
-
-            <div class="settings-list">
-                <div class="settings-item" onclick="toggleSettingsAccordion(this, 'userProfileSub')">
-                    <div class="settings-item-icon"><i data-lucide="user" size="20"></i></div>
-                    <div class="settings-item-info">
-                        <div class="settings-item-title">User Profile</div>
-                        <div class="settings-item-desc">Update your profile information.</div>
-                    </div>
-                    <i data-lucide="chevron-right" class="settings-chevron" size="18"></i>
-                </div>
-                <div id="userProfileSub" class="sub-menu">
-                    <div class="sub-item" onclick="openUpdateAvatar()">
-                        <i data-lucide="user-circle" size="18"></i> Update Avatar
-                    </div>
-                    <div class="sub-item" onclick="location.href='admin_login.html?action=kyc'">
-                        <i data-lucide="contact" size="18"></i> View KYC
-                    </div>
-                </div>
-
-                <div class="settings-item" onclick="toggleSettingsAccordion(this, 'securitySub')">
-                    <div class="settings-item-icon"><i data-lucide="lock" size="20"></i></div>
-                    <div class="settings-item-info">
-                        <div class="settings-item-title">Security</div>
-                        <div class="settings-item-desc">Update your system security settings.</div>
-                    </div>
-                    <i data-lucide="chevron-right" class="settings-chevron" size="18"></i>
-                </div>
-                <div id="securitySub" class="sub-menu">
-                    <div class="sub-item">
-                        <i data-lucide="shield-check" size="18"></i> Withdrawal PIN
-                    </div>
-                    <div class="sub-item" onclick="openResetPassword()">
-                        <i data-lucide="key" size="18"></i> Change Login Password
-                    </div>
-                </div>
-                <div class="settings-item" onclick="location.href='bank_accounts.html'">
-                    <div class="settings-item-icon"><i data-lucide="landmark" size="20"></i></div>
-                    <div class="settings-item-info">
-                        <div class="settings-item-title">Bank Accounts</div>
-                        <div class="settings-item-desc">Manage bank accounts and info</div>
-                    </div>
-                </div>
-                <div class="settings-item" onclick="openCS()">
-                    <div class="settings-item-icon"><i data-lucide="headset" size="20"></i></div>
-                    <div class="settings-item-info">
-                        <div class="settings-item-title">Customer Service</div>
-                        <div class="settings-item-desc">Contact customer service</div>
-                    </div>
-                </div>
-                <div class="settings-item">
-                    <div class="settings-item-icon"><i data-lucide="search" size="20"></i></div>
-                    <div class="settings-item-info">
-                        <div class="settings-item-title">Test Connection</div>
-                        <div class="logout-btn-container">
-                            <button class="logout-btn" onclick="DB.logout()">Logout</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Update Avatar Modal -->
-                <div id="updateAvatarModal" class="settings-modal"
-                    onclick="if(event.target == this) closeUpdateAvatar()">
-                    <div class="settings-content" style="max-width: 500px;">
-                        <button class="settings-close" onclick="closeUpdateAvatar()"><i data-lucide="x"
-                                size="24"></i></button>
-                        <div class="settings-header" style="margin-bottom: 2rem;">
-                            <h2 style="font-size: 1.2rem; font-weight: 700; color: #1e293b;">Update Avatar</h2>
-                        </div>
-
-                        <div class="avatar-upload-container"
-                            style="flex-direction: row; justify-content: space-around; width: 100%;">
-
-                            <div class="file-input-wrapper">
-                                <button class="btn-choose-file">Choose File</button>
-                                <input type="file" id="avatarInput" class="file-input-actual" accept="image/*"
-                                    onchange="previewAvatar(this)">
-                            </div>
-
-                            <div class="avatar-preview-area">
-                                <span class="avatar-preview-label">Avatar Preview</span>
-                                <div class="avatar-preview-circle" id="avatarPreviewCircle">
-                                    <span class="avatar-preview-placeholder">Avatar<br>Preview</span>
-                                </div>
-                            </div>
-
-                            <button id="uploadAvatarBtn" class="btn-upload-avatar" onclick="uploadAvatar()">Upload
-                                Avatar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Reset Password Modal (Logged-In) -->
-                <div id="resetPasswordModal" class="settings-modal"
-                    onclick="if(event.target == this) closeResetPassword()">
-                    <div class="settings-content" style="max-width: 450px;">
-                        <button class="settings-close" onclick="closeResetPassword()"><i data-lucide="x"
-                                size="24"></i></button>
-                        <div class="settings-header" style="margin-bottom: 1.5rem;">
-                            <h2 style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">Reset Password</h2>
-                        </div>
-
-                        <div style="padding: 1rem 0;">
-                            <div class="reg-input-group" style="margin-bottom: 1.5rem;">
-                                <label
-                                    style="display: block; font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Current
-                                    Password</label>
-                                <div class="reg-password-wrapper" style="position: relative;">
-                                    <input type="password" id="currentPass" class="reg-input"
-                                        style="width: 100%; padding: 0.8rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
-                                    <i data-lucide="eye-off"
-                                        style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer;"
-                                        onclick="toggleInternalPass('currentPass', this)"></i>
-                                </div>
-                            </div>
-
-                            <div class="reg-input-group" style="margin-bottom: 1.5rem;">
-                                <label
-                                    style="display: block; font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">New
-                                    Password</label>
-                                <div class="reg-password-wrapper" style="position: relative;">
-                                    <input type="password" id="newPassInternal" class="reg-input"
-                                        style="width: 100%; padding: 0.8rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
-                                    <i data-lucide="eye-off"
-                                        style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer;"
-                                        onclick="toggleInternalPass('newPassInternal', this)"></i>
-                                </div>
-                            </div>
-
-                            <div class="reg-input-group" style="margin-bottom: 2rem;">
-                                <label
-                                    style="display: block; font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Confirm
-                                    New Password</label>
-                                <div class="reg-password-wrapper" style="position: relative;">
-                                    <input type="password" id="confirmPassInternal" class="reg-input"
-                                        style="width: 100%; padding: 0.8rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
-                                    <i data-lucide="eye-off"
-                                        style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer;"
-                                        onclick="toggleInternalPass('confirmPassInternal', this)"></i>
-                                </div>
-                            </div>
-
-                            <button class="logout-btn" style="background: #3b82f6;"
-                                onclick="handleInternalReset()">Update
-                                Password</button>
-                            <button class="logout-btn" style="background: #f1f5f9; color: #64748b; margin-top: 1rem;"
-                                onclick="closeResetPassword()">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Customer Service Modal -->
-                <div id="csModal" class="cs-modal" onclick="if(event.target == this) closeCS()">
-                    <div class="cs-content">
-                        <!-- Header -->
-                        <div class="cs-header">
-                            <div class="cs-header-avatar">
-                                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Support" alt="Support">
-                            </div>
-                            <div class="cs-header-info">
-                                <div class="cs-header-title">VSL Customer Service</div>
-                                <div class="cs-header-hours">Service Hours: 8:30 AM - 10:00 PM</div>
-                            </div>
-                            <button class="cs-minimize" onclick="closeCS()">
-                                <i data-lucide="chevron-down" size="24"></i>
-                            </button>
-                        </div>
-
-                        <!-- Body / Chat History -->
-                        <div class="cs-body" id="csBody">
-                            <!-- Messages injected via JS -->
-                        </div>
-
-                        <!-- Footer / Input -->
-                        <div class="cs-footer">
-                            <div id="csEmojiPicker" class="cs-emoji-picker">
-                                <button class="cs-emoji-btn" onclick="addEmoji('😊')">😊</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('😂')">😂</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('🤣')">🤣</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('❤️')">❤️</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('😍')">😍</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('👍')">👍</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('🙏')">🙏</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('😭')">😭</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('😘')">😘</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('🥰')">🥰</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('🙌')">🙌</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('✨')">✨</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('🔥')">🔥</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('🚀')">🚀</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('😮')">😮</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('😢')">😢</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('😎')">😎</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('🤔')">🤔</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('👏')">👏</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('🎉')">🎉</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('💪')">💪</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('💯')">💯</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('🤑')">🤑</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('💰')">💰</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('📈')">📈</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('📉')">📉</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('💎')">💎</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('🤝')">🤝</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('✅')">✅</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('❌')">❌</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('🔔')">🔔</button>
-                                <button class="cs-emoji-btn" onclick="addEmoji('🎁')">🎁</button>
-                            </div>
-
-                            <div id="csAttachmentPreview" class="cs-attachment-preview">
-                                <img id="csPreviewImg" src="" class="cs-preview-img" style="display:none;">
-                                <span id="csFileName">File name</span>
-                                <i data-lucide="x" class="cs-remove-attachment" onclick="clearAttachment()"
-                                    size="16"></i>
-                            </div>
-
-                            <div class="cs-input-area">
-                                <input type="file" id="csFileInput" style="display:none;" onchange="handleCSFile(this)">
-                                <div class="cs-input-row">
-                                    <input type="text" id="csInput" class="cs-input" placeholder="Type a message..."
-                                        onkeypress="if(event.key === 'Enter') sendCSMessage()">
-                                </div>
-                                <div class="cs-actions">
-                                    <div class="cs-tools">
-                                        <button class="cs-tool-btn" onclick="csTool('emoji')" title="Emoji">
-                                            <i data-lucide="smile" size="20"></i>
-                                        </button>
-                                        <button class="cs-tool-btn" onclick="csTool('image')" title="Send Image">
-                                            <i data-lucide="camera" size="20"></i>
-                                        </button>
-                                        <button class="cs-tool-btn" onclick="csTool('video')" title="Send Video">
-                                            <i data-lucide="video" size="20"></i>
-                                        </button>
-                                        <button class="cs-tool-btn" onclick="csTool('file')" title="Send File">
-                                            <i data-lucide="link" size="20"></i>
-                                        </button>
-                                    </div>
-                                    <button class="cs-send-btn" onclick="sendCSMessage()">
-                                        <i data-lucide="send" size="18"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="topAlertContainer" class="top-alert-container">
-                    <div class="top-alert">
-                        <i data-lucide="alert-circle"></i>
-                        <span>Please sign in to continue.</span>
-                        <i data-lucide="x" class="close-alert" onclick="closeAlert()"></i>
-                    </div>
-                </div>
-                <div id="messageCenterOverlay" class="message-center-overlay" onclick="toggleMessageCenter()"></div>
-                <div id="messageCenter" class="message-center-modal">
-                    <div class="mc-header">
-                        <div class="mc-title-row">
-                            <span class="mc-title">Message Center</span>
-                            <span class="mc-subtitle" id="msgCount">10 Messages</span>
-                        </div>
-                        <button class="mc-close" onclick="toggleMessageCenter()"><i data-lucide="x"
-                                size="24"></i></button>
-                    </div>
-                    <div class="mc-actions">
-                        <button class="mc-btn" onclick="makeAllRead()">Make all read</button>
-                        <button class="mc-btn delete-all" onclick="deleteAllMessages()">Delete all</button>
-                    </div>
-                    <div class="mc-list" id="mcList">
-                        <!-- Item 1 -->
-                        <div class="mc-item">
-                            <div class="mc-dot unread"></div>
-                            <div class="mc-content">
-                                <div class="mc-msg-title">IPO Announcement – Armour Security IPO（QIB）</div>
-                                <div class="mc-time">14-01-2026 15:10:23</div>
-                                <div class="mc-tag">IPO:NEW</div>
-                                <button class="mc-delete-item" onclick="deleteMessage(this)">Delete</button>
-                            </div>
-                        </div>
-                        <!-- Item 2 -->
-                        <div class="mc-item">
-                            <div class="mc-dot unread"></div>
-                            <div class="mc-content">
-                                <div class="mc-msg-title">Important Notice</div>
-                                <div class="mc-time">12-01-2026 09:32:02</div>
-                                <div class="mc-tag">TEXT</div>
-                                <button class="mc-delete-item" onclick="deleteMessage(this)">Delete</button>
-                            </div>
-                        </div>
-                        <!-- Item 3 -->
-                        <div class="mc-item">
-                            <div class="mc-dot unread"></div>
-                            <div class="mc-content">
-                                <div class="mc-msg-title">IPO Listed now!</div>
-                                <div class="mc-time">07-01-2026 10:10:05</div>
-                                <div class="mc-tag">IPO:LIST</div>
-                                <button class="mc-delete-item" onclick="deleteMessage(this)">Delete</button>
-                            </div>
-                        </div>
-                        <!-- Item 4 -->
-                        <div class="mc-item">
-                            <div class="mc-dot"></div>
-                            <div class="mc-content">
-                                <div class="mc-msg-title">IPO Listed now!</div>
-                                <div class="mc-time">07-01-2026 10:10:04</div>
-                                <div class="mc-tag">IPO:LIST</div>
-                                <button class="mc-delete-item">Delete</button>
-                            </div>
-                        </div>
-                        <!-- Item 5 -->
-                        <div class="mc-item">
-                            <div class="mc-dot"></div>
-                            <div class="mc-content">
-                                <div class="mc-msg-title">IPO Listed now!</div>
-                                <div class="mc-time">07-01-2026 10:10:04</div>
-                                <div class="mc-tag">IPO:LIST</div>
-                                <button class="mc-delete-item">Delete</button>
-                            </div>
-                        </div>
-                        <!-- Item 6 -->
-                        <div class="mc-item">
-                            <div class="mc-dot"></div>
-                            <div class="mc-content">
-                                <div class="mc-msg-title">IPO Listed now!</div>
-                                <div class="mc-time">07-01-2026 10:10:04</div>
-                                <div class="mc-tag">IPO:LIST</div>
-                                <button class="mc-delete-item">Delete</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Floating Contact Us Tab -->
-                <div class="cs-floating-tab" onclick="openCS()">
-                    <span class="cs-floating-text">Contact us</span>
-                    <div class="cs-floating-icon">
-                        <i data-lucide="messages-square" size="16"></i>
-                    </div>
-                </div>
 </body>
 
 </html>
