@@ -1010,14 +1010,17 @@
 
         async function loadCSMessages() {
             const user = DB.getCurrentUser();
-            if (!user) return;
+            if (!user) { console.warn("Chat: No user logged in."); return; }
 
             const msgs = await DB.getMessages(user.id);
             const chatBox = document.getElementById('chatBox');
             if (!chatBox) return;
 
             chatBox.innerHTML = msgs.filter(m => {
-                try { JSON.parse(m.message); return false; } catch (e) { return true; }
+                try {
+                    const p = JSON.parse(m.message);
+                    return p.title === undefined; // Keep if it's NOT a structured notification
+                } catch (e) { return true; } // Keep if not JSON
             }).map(m => `
                 <div style="align-self: ${m.sender === 'User' ? 'flex-end' : 'flex-start'}; 
                             background: ${m.sender === 'User' ? '#3b82f6' : 'white'}; 
@@ -1035,24 +1038,35 @@
             // Subscribe to real-time updates if not already done
             if (!isChatSubscribed) {
                 const client = DB.getClient();
-                client.channel('public:messages')
-                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `user_id=eq.${user.id}` }, payload => {
-                        const m = payload.new;
-                        try { JSON.parse(m.message); return; } catch (e) { } // Skip notifications
+                if (client) {
+                    client.channel('public:messages')
+                        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `user_id=eq.${user.id}` }, payload => {
+                            const m = payload.new;
+                            // Check if it's an internal notification (has JSON title)
+                            try {
+                                const p = JSON.parse(m.message);
+                                if (p.title !== undefined) return;
+                            } catch (e) { }
 
-                        const div = document.createElement('div');
-                        div.style.cssText = `align-self: ${m.sender === 'User' ? 'flex-end' : 'flex-start'}; 
-                                            background: ${m.sender === 'User' ? '#3b82f6' : 'white'}; 
-                                            color: ${m.sender === 'User' ? 'white' : '#1e293b'}; 
-                                            padding: 0.75rem 1rem; border-radius: 12px; max-width: 80%; 
-                                            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                                            border: ${m.sender === 'Admin' ? '1px solid #e2e8f0' : 'none'};`;
-                        div.innerText = m.message;
-                        chatBox.appendChild(div);
-                        chatBox.scrollTop = chatBox.scrollHeight;
-                    })
-                    .subscribe();
-                isChatSubscribed = true;
+                            // Don't append if it's already there (e.g. sent by this user)
+                            // We use a simple check for now
+                            const divs = chatBox.querySelectorAll('div');
+                            for (let d of divs) if (d.innerText === m.message) return;
+
+                            const div = document.createElement('div');
+                            div.style.cssText = `align-self: ${m.sender === 'User' ? 'flex-end' : 'flex-start'}; 
+                                                background: ${m.sender === 'User' ? '#3b82f6' : 'white'}; 
+                                                color: ${m.sender === 'User' ? 'white' : '#1e293b'}; 
+                                                padding: 0.75rem 1rem; border-radius: 12px; max-width: 80%; 
+                                                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                                                border: ${m.sender === 'Admin' ? '1px solid #e2e8f0' : 'none'};`;
+                            div.innerText = m.message;
+                            chatBox.appendChild(div);
+                            chatBox.scrollTop = chatBox.scrollHeight;
+                        })
+                        .subscribe();
+                    isChatSubscribed = true;
+                }
             }
         }
 
@@ -1062,8 +1076,20 @@
             const user = DB.getCurrentUser();
             if (!message || !user) return;
 
+            // Immediate local feedback
+            const chatBox = document.getElementById('chatBox');
+            const div = document.createElement('div');
+            div.style.cssText = `align-self: flex-end; background: #3b82f6; color: white; padding: 0.75rem 1rem; border-radius: 12px; max-width: 80%; box-shadow: 0 2px 5px rgba(0,0,0,0.05);`;
+            div.innerText = message;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
             input.value = '';
-            await DB.sendMessage(user.id, message, 'User');
+            const res = await DB.sendMessage(user.id, message, 'User');
+            if (!res.success) {
+                div.style.background = '#ef4444';
+                div.innerText += " (Failed to send)";
+            }
         }
 
         // Settings Modal Logic
