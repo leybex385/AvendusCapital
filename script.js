@@ -86,9 +86,8 @@ function initCarousel(container) {
 
 // Initial Auth State Check (Preserved)
 const urlParams = new URLSearchParams(window.location.search);
-// Mock helper for DB (if existing in other files, otherwise this is just placeholder)
-const DB = { getCurrentUser: () => localStorage.getItem('user') };
-const user = DB.getCurrentUser();
+// Use global DB from db.js
+const user = typeof DB !== 'undefined' ? DB.getCurrentUser() : null;
 const isLoggedIn = user || urlParams.get('logged_in') === 'true';
 
 // Simple UI updates based on auth (if elements exist)
