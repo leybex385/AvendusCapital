@@ -1674,29 +1674,33 @@
             const client = DB.getClient();
             if (!client) return;
 
-            // Fetch users with messages (limit to 100 recent to avoid crash)
+            // Fetch users with messages
             const { data: msgs } = await client.from('messages').select('user_id, created_at').order('created_at', { ascending: false }).limit(500);
             const uids = [...new Set(msgs.map(m => m.user_id))];
             chatUsers = allUsers.filter(u => uids.includes(u.id));
             renderChatUserList();
 
             if (!isAdminChatSubscribed) {
-                client.channel('public:messages')
+                // Unique channel name to avoid conflicts
+                const chatChannel = client.channel('admin-chat-broadcaster')
                     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
                         const newMsg = payload.new;
-                        // Skip if it's a notification
-                        try { if (JSON.parse(newMsg.message).title !== undefined) return; } catch (e) { }
+                        console.log("New message received in backend:", newMsg);
 
-                        if (currentChatUser && newMsg.user_id == currentChatUser.id) {
-                            // Don't append if already local (sent by us)
-                            const bubbles = document.querySelectorAll('#chatHistory > div');
-                            let exists = false;
-                            bubbles.forEach(b => { if (b.innerText.includes(newMsg.message)) exists = true; });
-                            if (!exists) appendChatMessage(newMsg);
+                        // If user is currently selected, show the message
+                        if (currentChatUser && String(newMsg.user_id) === String(currentChatUser.id)) {
+                            // Avoid duplicates
+                            const history = document.getElementById('chatHistory');
+                            const alreadyShown = Array.from(history.querySelectorAll('div')).some(d => d.innerText.includes(newMsg.message));
+                            if (!alreadyShown) {
+                                appendChatMessage(newMsg);
+                            }
                         }
                         updateChatUserList(newMsg);
                     })
-                    .subscribe();
+                    .subscribe((status) => {
+                        console.log("Chat Channel Status:", status);
+                    });
                 isAdminChatSubscribed = true;
             }
         }
