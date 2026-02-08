@@ -1497,6 +1497,45 @@ body {
 
 .settings-chevron {
     color: #cbd5e1;
+    transition: transform 0.3s ease;
+}
+
+.settings-chevron.rotated {
+    transform: rotate(90deg);
+}
+
+.sub-menu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease;
+    background: #fbfcfe;
+    border-radius: 0 0 12px 12px;
+}
+
+.sub-menu.active {
+    max-height: 200px;
+    /* Large enough to fit content */
+    padding-bottom: 0.5rem;
+}
+
+.sub-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem 1rem 4rem;
+    cursor: pointer;
+    color: #475569;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.sub-item:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+.sub-item i {
+    color: #64748b;
 }
 
 .logout-btn-container {
@@ -2092,4 +2131,707 @@ body {
     .message-center-modal {
         width: 100%;
     }
+}
+
+/* Update Avatar Modal Styles */
+.avatar-upload-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 1rem;
+}
+
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.btn-choose-file {
+    background-color: #3b82f6;
+    color: white;
+    font-weight: 600;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.btn-choose-file:hover {
+    background-color: #2563eb;
+}
+
+.file-input-actual {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.avatar-preview-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.avatar-preview-label {
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.avatar-preview-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px dashed #cbd5e1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #f8fafc;
+}
+
+.avatar-preview-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-preview-placeholder {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.btn-upload-avatar {
+    background-color: #8da2fb;
+    /* Light blue as in screenshot */
+    color: white;
+    font-weight: 600;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    cursor: not-allowed;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.btn-upload-avatar.active {
+    background-color: #6366f1;
+    /* Indigo */
+    cursor: pointer;
+}
+
+.btn-upload-avatar.active:hover {
+    background-color: #4f46e5;
+}
+
+/* KYC Modal Styles */
+.kyc-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+.kyc-form-group {
+    margin-bottom: 1rem;
+}
+
+.kyc-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.4rem;
+}
+
+.kyc-input {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #1e293b;
+    background: #f8fafc;
+    outline: none;
+}
+
+.kyc-input:focus {
+    border-color: #3b82f6;
+    background: white;
+}
+
+.kyc-input:disabled {
+    background: #f1f5f9;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.kyc-images-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.kyc-image-block {
+    flex: 1;
+}
+
+.kyc-image-upload-box {
+    width: 100%;
+    height: 150px;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: #f8fafc;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.kyc-image-upload-box:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.kyc-plus-icon {
+    font-size: 2rem;
+    color: #cbd5e1;
+}
+
+.kyc-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* Changed to contain to show full ID card */
+    display: none;
+}
+
+.kyc-notice {
+    font-size: 0.75rem;
+    color: #64748b;
+    background: #fff1f2;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+    border: 1px solid #ffe4e6;
+    line-height: 1.4;
+}
+
+.kyc-notice strong {
+    color: #be123c;
+    display: block;
+    margin-bottom: 0.3rem;
+}
+
+.kyc-submit-btn {
+    width: 100%;
+    background: #3b82f6;
+    color: white;
+    padding: 0.9rem;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s;
+}
+
+.kyc-submit-btn:hover {
+    background: #2563eb;
+}
+
+/* Change Password Modal Styles */
+.cp-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.cp-label span {
+    color: #ef4444;
+    /* Red asterisk */
+}
+
+.cp-input-group {
+    margin-bottom: 1.2rem;
+    position: relative;
+}
+
+.cp-input {
+    width: 100%;
+    padding: 0.7rem 2.5rem 0.7rem 0.7rem;
+    /* Space for eye icon */
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #1e293b;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.cp-input:focus {
+    border-color: #3b82f6;
+}
+
+.cp-eye-icon {
+    position: absolute;
+    right: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+.cp-warning {
+    background: #fff1f2;
+    border: 1px solid #ffe4e6;
+    color: #1e293b;
+    font-size: 0.8rem;
+    padding: 0.8rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+}
+
+.cp-submit-btn {
+    width: 100%;
+    background: #fed7aa;
+    /* Orange-ish yellow as in screenshot base */
+    color: white;
+    /* Will override with specific style if needed, but screenshot implies white text or similar */
+    background: #fbbf24;
+    /* Amber-400 */
+    background: #fcd34d;
+    /* Amber-300 lighter */
+    background-color: #fca5a5;
+    /* Let's match the screenshot orange/peach color more closely */
+    background-color: #fdba74;
+    /* Orange-300 */
+    background-color: #ffcc80;
+    /* Material Orange */
+    background-color: #ffbb55;
+    /* Visible Orange */
+    color: white;
+    font-weight: 600;
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: opacity 0.2s;
+}
+
+.cp-submit-btn:hover {
+    opacity: 0.9;
+}
+
+/* Customer Service Chat Window */
+.cs-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(4px);
+}
+
+.cs-content {
+    width: 90%;
+    max-width: 450px;
+    height: 80vh;
+    background: white;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.cs-header {
+    background: linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%);
+    padding: 1.25rem 1.5rem;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+}
+
+.cs-header-avatar {
+    width: 45px;
+    height: 45px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.cs-header-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cs-header-info {
+    flex: 1;
+}
+
+.cs-header-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.cs-header-hours {
+    font-size: 0.75rem;
+    opacity: 0.9;
+}
+
+.cs-minimize {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 5px;
+    transition: var(--transition);
+}
+
+.cs-minimize:hover {
+    transform: scale(1.1);
+}
+
+.cs-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.cs-msg {
+    display: flex;
+    gap: 0.75rem;
+    max-width: 85%;
+}
+
+.cs-msg.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.cs-msg-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.cs-msg-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cs-msg-bubble {
+    padding: 0.8rem 1rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.cs-msg.service .cs-msg-bubble {
+    background: #e2e8f0;
+    color: #1e293b;
+    border-bottom-left-radius: 2px;
+}
+
+.cs-msg.user .cs-msg-bubble {
+    background: #06b6d4;
+    color: white;
+    border-bottom-right-radius: 2px;
+}
+
+.cs-footer {
+    padding: 1rem 1.5rem;
+    background: white;
+    border-top: 1px solid #f1f5f9;
+}
+
+.cs-input-area {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.cs-input-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.cs-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 0.95rem;
+    color: #1e293b;
+    font-family: inherit;
+}
+
+.cs-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cs-tools {
+    display: flex;
+    gap: 1rem;
+    color: #94a3b8;
+}
+
+.cs-tool-btn {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+}
+
+.cs-tool-btn:hover {
+    color: #06b6d4;
+}
+
+.cs-send-btn {
+    background: #06b6d4;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+}
+
+.cs-send-btn:hover {
+    transform: scale(1.05) rotate(-10deg);
+    background: #0891b2;
+}
+
+/* Emoji Picker */
+.cs-emoji-picker {
+    position: absolute;
+    bottom: 80px;
+    left: 20px;
+    background: white;
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    display: none;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+    z-index: 2010;
+    border: 1px solid #f1f5f9;
+    max-height: 250px;
+    overflow-y: auto;
+    width: 320px;
+}
+
+.cs-emoji-picker::-webkit-scrollbar {
+    width: 6px;
+}
+
+.cs-emoji-picker::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+
+.cs-emoji-btn {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.cs-emoji-btn:hover {
+    background: #f1f5f9;
+}
+
+/* File Previews */
+.cs-attachment-preview {
+    margin-top: 10px;
+    display: none;
+    padding: 8px;
+    background: #f1f5f9;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    align-items: center;
+    gap: 10px;
+}
+
+.cs-preview-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.cs-remove-attachment {
+    margin-left: auto;
+    color: #ef4444;
+    cursor: pointer;
+}
+
+/* Floating Contact Us Tab */
+.cs-floating-tab {
+    position: fixed;
+    right: 0;
+    top: 75%;
+    transform: translateY(-50%);
+    background: #0ea5e9;
+    color: white;
+    padding: 20px 6px;
+    border-radius: 12px 0 0 12px;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    box-shadow: -2px 4px 15px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cs-floating-tab:hover {
+    padding-right: 12px;
+    background: #0284c7;
+}
+
+.cs-floating-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    transform: rotate(180deg);
+}
+
+.cs-floating-icon {
+    background: white;
+    color: #0ea5e9;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* CS Modal Input Area and Buttons */
+.cs-input-area {
+    width: 100%;
+}
+
+.cs-input-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.cs-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.cs-tools {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.cs-tool-btn {
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.cs-tool-btn:hover {
+    background: #f1f5f9;
+    color: #0ea5e9;
+}
+
+.cs-send-btn {
+    background: #0ea5e9;
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.cs-send-btn:hover {
+    background: #0284c7;
+    transform: scale(1.05);
 }
