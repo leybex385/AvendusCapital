@@ -2835,3 +2835,25 @@ body {
     background: #0284c7;
     transform: scale(1.05);
 }
+/* Settings Modal */
+.settings-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(4px); }
+.settings-content { background: white; width: 90%; max-width: 500px; border-radius: 20px; padding: 2rem; position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+.settings-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; cursor: pointer; color: #64748b; }
+.settings-header { text-align: center; margin-bottom: 2rem; }
+.avatar-circle { width: 80px; height: 80px; background: #3b82f6; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; margin: 0 auto 1rem; }
+.settings-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.settings-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; border-radius: 12px; cursor: pointer; transition: background 0.2s; color: #1e293b; font-weight: 500; }
+.settings-item:hover { background: #f8fafc; }
+.sub-menu { display: none; flex-direction: column; gap: 0.25rem; padding-left: 3rem; margin-bottom: 0.5rem; }
+.sub-menu.active { display: flex; }
+.sub-item { padding: 0.5rem; color: #64748b; cursor: pointer; font-size: 0.9rem; }
+.sub-item:hover { color: #3b82f6; }
+.top-alert-container { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%); background: #ef4444; color: white; padding: 1rem 2rem; border-radius: 50px; z-index: 11000; box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4); display: none; font-weight: 600; }
+/* Message Center */
+.message-center-modal { position: fixed; top: 0; right: -400px; width: 400px; height: 100vh; background: white; z-index: 10500; transition: right 0.3s ease; box-shadow: -10px 0 30px rgba(0,0,0,0.1); display: flex; flex-direction: column; }
+.message-center-modal.active { right: 0; }
+.message-center-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 10400; display: none; }
+.message-center-overlay.active { display: block; }
+.mc-header { padding: 1.5rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+.mc-list { flex: 1; overflow-y: auto; }
+
