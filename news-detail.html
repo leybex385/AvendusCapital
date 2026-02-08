@@ -203,14 +203,236 @@
         </div>
     </div>
 
-    <div class="contact-widget">
-        <span>Contact</span>
-        <span>us</span>
-        <i data-lucide="message-circle" style="margin-top:5px"></i>
+    <!-- Customer Service Modal -->
+    <div id="csModal" class="cs-modal" onclick="if(event.target == this) closeCS()">
+        <div class="cs-content">
+            <!-- Header -->
+            <div class="cs-header">
+                <div class="cs-header-avatar">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Support" alt="Support">
+                </div>
+                <div class="cs-header-info">
+                    <div class="cs-header-title">VSL Customer Service</div>
+                    <div class="cs-header-hours">Service Hours: 8:30 AM - 10:00 PM</div>
+                </div>
+                <button class="cs-minimize" onclick="closeCS()">
+                    <i data-lucide="chevron-down" size="24"></i>
+                </button>
+            </div>
+
+            <!-- Body / Chat History -->
+            <div class="cs-body" id="csBody">
+                <!-- Messages injected via JS -->
+            </div>
+
+            <!-- Footer / Input -->
+            <div class="cs-footer">
+                <div id="csEmojiPicker" class="cs-emoji-picker">
+                    <button class="cs-emoji-btn" onclick="addEmoji('😊')">😊</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('😂')">😂</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🤣')">🤣</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('❤️')">❤️</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('😍')">😍</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('👍')">👍</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🙏')">🙏</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('😭')">😭</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('😘')">😘</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🥰')">🥰</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🙌')">🙌</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('✨')">✨</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🔥')">🔥</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🚀')">🚀</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('😮')">😮</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('😢')">😢</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('😎')">😎</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🤔')">🤔</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('👏')">👏</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🎉')">🎉</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('💪')">💪</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('💯')">💯</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🤑')">🤑</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('💰')">💰</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('📈')">📈</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('📉')">📉</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('💎')">💎</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🤝')">🤝</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('✅')">✅</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('❌')">❌</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🔔')">🔔</button>
+                    <button class="cs-emoji-btn" onclick="addEmoji('🎁')">🎁</button>
+                </div>
+
+                <div id="csAttachmentPreview" class="cs-attachment-preview">
+                    <img id="csPreviewImg" src="" class="cs-preview-img" style="display:none;">
+                    <span id="csFileName">File name</span>
+                    <i data-lucide="x" class="cs-remove-attachment" onclick="clearAttachment()" size="16"></i>
+                </div>
+
+                <div class="cs-input-area">
+                    <input type="file" id="csFileInput" style="display:none;" onchange="handleCSFile(this)">
+                    <div class="cs-input-row">
+                        <input type="text" id="csInput" class="cs-input" placeholder="Type a message..."
+                            onkeypress="if(event.key === 'Enter') sendCSMessage()">
+                    </div>
+                    <div class="cs-actions">
+                        <div class="cs-tools">
+                            <button class="cs-tool-btn" onclick="csTool('emoji')" title="Emoji">
+                                <i data-lucide="smile" size="20"></i>
+                            </button>
+                            <button class="cs-tool-btn" onclick="csTool('image')" title="Send Image">
+                                <i data-lucide="camera" size="20"></i>
+                            </button>
+                            <button class="cs-tool-btn" onclick="csTool('video')" title="Send Video">
+                                <i data-lucide="video" size="20"></i>
+                            </button>
+                            <button class="cs-tool-btn" onclick="csTool('file')" title="Send File">
+                                <i data-lucide="link" size="20"></i>
+                            </button>
+                        </div>
+                        <button class="cs-send-btn" onclick="sendCSMessage()">
+                            <i data-lucide="send" size="18"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Contact Us Tab -->
+    <div class="cs-floating-tab" onclick="openCS()">
+        <span class="cs-floating-text">Contact us</span>
+        <div class="cs-floating-icon">
+            <i data-lucide="messages-square" size="16"></i>
+        </div>
     </div>
 
     <script>
         lucide.createIcons();
+
+        // Customer Service Script Logic
+        function openCS() {
+            document.getElementById('csModal').style.display = 'flex';
+            const chatBody = document.getElementById('csBody');
+            if (chatBody.children.length === 0) {
+                addCSMessage('service', 'Please don\'t share any sensitive information. Do not transfer funds without my explicit permission.', '8:30 AM');
+                addCSMessage('user', 'Sharad Madhukar Mali | *******38029', '8:31 AM');
+                addCSMessage('service', 'Hello, how can I help you today?', '8:32 AM');
+            }
+        }
+
+        function closeCS() {
+            document.getElementById('csModal').style.display = 'none';
+        }
+
+        function addCSMessage(type, text, time = '') {
+            const chatBody = document.getElementById('csBody');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `cs-msg ${type}`;
+
+            const avatarUrl = type === 'service'
+                ? 'https://api.dicebear.com/7.x/bottts/svg?seed=Support'
+                : 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sharad';
+
+            // Convert URLs to clickable links
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            const formattedText = text.replace(urlRegex, (url) => {
+                return `<a href="${url}" target="_blank" style="color: inherit; text-decoration: underline;">${url}</a>`;
+            });
+
+            msgDiv.innerHTML = `
+                <div class="cs-msg-avatar">
+                    <img src="${avatarUrl}" alt="avatar">
+                </div>
+                <div class="cs-msg-bubble">
+                    ${formattedText}
+                    ${time ? `<div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">${time}</div>` : ''}
+                </div>
+            `;
+            chatBody.appendChild(msgDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+            lucide.createIcons();
+        }
+
+        let csAttachment = null;
+        function sendCSMessage() {
+            const input = document.getElementById('csInput');
+            const text = input.value.trim();
+            if (!text && !csAttachment) return;
+
+            const now = new Date();
+            const time = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+
+            let messageHtml = text;
+            if (csAttachment) {
+                if (csAttachment.type.startsWith('image/')) {
+                    messageHtml = `<div>${text}</div><img src="${csAttachment.url}" style="max-width: 100%; border-radius: 8px; margin-top: 8px;">`;
+                } else {
+                    messageHtml = `<div>${text}</div><div style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.05); padding:8px; border-radius:8px; margin-top:8px;">
+                        <i data-lucide="file-text" size="20"></i> <span>${csAttachment.name}</span>
+                    </div>`;
+                }
+            }
+
+            addCSMessage('user', messageHtml, time);
+            input.value = '';
+            clearAttachment();
+            document.getElementById('csEmojiPicker').style.display = 'none';
+
+            setTimeout(() => {
+                addCSMessage('service', 'Thank you for your message. An agent will be with you shortly.', time);
+            }, 1000);
+        }
+
+        function csTool(action) {
+            if (action === 'emoji') {
+                const picker = document.getElementById('csEmojiPicker');
+                picker.style.display = picker.style.display === 'grid' ? 'none' : 'grid';
+            } else if (action === 'image' || action === 'file' || action === 'video') {
+                document.getElementById('csFileInput').click();
+            }
+        }
+
+        function addEmoji(emoji) {
+            const input = document.getElementById('csInput');
+            input.value += emoji;
+            input.focus();
+            document.getElementById('csEmojiPicker').style.display = 'none';
+        }
+
+        function handleCSFile(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    csAttachment = {
+                        name: file.name,
+                        type: file.type,
+                        url: e.target.result
+                    };
+                    const preview = document.getElementById('csAttachmentPreview');
+                    const previewImg = document.getElementById('csPreviewImg');
+                    const fileNameSpan = document.getElementById('csFileName');
+                    preview.style.display = 'flex';
+                    if (file.type.startsWith('image/')) {
+                        previewImg.src = e.target.result;
+                        previewImg.style.display = 'block';
+                        fileNameSpan.style.display = 'none';
+                    } else {
+                        previewImg.style.display = 'none';
+                        fileNameSpan.innerText = file.name;
+                        fileNameSpan.style.display = 'block';
+                    }
+                    lucide.createIcons();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearAttachment() {
+            csAttachment = null;
+            document.getElementById('csAttachmentPreview').style.display = 'none';
+            document.getElementById('csFileInput').value = '';
+        }
 
         // Safe decode utility
         function safeDecode(str) {
@@ -249,7 +471,6 @@
 
         // Use content from URL or default
         document.getElementById('articleContent').innerHTML = content ? content.replace(/\n/g, '<br><br>') : defaultText;
-
     </script>
 </body>
 
