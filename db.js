@@ -53,6 +53,17 @@ const DB = {
         return { success: true, user: data };
     },
 
+    async resetPassword(mobile, newPassword) {
+        const client = this.getClient();
+        const { data, error } = await client
+            .from('users')
+            .update({ password: newPassword })
+            .eq('mobile', mobile);
+
+        if (error) return { success: false, message: error.message };
+        return { success: true };
+    },
+
     getCurrentUser() {
         const user = localStorage.getItem(this.CURRENT_USER_KEY);
         return user ? JSON.parse(user) : null;
