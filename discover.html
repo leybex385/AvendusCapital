@@ -6,17 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Market - Avendus Capital</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="portfolio-theme.css">
     <link rel="stylesheet" href="settings-panel-fix.css">
+    <link rel="stylesheet" href="portfolio-theme.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="db.js?v=20260212"></script>
-    <script src="db_patch.js"></script>
     <script src="market_data.js"></script>
-    <script src="script.js"></script>
     <style>
         /* Using global styles from styles.css */
 
@@ -1103,6 +1101,8 @@
             align-items: center;
             gap: 10px;
         }
+
+
 
         .cs-input:focus {
             border-color: #1e56a0;
@@ -2210,36 +2210,6 @@
             font-weight: 800;
             color: #10b981;
             margin-bottom: 0.5rem;
-        }
-
-        /* Category List Styling */
-        .score-details {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .score-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
-            line-height: 1.6;
-            opacity: 0.9;
-            margin-bottom: 2px;
-        }
-
-        .score-row span {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .score-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            flex-shrink: 0;
         }
 
         /* Applications Right Col */
@@ -3832,38 +3802,32 @@
                     <div class="p-assets-grid">
                         <div class="p-asset-item">
                             <span class="p-asset-label">Available Balance</span>
-                            <span class="p-asset-val" id="pAvailableBalance" data-val="₹0.00"><span
-                                    class="asset-value">₹0.00</span></span>
+                            <span class="p-asset-val" id="pAvailableBalance" data-val="₹0.00">₹0.00</span>
                             <span class="p-asset-sub">Cash</span>
                         </div>
                         <div class="p-asset-item">
                             <span class="p-asset-label">Current Investments</span>
-                            <span class="p-asset-val" id="pCurrentInvested" data-val="₹0.00"><span
-                                    class="asset-value">₹0.00</span></span>
+                            <span class="p-asset-val" id="pCurrentInvested" data-val="₹0.00">₹0.00</span>
                             <span class="p-asset-sub">Invested</span>
                         </div>
                         <div class="p-asset-item">
                             <span class="p-asset-label">Promotional Credits</span>
-                            <span class="p-asset-val" id="pPromoCredits" data-val="₹0.00"><span
-                                    class="asset-value">₹0.00</span></span>
+                            <span class="p-asset-val" id="pPromoCredits" data-val="₹0.00">₹0.00</span>
                             <span class="p-asset-sub">Bonus</span>
                         </div>
                         <div class="p-asset-item">
                             <span class="p-asset-label">Pending Funds</span>
-                            <span class="p-asset-val" id="pPendingFunds" data-val="₹0.00"><span
-                                    class="asset-value">₹0.00</span></span>
+                            <span class="p-asset-val" id="pPendingFunds" data-val="₹0.00">₹0.00</span>
                             <span class="p-asset-sub">Frozen</span>
                         </div>
                         <div class="p-asset-item">
                             <span class="p-asset-label">Borrowed Funds</span>
-                            <span class="p-asset-val" id="pBorrowedFunds" data-val="₹0.00"><span
-                                    class="asset-value">₹0.00</span></span>
+                            <span class="p-asset-val" id="pBorrowedFunds" data-val="₹0.00">₹0.00</span>
                             <span class="p-asset-sub">Loan</span>
                         </div>
                         <div class="p-asset-item">
                             <span class="p-asset-label">Outstanding</span>
-                            <span class="p-asset-val red" id="pPendingSettlement" data-val="₹0.00"><span
-                                    class="asset-value">₹0.00</span></span>
+                            <span class="p-asset-val red" id="pPendingSettlement" data-val="₹0.00">₹0.00</span>
                             <span class="p-asset-sub red" style="cursor: pointer; text-decoration: underline;"
                                 onclick="showDiscoverView('transactions'); switchTransactionTab(null, 'pendingPayment');">Clear
                                 Due</span>
@@ -4040,9 +4004,7 @@
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
                         <div>
-                            <div id="pStatsInvested"
-                                style="font-size: clamp(16px, 2vw, 22px); font-weight: 700; word-break: break-all; overflow-wrap: anywhere; white-space: normal; max-width: 100%; display: block;">
-                                ₹0.00</div>
+                            <div id="pStatsInvested" style="font-size: 1.5rem; font-weight: 700;">₹0.00</div>
                             <div style="font-size: 0.8rem; color: #94a3b8;">Invested</div>
                         </div>
                         <div style="text-align: right;">
@@ -4271,8 +4233,7 @@
             <div class="me-left-col">
                 <!-- Profile Card -->
                 <div class="me-card">
-                    <div class="me-card-tag"><i data-lucide="rotate-cw" size="18" style="cursor: pointer;"
-                            onclick="refreshMeProfile(this)"></i></div>
+                    <div class="me-card-tag"><i data-lucide="rotate-cw" size="18"></i></div>
                     <div class="me-title-row">
                         <i data-lucide="user-circle"></i> Your Profile
                     </div>
@@ -4307,45 +4268,42 @@
                 </div>
 
                 <!-- Assets Card -->
-                <!-- Assets Card -->
                 <div class="me-card">
-                    <div class="me-card-tag"><i data-lucide="rotate-cw" size="18" style="cursor: pointer;"
-                            onclick="refreshMeAssets(this)"></i></div>
+                    <div class="me-card-tag"><i data-lucide="rotate-cw" size="18"></i></div>
                     <div class="me-title-row">
-                        <i data-lucide="wallet"></i> Assets <i data-lucide="eye" size="14" id="meAssetsEye"
-                            style="margin-left: 5px; cursor: pointer;" onclick="toggleMeAssets()"></i>
+                        <i data-lucide="wallet"></i> Assets <i data-lucide="eye" size="14"
+                            style="margin-left: 5px;"></i>
                     </div>
                     <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 1rem;">INR</div>
                     <div class="me-asset-grid">
                         <div class="me-as-card">
                             <div class="me-as-lbl">Available Balance</div>
-                            <div class="me-as-val" id="meAvailableBalance"><span class="asset-value">₹0.00</span></div>
+                            <div class="me-as-val" id="meAvailableBalance">₹0.00</div>
                             <div class="me-as-sub" style="color: #10b981;">Cash</div>
                         </div>
                         <div class="me-as-card">
                             <div class="me-as-lbl">Current Investments</div>
-                            <div class="me-as-val" id="meCurrentInvestments"><span class="asset-value">₹0.00</span>
-                            </div>
+                            <div class="me-as-val" id="meCurrentInvestments">₹0.00</div>
                             <div class="me-as-sub" style="color: #3b82f6;">Invested</div>
                         </div>
                         <div class="me-as-card">
                             <div class="me-as-lbl">Promotional Credits</div>
-                            <div class="me-as-val" id="meBonusCredits"><span class="asset-value">₹0.00</span></div>
+                            <div class="me-as-val" id="meBonusCredits">₹0.00</div>
                             <div class="me-as-sub" style="color: #db2777;">Bonus</div>
                         </div>
                         <div class="me-as-card">
                             <div class="me-as-lbl">Pending Funds</div>
-                            <div class="me-as-val" id="meFrozenFunds"><span class="asset-value">₹0.00</span></div>
+                            <div class="me-as-val" id="meFrozenFunds">₹0.00</div>
                             <div class="me-as-sub" style="color: #ef4444;">Frozen</div>
                         </div>
                         <div class="me-as-card">
                             <div class="me-as-lbl">Borrowed Funds</div>
-                            <div class="me-as-val" id="meBorrowedFunds"><span class="asset-value">₹0.00</span></div>
+                            <div class="me-as-val" id="meBorrowedFunds">₹0.00</div>
                             <div class="me-as-sub" style="color: #6366f1;">Loan</div>
                         </div>
                         <div class="me-as-card">
                             <div class="me-as-lbl">Pending Settlement</div>
-                            <div class="me-as-val" id="mePendingSettlement"><span class="asset-value">₹0.00</span></div>
+                            <div class="me-as-val" id="mePendingSettlement">₹0.00</div>
                             <div class="me-as-sub" style="color: #ef4444;">Outstanding</div>
                         </div>
                     </div>
@@ -4357,7 +4315,7 @@
                         <i data-lucide="calculator"></i> Scores and Offers
                     </div>
                     <div class="gauge-wrap">
-                        <div class="gauge-score-text" id="meGaugeScore" style="color: #64748b;">-</div>
+                        <div class="gauge-score-text" style="color: #64748b;">N/A</div>
                         <svg class="gauge-svg" viewBox="0 0 100 50">
                             <!-- Gauge Background -->
                             <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#f1f5f9" stroke-width="8" />
@@ -4367,15 +4325,15 @@
                             <path d="M 50 10 A 40 40 0 0 1 75 20" fill="none" stroke="#3b82f6" stroke-width="8" />
                             <path d="M 75 20 A 40 40 0 0 1 90 50" fill="none" stroke="#10b981" stroke-width="8" />
 
-                            <!-- Dynamic Needle -->
-                            <line id="meGaugeNeedle" x1="50" y1="50" x2="10" y2="50" stroke="#1e293b" stroke-width="2"
-                                stroke-linecap="round"
-                                style="transform-origin: 50px 50px; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);" />
+                            <!-- Needle at the beginning (Poor) -->
+                            <line x1="50" y1="50" x2="15" y2="45" stroke="#1e293b" stroke-width="2"
+                                stroke-linecap="round" />
                             <circle cx="50" cy="50" r="3" fill="#1e293b" />
                         </svg>
-                        <div id="meCreditGaugeInfo"
+                        <div
                             style="font-size: 0.85rem; color: #64748b; margin-top: 1rem; text-align: center; max-width: 400px;">
-                            Loading credit evaluation...
+                            Based on the latest evaluation, your <b>Credit Score is 0</b>. Your credit profile falls
+                            under the <b style="color: #64748b;">New Account</b> category.
                         </div>
                         <div class="score-details" style="width: 100%; margin-top: 1.5rem;">
                             <div class="score-row"><span>
@@ -4407,23 +4365,9 @@
                     <div class="me-title-row">
                         <i data-lucide="gift"></i> Offers
                     </div>
-                    <div onclick="window.location.href='loan_application.html'"
-                        style="background: #f8fafc; border-radius: 12px; padding: 1.25rem; border: 1px solid #e2e8f0; display: flex; gap: 1rem; align-items: center; cursor: pointer; transition: transform 0.2s;"
-                        onmouseover="this.style.transform='scale(1.02)'; this.querySelector('.loan-icon-box').style.boxShadow='0 0 15px rgba(212, 175, 55, 0.4)'"
-                        onmouseout="this.style.transform='scale(1)'; this.querySelector('.loan-icon-box').style.boxShadow='none'">
-                        <div class="loan-icon-box"
-                            style="width: 48px; height: 48px; background: #111111; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #D4AF37; flex-shrink: 0; transition: box-shadow 0.3s ease;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round">
-                                <line x1="3" y1="22" x2="21" y2="22"></line>
-                                <line x1="6" y1="18" x2="6" y2="11"></line>
-                                <line x1="10" y1="18" x2="10" y2="11"></line>
-                                <line x1="14" y1="18" x2="14" y2="11"></line>
-                                <line x1="18" y1="18" x2="18" y2="11"></line>
-                                <polygon points="12 2 20 7 4 7 12 2"></polygon>
-                            </svg>
-                        </div>
+                    <div
+                        style="background: #f8fafc; border-radius: 12px; padding: 1.25rem; border: 1px solid #e2e8f0; display: flex; gap: 1rem; align-items: center;">
+                        <img src="https://flagcdn.com/w80/in.png" width="40" style="opacity: 0.2;">
                         <div>
                             <div style="font-weight: 700; color: #1e293b;">Tailored Personal Credit Loans</div>
                             <div style="font-size: 0.75rem; color: #64748b; margin-top: 0.3rem;">Enjoy a seamless,
@@ -4451,7 +4395,7 @@
                         <div class="app-pill">Repayment</div>
                         <div class="app-pill">Recycled</div>
                     </div>
-                    <div class="no-data-wrap" id="myApplicationsList">
+                    <div class="no-data-wrap">
                         <i data-lucide="inbox" size="48" stroke-width="1" style="margin-bottom: 1rem;"></i>
                         No data.
                     </div>
@@ -4798,7 +4742,6 @@
             document.querySelector('.header').style.display = 'flex';
 
             setActiveNav(document.getElementById('navMe'));
-            if (typeof window.syncVipCredit === 'function') window.syncVipCredit();
 
             // Refresh user data (KYC status, balance, etc.) from backend
             DB.refreshCurrentUser().then(fullUser => {
@@ -4816,52 +4759,22 @@
             });
         });
 
-        async function refreshMeProfile(btn) {
-            if (btn) {
-                btn.style.transition = 'transform 0.6s ease-in-out';
-                btn.style.transform = 'rotate(360deg)';
-                setTimeout(() => btn.style.transform = 'none', 600);
-            }
-            if (typeof syncUserData === 'function') await syncUserData();
-        }
-
-        let meAssetsHidden = false;
-        function toggleMeAssets() {
-            meAssetsHidden = !meAssetsHidden;
-            const eyeIcon = document.getElementById('meAssetsEye');
-            const assetsGrid = document.querySelector('.me-asset-grid');
-
-            if (meAssetsHidden) {
-                eyeIcon.setAttribute('data-lucide', 'eye-off');
-                assetsGrid.classList.add('hidden-balance');
-            } else {
-                eyeIcon.setAttribute('data-lucide', 'eye');
-                assetsGrid.classList.remove('hidden-balance');
-            }
-            lucide.createIcons();
-        }
-
-        async function refreshMeAssets(btn) {
-            if (btn) {
-                btn.style.transition = 'transform 1s';
-                btn.style.transform = 'rotate(360deg)';
-                setTimeout(() => btn.style.transform = 'none', 1000);
-            }
-            if (typeof syncUserData === 'function') await syncUserData();
-        }
-
         let portfolioAssetsHidden = false;
         function toggleAssetsVisibility() {
             portfolioAssetsHidden = !portfolioAssetsHidden;
             const eyeIcon = document.getElementById('assetToggleEye');
-            const assetsGrid = document.querySelector('.p-assets-grid');
+            const assetValues = document.querySelectorAll('.p-asset-val');
 
             if (portfolioAssetsHidden) {
                 eyeIcon.setAttribute('data-lucide', 'eye-off');
-                assetsGrid.classList.add('hidden-balance');
+                assetValues.forEach(el => {
+                    el.innerText = '********';
+                });
             } else {
                 eyeIcon.setAttribute('data-lucide', 'eye');
-                assetsGrid.classList.remove('hidden-balance');
+                assetValues.forEach(el => {
+                    el.innerText = el.getAttribute('data-val');
+                });
             }
             lucide.createIcons();
         }
@@ -5790,26 +5703,7 @@
             if (icon) {
                 setTimeout(() => icon.style.transform = 'none', 1000);
             }
-
-            // Custom Toast Notification
-            let toast = document.getElementById('fundRefreshToast');
-            if (!toast) {
-                toast = document.createElement('div');
-                toast.id = 'fundRefreshToast';
-                toast.innerHTML = `<i data-lucide="check-circle"></i> Fund records updated`;
-                document.body.appendChild(toast);
-                lucide.createIcons();
-            }
-
-            // Trigger Animation
-            requestAnimationFrame(() => {
-                toast.classList.add('show');
-            });
-
-            // Auto-hide
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+            alert("Fund records updated.");
         }
 
         function switchFundTab(el, tab) {
@@ -5821,12 +5715,10 @@
         // Helper to render filtered list
         function renderFundList(data) {
             const list = document.getElementById('fundRecordsList');
-            if (!data || data.length === 0) {
+            if (data.length === 0) {
                 list.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 2rem; font-size: 0.85rem;">No data.</div>`;
-                const countEl = document.getElementById('fundRecordCount');
-                if (countEl) countEl.textContent = '0 records';
-                const totalEl = document.getElementById('fundTotalAmount');
-                if (totalEl) totalEl.textContent = '₹0.00';
+                document.getElementById('fundRecordCount').textContent = '0 records';
+                document.getElementById('fundTotalAmount').textContent = '₹0.00';
                 return;
             }
 
@@ -5848,7 +5740,7 @@
             }
 
             list.innerHTML = data.map(item => `
-                <div class="fund-item-card" data-date="${item.rawDate ? item.rawDate.toISOString() : ''}">
+                <div class="fund-item-card">
                     <div class="f-item-main">
                         <div class="f-item-type">${item.type}</div>
                         <div class="f-item-sub">${item.date} • ${item.ex}</div>
@@ -5860,13 +5752,6 @@
                     </div>
                 </div>
             `).join('');
-
-            // Apply filter immediately if dates are set (persistence across tab switches)
-            const fVal = document.getElementById('fundDateFrom')?.value;
-            const tVal = document.getElementById('fundDateTo')?.value;
-            if (fVal || tVal) {
-                applyDateFilter();
-            }
         }
 
         function renderFundRecords(tab) {
@@ -5884,41 +5769,28 @@
         updateClock();
 
         // Date Filtering Logic
-        // Date Filtering Logic
         function applyDateFilter() {
-            const fVal = document.getElementById('fundDateFrom')?.value;
-            const tVal = document.getElementById('fundDateTo')?.value;
+            const fVal = document.getElementById('fundDateFrom').value;
+            const tVal = document.getElementById('fundDateTo').value;
 
-            // Tabs remain active. We filter within the current view.
+            // If empty, maybe revert to tab? Let's just filter 'all' if input changes
+            if (!fVal && !tVal) return;
 
-            const fromDate = fVal ? new Date(fVal) : null;
-            if (fromDate) fromDate.setHours(0, 0, 0, 0);
+            // Deselect tabs visually to indicate custom filter
+            document.querySelectorAll('#fundTabs .p-tab').forEach(t => t.classList.remove('active'));
 
-            const toDate = tVal ? new Date(tVal) : null;
-            if (toDate) toDate.setHours(23, 59, 59, 999);
-
-            const cards = document.querySelectorAll('#fundRecordsList .fund-item-card');
-            let visibleCount = 0;
-
-            cards.forEach(card => {
-                const dateStr = card.getAttribute('data-date');
-                if (!dateStr) return;
-
-                const cardDate = new Date(dateStr);
-                let isVisible = true;
-
-                if (fromDate && cardDate < fromDate) isVisible = false;
-                if (toDate && cardDate > toDate) isVisible = false;
-
-                card.style.display = isVisible ? '' : 'none';
-                if (isVisible) visibleCount++;
-            });
-
-            // Optional: Update record count specifically for filtered view?
-            // User requirement: "The filtering must work together with the existing tabs"
-            // Let's update the visual count to reflect what the user actually sees
-            const countEl = document.getElementById('fundRecordCount');
-            if (countEl) countEl.textContent = `${visibleCount} records`;
+            let list = fundRecordsData['all'] || [];
+            if (fVal) {
+                const fromD = new Date(fVal);
+                fromD.setHours(0, 0, 0, 0);
+                list = list.filter(i => i.rawDate && i.rawDate >= fromD);
+            }
+            if (tVal) {
+                const toD = new Date(tVal);
+                toD.setHours(23, 59, 59, 999);
+                list = list.filter(i => i.rawDate && i.rawDate <= toD);
+            }
+            renderFundList(list);
         }
 
         const fundDateFrom = document.getElementById('fundDateFrom');
@@ -5933,145 +5805,139 @@
             if (fFrom) fFrom.value = '';
             if (fTo) fTo.value = '';
 
-            // Restore all items
-            const cards = document.querySelectorAll('#fundRecordsList .fund-item-card');
-            cards.forEach(c => c.style.display = '');
-
-            // Restore original total count based on all cards
-            const countEl = document.getElementById('fundRecordCount');
-            if (countEl) countEl.textContent = `${cards.length} records`;
-
-            // Reset Tab Selection? The user said "Restore the full list based on the currently selected tab"
-            // The list is already based on the selected tab (because renderFundRecords was called last).
-            // So simply showing all hidden items restores the tab's full list.
-        }
+            // Reset to All Tab
+            const fundTabs = document.getElementById('fundTabs');
+            if (fundTabs) {
+                const allTab = fundTabs.querySelector('.p-tab'); // First tab is 'All'
+                if (allTab) switchFundTab(allTab, 'all');
+            } else {
+                renderFundRecords('all');
+            }
+        };
 
         // Settings Modal Logic
+        function deleteAllMessages() {
+            const mcList = document.getElementById('mcList');
+            const msgCount = document.getElementById('msgCount');
+            if (mcList) {
+                mcList.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 2rem; font-size: 0.85rem;">No messages</div>';
+            }
+            if (msgCount) {
+                msgCount.innerText = '0 Messages';
+            }
+        }
+
+        function deleteMessage(btn) {
+            const item = btn.closest('.mc-item');
+            if (item) {
+                item.remove();
+                updateMessageCount();
+            }
+        }
+
+        function updateMessageCount() {
+            const mcList = document.getElementById('mcList');
+            const msgCount = document.getElementById('msgCount');
+            const items = mcList ? mcList.querySelectorAll('.mc-item') : [];
+            if (msgCount) {
+                msgCount.innerText = `${items.length} Messages`;
+            }
+            if (mcList && items.length === 0) {
+                mcList.innerHTML = '<div style="text-align: center; color: #94a3b8; padding: 2rem; font-size: 0.85rem;">No messages</div>';
+            }
+        }
+
+        function makeAllRead() {
+            const dots = document.querySelectorAll('.mc-dot.unread');
+            dots.forEach(dot => dot.classList.remove('unread'));
+        }
+
+        function openSettings() {
+            const modal = document.getElementById('settingsModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                lucide.createIcons();
+            }
+        }
+
+        function closeSettings() {
+            const modal = document.getElementById('settingsModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function toggleSettingsAccordion(element, id) {
+            const subMenu = document.getElementById(id);
+            const chevron = element.querySelector('.settings-chevron');
+
+            if (!subMenu) return;
+
+            // Toggle active class
+            subMenu.classList.toggle('active');
+
+            // Dynamic max-height for smooth animation
+            if (subMenu.classList.contains('active')) {
+                subMenu.style.maxHeight = subMenu.scrollHeight + "px";
+            } else {
+                subMenu.style.maxHeight = null;
+            }
+
+            // Toggle rotation class on chevron
+            if (chevron) {
+                chevron.classList.toggle('rotated');
+            }
+        }
+
+        // Update Avatar Logic
+        function openUpdateAvatar() {
+            // Keep settings open behind
+            document.getElementById('updateAvatarModal').style.display = 'flex';
+            lucide.createIcons();
+        }
+
+        function closeUpdateAvatar() {
+            document.getElementById('updateAvatarModal').style.display = 'none';
+        }
+
+        let currentAvatarData = null;
+
         // Consolidate Page-Specific Sync with Global State
         window.syncUserData = async function () {
             const user = DB.getCurrentUser();
+            if (!user) return;
 
             // 1. Run Global Synchronization (Handles Avatar, Global Name, Balance, etc.)
             if (window.loadUserAssets) await window.loadUserAssets(user.id);
 
-            // 2. Refresh local transaction state if applicable
-            if (typeof fetchUserTransactions === 'function') await fetchUserTransactions();
-
-            // 3. Market-Specific Dashboard Sync (Charts, Portfolio Stats, Allocation)
+            // 2. Perform Discovery/Me Specific UI sync
             const dbUser = DB.getCurrentUser(); // Latest state
-            const formats = { minimumFractionDigits: 2 };
+            const rawBalance = parseFloat(dbUser.balance) || 0;
             const inv = parseFloat(dbUser.invested) || 0;
+            const frozen = parseFloat(dbUser.frozen) || 0;
+            const loan = parseFloat(dbUser.loan) || 0;
+            const bonus = parseFloat(dbUser.bonus) || 0;
 
-            // Updated targets for specific views
             const updateVal = (id, val) => {
                 const el = document.getElementById(id);
                 if (el) {
-                    const fmt = '₹' + val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                    el.textContent = fmt;
+                    el.textContent = '₹' + val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 }
             };
 
-            updateVal('pInvestedMain', inv);
-            updateVal('pPortfolioTotal', inv);
-            updateVal('pCircleText', inv);
-            updateVal('pInsStockVal', inv);
-            updateVal('pStatsInvested', inv);
-            updateVal('pStatsCurrentValue', inv);
+            updateVal('meAvailableBalance', rawBalance);
+            updateVal('meCurrentInvestments', inv);
+            updateVal('meFrozenFunds', frozen);
+            updateVal('meBorrowedFunds', loan);
+            updateVal('meBonusCredits', bonus);
 
-            // Calculate Total Profit & ROI for the charts
-            let totalProfit = 0;
-            let tradesCount = 0;
-
-            if (typeof transactionData !== 'undefined' && transactionData.holding) {
-                tradesCount = transactionData.holding.length;
-                transactionData.holding.forEach(item => {
-                    const liveProd = (window.MarketEngine && window.MarketEngine.getProduct) ? window.MarketEngine.getProduct(item.symbol) : null;
-                    const currentPrice = liveProd ? liveProd.price : parseFloat(item.price);
-                    const profit = (currentPrice * item.quantity) - parseFloat(item.total_amount);
-                    totalProfit += profit;
-                });
-            }
-
-            const roiPercent = inv > 0 ? (totalProfit / inv) * 100 : 0;
-            updateVal('pProfitMain', totalProfit);
-
-            const roiEl = document.getElementById('pROIMain');
-            if (roiEl) {
-                roiEl.textContent = (roiPercent >= 0 ? '+' : '') + roiPercent.toFixed(2) + '%';
-                roiEl.style.color = roiPercent >= 0 ? '#10b981' : '#ef4444';
-            }
-
-            const tradesCountEl = document.getElementById('pTradesCount');
-            if (tradesCountEl) tradesCountEl.textContent = tradesCount;
-            updateVal('pTradesProfit', totalProfit);
-
-            // Animate Donut Chart
-            const donutCircle = document.getElementById('pDonutCircle');
-            const donutPctLabel = document.getElementById('pDonutPct');
-            if (donutCircle) {
-                let profitRatio = Math.min(Math.max(totalProfit / (inv || 1), 0), 1);
-                if (totalProfit > 0 && profitRatio < 0.01) profitRatio = 0.01;
-                const offset = 251.2 * (1 - profitRatio);
-                donutCircle.style.strokeDashoffset = offset;
-                if (donutPctLabel) {
-                    const displayPct = (totalProfit / (inv || 1) * 100);
-                    donutPctLabel.textContent = (displayPct < 0.01 && totalProfit > 0 ? '<0.01' : displayPct.toFixed(displayPct < 1 ? 2 : 0)) + '%';
-                }
-            }
-
-            // Animate Gauge Needle
-            const gaugeNeedle = document.getElementById('pGaugeNeedle');
-            if (gaugeNeedle) {
-                let normalizedROI = (roiPercent + 10) / 20;
-                normalizedROI = Math.min(Math.max(normalizedROI, 0), 1);
-                const angle = -90 + (normalizedROI * 180);
-                gaugeNeedle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
-            }
-
-            // Gainer / Loser Logic
-            if (typeof transactionData !== 'undefined' && transactionData.holding && transactionData.holding.length > 0) {
-                let gainer = null, loser = null;
-                let maxProfitPct = -Infinity, maxLossPct = Infinity;
-
-                transactionData.holding.forEach(item => {
-                    const liveProd = (window.MarketEngine && window.MarketEngine.getProduct) ? window.MarketEngine.getProduct(item.symbol) : null;
-                    const currentPrice = liveProd ? liveProd.price : parseFloat(item.price);
-                    const profit = (currentPrice * item.quantity) - parseFloat(item.total_amount);
-                    const profitPct = (profit / parseFloat(item.total_amount)) * 100;
-
-                    if (profitPct > maxProfitPct) {
-                        maxProfitPct = profitPct;
-                        gainer = { ...item, currentPrice, profit, profitPct };
-                    }
-                    if (profitPct < maxLossPct) {
-                        maxLossPct = profitPct;
-                        loser = { ...item, currentPrice, profit, profitPct };
-                    }
-                });
-
-                if (gainer) {
-                    const gName = document.getElementById('pGainerName');
-                    if (gName) gName.textContent = gainer.name;
-                    updateVal('pGainerVal', gainer.currentPrice);
-                    const gPct = document.getElementById('pGainerPct');
-                    if (gPct) gPct.innerHTML = `<i data-lucide="arrow-up" size="12"></i> ${gainer.profitPct.toFixed(2)}%`;
-                }
-
-                if (loser) {
-                    const lName = document.getElementById('pLoserName');
-                    if (lName) lName.textContent = loser.name;
-                    updateVal('pLoserVal', loser.currentPrice);
-                    const lPct = document.getElementById('pLoserPct');
-                    if (lPct) lPct.innerHTML = `<i data-lucide="arrow-down" size="12"></i> ${loser.profitPct.toFixed(2)}%`;
-                }
-            }
-
-            // Update Buy Widget Balance Info
-            const fundStatus = document.getElementById('fundStatus');
-            if (fundStatus) {
-                const fmtRaw = '₹' + rawBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-                fundStatus.textContent = `Available: ${fmtRaw}`;
-                fundStatus.style.color = rawBalance > 0 ? '#10b981' : '#ef4444';
+            // Update sidebar assets
+            const assetAmounts = document.querySelectorAll('.asset-amount');
+            if (assetAmounts.length >= 6) {
+                updateVal('meAvailableBalance', rawBalance); // redundant but safe
+                assetAmounts[0].textContent = '₹' + rawBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                assetAmounts[1].textContent = '₹' + inv.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                assetAmounts[2].textContent = '₹' + bonus.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                assetAmounts[3].textContent = '₹' + frozen.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                assetAmounts[4].textContent = '₹' + loan.toLocaleString('en-IN', { minimumFractionDigits: 2 });
             }
 
             if (window.lucide) window.lucide.createIcons();
@@ -6080,9 +5946,161 @@
         // Initialize sync on load
         if (DB.getCurrentUser()) syncUserData();
 
+        // Update Portfolio View Invested Amounts
+        const formattedRawBal = '₹' + rawBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const formattedInv = '₹' + inv.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+        // Update p-asset-val elements in Portfolio view
+        // Use ID targeting for precision
+        const updatePortfolioVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) {
+                const fmt = '₹' + val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                fitText(el, fmt);
+            }
+        };
 
+        updatePortfolioVal('pAvailableBalance', rawBalance);
 
+        updatePortfolioVal('pCurrentInvested', inv);
+        updatePortfolioVal('pPromoCredits', bonus);
+        updatePortfolioVal('pPendingFunds', frozen);
+        updatePortfolioVal('pBorrowedFunds', loan);
+        updatePortfolioVal('pPendingSettlement', outstanding);
+
+        // Legacy Loop for safety (if IDs missing on some copies)
+        // But skip elements that have IDs since we handled them above
+        document.querySelectorAll('.p-asset-val').forEach(el => {
+            if (el.id) return; // Skip if ID exists (handled above)
+
+            const label = el.previousElementSibling?.textContent;
+            if (label === 'Available Balance') {
+                el.textContent = formattedRawBal;
+                el.setAttribute('data-val', formattedRawBal);
+            } else if (label === 'Current Investments') {
+                el.textContent = formattedInv;
+                el.setAttribute('data-val', formattedInv);
+            }
+        });
+
+        updateVal('pInvestedMain', inv);
+
+        updateVal('pPortfolioTotal', inv);
+
+        updateVal('pCircleText', inv);
+
+        updateVal('pInsStockVal', inv);
+
+        updateVal('pStatsInvested', inv);
+        updateVal('pStatsCurrentValue', inv);
+
+        // --- PORTFOLIO DASHBOARD ENHANCEMENTS ---
+        // Calculate Total Profit & ROI for the charts
+        let totalProfit = 0;
+        let tradesCount = 0;
+
+        if (typeof transactionData !== 'undefined' && transactionData.holding) {
+            tradesCount = transactionData.holding.length;
+            transactionData.holding.forEach(item => {
+                // Use actual market price if available
+                const liveProd = (window.MarketEngine && window.MarketEngine.getProduct) ? window.MarketEngine.getProduct(item.symbol) : null;
+                const currentPrice = liveProd ? liveProd.price : parseFloat(item.price);
+                const profit = (currentPrice * item.quantity) - parseFloat(item.total_amount);
+                totalProfit += profit;
+            });
+        }
+
+        const roiPercent = inv > 0 ? (totalProfit / inv) * 100 : 0;
+
+        // Update Text Elements
+        updateVal('pProfitMain', totalProfit);
+
+        const roiEl = document.getElementById('pROIMain');
+        if (roiEl) {
+            roiEl.textContent = (roiPercent >= 0 ? '+' : '') + roiPercent.toFixed(2) + '%';
+            roiEl.style.color = roiPercent >= 0 ? '#10b981' : '#ef4444';
+        }
+
+        const tradesCountEl = document.getElementById('pTradesCount');
+        if (tradesCountEl) tradesCountEl.textContent = tradesCount;
+
+        updateVal('pTradesProfit', totalProfit);
+
+        // Animate Donut Chart
+        // The donut shows profit ratio relative to investment (capped at 100% for visual)
+        const donutCircle = document.getElementById('pDonutCircle');
+        const donutPctLabel = document.getElementById('pDonutPct');
+        if (donutCircle) {
+            let profitRatio = Math.min(Math.max(totalProfit / (inv || 1), 0), 1);
+            // Ensure a visual sliver if profit exists but is proportionately tiny
+            if (totalProfit > 0 && profitRatio < 0.01) profitRatio = 0.01;
+
+            const offset = 251.2 * (1 - profitRatio);
+            donutCircle.style.strokeDashoffset = offset;
+            if (donutPctLabel) {
+                const displayPct = (totalProfit / (inv || 1) * 100);
+                donutPctLabel.textContent = (displayPct < 0.01 && totalProfit > 0 ? '<0.01' : displayPct.toFixed(displayPct < 1 ? 2 : 0)) + '%';
+            }
+        }
+
+        // Animate Gauge Needle
+        // Map ROI -10% to +10% to the gauge 0-100%
+        const gaugeNeedle = document.getElementById('pGaugeNeedle');
+        if (gaugeNeedle) {
+            // Normalize ROI to a value between 0 and 1
+            // -10% (0) | 0% (0.5) | +10% (1.0)
+            let normalizedROI = (roiPercent + 10) / 20;
+            normalizedROI = Math.min(Math.max(normalizedROI, 0), 1);
+            const angle = -90 + (normalizedROI * 180);
+            gaugeNeedle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+        }
+
+        // Sync Stats View
+        const statsROI = document.getElementById('pStatsROI');
+        if (statsROI) {
+            statsROI.textContent = (roiPercent >= 0 ? '+' : '') + roiPercent.toFixed(2) + '%';
+        }
+
+        // Calculate Top Gainer/Loser
+        if (typeof transactionData !== 'undefined' && transactionData.holding && transactionData.holding.length > 0) {
+            let gainer = null, loser = null;
+            let maxProfitPct = -Infinity, maxLossPct = Infinity;
+
+            transactionData.holding.forEach(item => {
+                const liveProd = (window.MarketEngine && window.MarketEngine.getProduct) ? window.MarketEngine.getProduct(item.symbol) : null;
+                const currentPrice = liveProd ? liveProd.price : parseFloat(item.price);
+                const profit = (currentPrice * item.quantity) - parseFloat(item.total_amount);
+                const profitPct = (profit / parseFloat(item.total_amount)) * 100;
+
+                if (profitPct > maxProfitPct) {
+                    maxProfitPct = profitPct;
+                    gainer = { ...item, currentPrice, profit, profitPct };
+                }
+                if (profitPct < maxLossPct) {
+                    maxLossPct = profitPct;
+                    loser = { ...item, currentPrice, profit, profitPct };
+                }
+            });
+
+            if (gainer) {
+                const gName = document.getElementById('pGainerName');
+                if (gName) gName.textContent = gainer.name;
+                updateVal('pGainerVal', gainer.currentPrice);
+                const gPct = document.getElementById('pGainerPct');
+                if (gPct) gPct.innerHTML = `<i data-lucide="arrow-up" size="12"></i> ${gainer.profitPct.toFixed(2)}%`;
+            }
+
+            if (loser) {
+                const lName = document.getElementById('pLoserName');
+                if (lName) lName.textContent = loser.name;
+                updateVal('pLoserVal', loser.currentPrice);
+                const lPct = document.getElementById('pLoserPct');
+                if (lPct) lPct.innerHTML = `<i data-lucide="arrow-down" size="12"></i> ${loser.profitPct.toFixed(2)}%`;
+            }
+        }
+
+        // Sync Allocation
+        updateVal('pAllocInstVal', inv);
 
 
 
@@ -6556,10 +6574,8 @@
                 <div class="settings-phone" id="settingsPhone"
                     style="font-size: 0.9rem; color: #64748b; margin-top: 0.2rem;">+91</div>
                 <div class="badge-row">
-                    <div class="s-badge vip"><i data-lucide="shield-check" size="18"></i> VIP: <span
-                            id="settingsVip">0</span></div>
-                    <div class="s-badge credit"><i data-lucide="crown" size="18"></i> Credit Score: <span
-                            id="settingsCredit">100</span></div>
+                    <div class="s-badge vip"><i data-lucide="shield-check" size="18"></i> VIP: 0</div>
+                    <div class="s-badge credit"><i data-lucide="crown" size="18"></i> Credit Score: 100</div>
                 </div>
             </div>
             <div class="settings-list">
@@ -6633,28 +6649,7 @@
             <div id="chatBox"
                 style="flex: 1; overflow-y: auto; padding: 1rem; background: #f8fafc; border-radius: 12px; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
             </div>
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <input type="file" id="csImageInput" accept="image/*" style="display: none;"
-                    onchange="handleCSImageUpload(this)">
-                <button onclick="document.getElementById('csImageInput').click()"
-                    style="background: none; border: none; cursor: pointer; color: #64748b; padding: 0.5rem;">
-                    <i data-lucide="image" size="20"></i>
-                </button>
-                <button onclick="toggleEmojiPicker()"
-                    style="background: none; border: none; cursor: pointer; color: #64748b; padding: 0.5rem; position: relative;">
-                    <i data-lucide="smile" size="20"></i>
-                    <div id="emojiPicker"
-                        style="display: none; position: absolute; bottom: 40px; left: 0; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.5rem; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); width: 150px;">
-                        <span onclick="insertEmoji('👍')" style="cursor: pointer; font-size: 1.2rem;">👍</span>
-                        <span onclick="insertEmoji('👋')" style="cursor: pointer; font-size: 1.2rem;">👋</span>
-                        <span onclick="insertEmoji('😊')" style="cursor: pointer; font-size: 1.2rem;">😊</span>
-                        <span onclick="insertEmoji('😂')" style="cursor: pointer; font-size: 1.2rem;">😂</span>
-                        <span onclick="insertEmoji('❤️')" style="cursor: pointer; font-size: 1.2rem;">❤️</span>
-                        <span onclick="insertEmoji('🔥')" style="cursor: pointer; font-size: 1.2rem;">🔥</span>
-                        <span onclick="insertEmoji('🎉')" style="cursor: pointer; font-size: 1.2rem;">🎉</span>
-                        <span onclick="insertEmoji('😢')" style="cursor: pointer; font-size: 1.2rem;">😢</span>
-                    </div>
-                </button>
+            <div style="display: flex; gap: 0.5rem;">
                 <input type="text" id="csInput" placeholder="Type a message..."
                     style="flex: 1; padding: 0.8rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
                 <button onclick="sendCSMessage()"
@@ -7069,6 +7064,47 @@
                 <p style="text-align: center; margin-top: 1rem; font-size: 0.7rem; color: #94a3b8; line-height: 1.4;">
                     Settlement will be immediate. Proceeds will be credited to your wallet after statutory deductions.
                 </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Service Modal -->
+
+    <div id="csModal" class="settings-modal" onclick="if(event.target == this) closeCS()">
+        <div class="settings-content" style="max-width: 500px; height: 600px; display: flex; flex-direction: column;">
+            <button class="settings-close" onclick="closeCS()"><i data-lucide="x" size="24"></i></button>
+            <div class="settings-header" style="margin-bottom: 1rem;">
+                <h2 style="font-size: 1.5rem; font-weight: 700;">Customer Service</h2>
+            </div>
+            <div id="chatBox"
+                style="flex: 1; overflow-y: auto; padding: 1rem; background: #f8fafc; border-radius: 12px; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="file" id="csImageInput" accept="image/*" style="display: none;"
+                    onchange="handleCSImageUpload(this)">
+                <button onclick="document.getElementById('csImageInput').click()"
+                    style="background: none; border: none; cursor: pointer; color: #64748b; padding: 0.5rem;">
+                    <i data-lucide="image" size="20"></i>
+                </button>
+                <button onclick="toggleEmojiPicker()"
+                    style="background: none; border: none; cursor: pointer; color: #64748b; padding: 0.5rem; position: relative;">
+                    <i data-lucide="smile" size="20"></i>
+                    <div id="emojiPicker"
+                        style="display: none; position: absolute; bottom: 40px; left: 0; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.5rem; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); width: 150px;">
+                        <span onclick="insertEmoji('👍')" style="cursor: pointer; font-size: 1.2rem;">👍</span>
+                        <span onclick="insertEmoji('👋')" style="cursor: pointer; font-size: 1.2rem;">👋</span>
+                        <span onclick="insertEmoji('😊')" style="cursor: pointer; font-size: 1.2rem;">😊</span>
+                        <span onclick="insertEmoji('😂')" style="cursor: pointer; font-size: 1.2rem;">😂</span>
+                        <span onclick="insertEmoji('❤️')" style="cursor: pointer; font-size: 1.2rem;">❤️</span>
+                        <span onclick="insertEmoji('🔥')" style="cursor: pointer; font-size: 1.2rem;">🔥</span>
+                        <span onclick="insertEmoji('🎉')" style="cursor: pointer; font-size: 1.2rem;">🎉</span>
+                        <span onclick="insertEmoji('😢')" style="cursor: pointer; font-size: 1.2rem;">😢</span>
+                    </div>
+                </button>
+                <input type="text" id="csInput" placeholder="Type a message..."
+                    style="flex: 1; padding: 0.8rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
+                <button onclick="sendCSMessage()"
+                    style="background: #3b82f6; color: white; border: none; padding: 0 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer;">Send</button>
             </div>
         </div>
     </div>
@@ -7548,6 +7584,14 @@
             color: #fff;
         }
     </style>
+    <script src="js/trading.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof showDiscoverView === 'function') {
+                showDiscoverView();
+            }
+        });
+    </script>
 </body>
 
 </html>

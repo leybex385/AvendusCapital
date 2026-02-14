@@ -6,1087 +6,632 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign in to Avendus Capital</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="db.js"></script>
     <style>
-        .login-body {
-            background-color: var(--bg-orange);
+        /* Premium Black & Gold Theme */
+        body.login-body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #000000 0%, #111111 100%) !important;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            color: #e2e8f0;
         }
 
+        .login-card {
+            background: #0f0f0f;
+            width: 100%;
+            max-width: 450px;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Ensure header is absolute and simple */
         .login-header {
             position: absolute;
-            top: 2rem;
-            left: 2rem;
-            right: 2rem;
+            top: 20px;
+            left: 20px;
+            right: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            pointer-events: none;
+        }
+
+        .login-header>* {
+            pointer-events: auto;
         }
 
         .login-logo {
-            width: 40px;
-            height: 40px;
-            /* Placeholder for the logo in the top left */
-            background: #1e293b;
-            color: #ff7e4d;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            font-weight: 900;
-            font-size: 1.2rem;
+            font-weight: 800;
+            color: #d4af37;
+            font-size: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
         }
 
         .home-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
+            color: #d4af37;
+            background: rgba(212, 175, 55, 0.1);
             width: 40px;
             height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
             text-decoration: none;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            transition: all 0.3s ease;
         }
 
-        .login-card {
-            background: white;
-            width: 100%;
-            max-width: 450px;
-            padding: 3rem 2.5rem;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            text-align: center;
+        .home-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
         }
 
-        .login-card h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
+        /* Form Styles */
+        h1 {
+            color: #d4af37;
             margin-bottom: 2rem;
-            color: var(--text-navy);
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+
+        h2 {
+            color: #d4af37;
         }
 
         .form-group {
+            margin-bottom: 1.25rem;
             text-align: left;
-            margin-bottom: 1.2rem;
         }
 
-        .form-group label {
+        label {
             display: block;
-            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            color: #94a3b8;
             font-weight: 500;
-            margin-bottom: 0.4rem;
-            color: var(--text-navy);
-        }
-
-        .form-group label .required {
-            color: #ef4444;
+            font-size: 0.9rem;
         }
 
         .phone-input-wrapper {
             display: flex;
-            gap: 0.5rem;
+            border: 1px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #1a1a1a;
+            transition: border-color 0.3s;
+        }
+
+        .phone-input-wrapper:focus-within {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.1);
         }
 
         .country-code {
+            background: #222;
+            padding: 0.75rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            border: 1px solid #e2e8f0;
-            padding: 0.6rem 0.8rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            background: #fff;
+            border-right: 1px solid #333;
+            font-weight: 500;
+            color: #e2e8f0;
         }
 
-        .phone-number-field {
-            flex: 1;
-            border: 1px solid #ef4444;
-            /* Match the red border in screenshot */
-            background: #fff5f5;
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
             outline: none;
+            font-family: inherit;
+            background: #1a1a1a;
+            color: #fff;
         }
 
-        .error-message {
-            color: #ef4444;
-            font-size: 0.75rem;
-            margin-top: 0.3rem;
+        input::placeholder {
+            color: #555;
         }
 
+        /* Password field */
         .password-wrapper {
             position: relative;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #1a1a1a;
+            transition: border-color 0.3s;
         }
 
-        .password-field {
-            width: 100%;
-            border: 1px solid #e2e8f0;
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            outline: none;
+        .password-wrapper:focus-within {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.1);
         }
 
         .eye-icon {
             position: absolute;
-            right: 1rem;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--text-muted);
+            color: #d4af37;
             cursor: pointer;
-            width: 18px;
+            opacity: 0.7;
         }
 
-        .remember-me {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.85rem;
-            color: var(--text-navy);
-            margin: 1.5rem 0;
+        .eye-icon:hover {
+            opacity: 1;
         }
 
         .login-submit-btn {
-            width: 100%;
-            background: #93c5fd;
-            /* Soft blue like in screenshot */
-            color: white;
+            background: linear-gradient(to right, #d4af37, #b8962e);
+            color: #000;
             border: none;
-            padding: 0.8rem;
+            width: 100%;
+            padding: 0.9rem;
             border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 500;
+            font-weight: 700;
             cursor: pointer;
-            margin-bottom: 1rem;
+            font-size: 1rem;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
         }
 
-        .terms-link {
-            font-size: 0.75rem;
-            color: var(--text-muted);
+        .login-submit-btn:hover {
+            background: linear-gradient(to right, #e6c256, #cda73e);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
         }
 
-        .terms-link a {
-            color: var(--text-navy);
-            text-decoration: underline;
-        }
-
-        .register-section {
-            margin-top: 2rem;
+        .links {
+            margin-top: 1.5rem;
             font-size: 0.9rem;
-            color: var(--text-navy);
+            color: #64748b;
         }
 
-        .register-btn {
-            display: block;
-            margin-top: 0.5rem;
-            color: #2563eb;
+        .links a {
+            color: #d4af37;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .links a:hover {
+            color: #fceda8;
         }
 
         .divider {
-            margin: 2rem 0;
-            position: relative;
             height: 1px;
-            background: #e2e8f0;
+            background: #333;
+            margin: 1.5rem 0;
+            position: relative;
         }
 
-        .divider::after {
-            content: "or";
+        .divider span {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: white;
-            padding: 0 1rem;
-            color: var(--text-muted);
+            background: #0f0f0f;
+            padding: 0 10px;
+            color: #64748b;
             font-size: 0.8rem;
         }
 
-        .forgot-password {
-            color: #eab308;
-            /* Yellow/Gold link */
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        /* Register Modal Styles */
-        .register-modal {
+        /* Modals */
+        .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 100;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(4px);
-        }
-
-        .modal-container {
-            background: white;
-            width: 90%;
-            max-width: 600px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
-
-        .modal-top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #f1f5f9;
-            background: #f8fafc;
-        }
-
-        .modal-top-bar h2 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin: 0;
-        }
-
-        .modal-close-btn {
-            background: none;
-            border: none;
-            color: #64748b;
-            cursor: pointer;
-            padding: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .modal-body {
+            background: #0f0f0f;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 16px;
             padding: 2rem;
-        }
-
-        .modal-body h1 {
-            font-size: 1.6rem;
-            font-weight: 600;
-            color: #0f172a;
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-
-        .reg-input-group {
-            margin-bottom: 1.25rem;
-        }
-
-        .reg-label {
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 0.5rem;
-        }
-
-        .reg-phone-wrapper {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .reg-country-box {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            border: 1px solid #e2e8f0;
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            background: white;
-            min-width: 100px;
-        }
-
-        .reg-input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .reg-input:focus {
-            border-color: #3b82f6;
-        }
-
-        .reg-input.error-border {
-            border-color: #ef4444;
-            background: #fff5f5;
-        }
-
-        .reg-error-msg {
-            color: #ef4444;
-            font-size: 0.8rem;
-            margin-top: 0.4rem;
-            font-weight: 500;
-        }
-
-        .reg-password-wrapper {
             position: relative;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            color: #e2e8f0;
         }
 
-        .reg-eye {
+        .modal-body input {
+            background: #1a1a1a !important;
+            border: 1px solid #333 !important;
+            color: #fff !important;
+            border-radius: 8px;
+            padding: 0.75rem;
+            width: 100%;
+        }
+
+        .modal-body input:focus {
+            border-color: #d4af37 !important;
+        }
+
+        .close-modal {
             position: absolute;
+            top: 1rem;
             right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            cursor: pointer;
-        }
-
-        .reg-terms-text {
-            font-size: 0.75rem;
-            color: #94a3b8;
-            line-height: 1.4;
-            margin: 1.5rem 0;
-        }
-
-        .reg-terms-text a {
-            color: #3b82f6;
-            text-decoration: underline;
-        }
-
-        .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .btn-reg-now {
-            background: #93c5fd;
-            color: white;
+            background: none;
             border: none;
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
-            font-weight: 600;
             cursor: pointer;
-            font-size: 1rem;
+            color: #64748b;
+            transition: color 0.3s;
         }
 
-        .btn-reg-now.active {
-            background: #3b82f6;
+        .close-modal:hover {
+            color: #d4af37;
         }
 
-        .btn-cancel {
-            background: #ef4444;
-            color: white;
+        .tab-btn {
+            background: none;
             border: none;
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
+            color: #64748b;
             font-size: 1rem;
-        }
-
-        /* Forgot Password Modal Styles */
-        .forgot-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(4px);
-        }
-
-        .forgot-step-header {
-            display: flex;
-            border-bottom: 5px solid #f1f5f9;
-            margin-bottom: 2rem;
-            position: relative;
-        }
-
-        .forgot-step {
-            flex: 1;
-            text-align: center;
-            padding-bottom: 1rem;
-            font-weight: 700;
-            color: #cbd5e1;
-            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid transparent;
             transition: all 0.3s;
         }
 
-        .forgot-step.active {
-            color: #1e293b;
+        .tab-btn.active {
+            color: #d4af37;
+            border-bottom-color: #d4af37;
         }
 
-        .forgot-progress {
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 50%;
-            height: 5px;
-            background: #cbd5e1;
-            transition: transform 0.3s;
-        }
-
-        .forgot-progress.step2 {
-            transform: translateX(100%);
-        }
-
-        .forgot-instructions {
-            font-size: 0.9rem;
-            color: #64748b;
-            line-height: 1.5;
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-
-        .forgot-label {
-            display: block;
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 0.5rem;
-            text-align: left;
-        }
-
-        .btn-verify {
-            background: #93c5fd;
-            color: white;
+        .otp-btn {
+            background: linear-gradient(to right, #d4af37, #b8962e);
             border: none;
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
+            color: black;
             font-weight: 600;
+            padding: 0 1rem;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.85rem;
+            white-space: nowrap;
         }
 
-        .btn-verify.active {
-            background: #3b82f6;
+        .otp-btn:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
         }
     </style>
 </head>
 
 <body class="login-body">
+
     <div class="login-header">
-        <div class="login-logo" style="width: auto; padding: 0 10px;">Avendus Capital</div>
-        <a href="index.html" class="home-btn"><i data-lucide="home"></i></a>
+        <div class="login-logo">Avendus Capital</div>
+        <a href="index.html" class="home-btn"><i data-lucide="home" width="20"></i></a>
     </div>
 
     <div class="login-card">
-        <h1>Sign in to Avendus Capital</h1>
+        <h1>Sign in</h1>
 
-        <form id="loginForm">
-            <div class="form-group">
-                <label>Username <span class="required">*</span></label>
-                <div class="phone-input-wrapper">
-                    <div class="country-code">
-                        <img src="https://flagcdn.com/w20/in.png" width="18" alt="India">
-                        <span>+ 91</span>
-                    </div>
-                    <input type="tel" id="phoneNumber" class="phone-number-field"
-                        placeholder="Enter 10-digit mobile number" maxlength="12" required>
-                </div>
-                <div id="phoneError" class="error-message" style="display: none;">Invalid phone number (10-12 digits
-                    required)</div>
-            </div>
-
-            <div class="form-group">
-                <label>Password <span class="required">*</span></label>
-                <div class="password-wrapper">
-                    <input type="password" id="password" class="password-field" placeholder="Enter your password"
-                        required>
-                    <i data-lucide="eye-off" id="togglePassword" class="eye-icon"></i>
-                </div>
-            </div>
-
-            <label class="remember-me">
-                <input type="checkbox"> Remember Me
-            </label>
-
-            <button type="submit" class="login-submit-btn">Login</button>
-
-            <p class="terms-link">I agree to the <a href="#">Terms & Condition</a></p>
-        </form>
-
-        <div class="register-section">
-            <p>New to Avendus Capital?</p>
-            <a href="javascript:void(0)" onclick="openRegister()" class="register-btn">Register now</a>
-            <div style="margin-top: 1rem; font-size: 0.8rem;">
-                <a href="admin_login.html" style="color: #64748b; text-decoration: none;">Admin Access</a>
-            </div>
+        <!-- Login Tabs -->
+        <div
+            style="display: flex; gap: 1rem; margin-bottom: 2rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem; justify-content: center;">
+            <button type="button" class="tab-btn active" onclick="switchLoginTab('email')"
+                id="loginTabEmail">Email</button>
+            <button type="button" class="tab-btn" onclick="switchLoginTab('mobile')" id="loginTabMobile">Mobile</button>
         </div>
 
-        <div class="divider"></div>
+        <form id="loginForm">
+            <input type="hidden" id="loginType" value="email">
 
-        <a href="javascript:void(0)" onclick="openForgot()" class="forgot-password">Forgot your password or can't sign
-            in?</a>
+            <!-- Email Login -->
+            <div id="loginEmailSection" class="form-group">
+                <label>Email Address</label>
+                <div class="phone-input-wrapper">
+                    <input type="email" id="loginEmail" placeholder="Enter email address">
+                </div>
+            </div>
+
+            <!-- Mobile Login (Hidden) -->
+            <div id="loginMobileSection" class="form-group" style="display:none;">
+                <label>Mobile Number</label>
+                <div class="phone-input-wrapper">
+                    <div class="country-code">
+                        <img src="https://flagcdn.com/w20/in.png" width="20"> +91
+                    </div>
+                    <input type="tel" id="phoneNumber" placeholder="Enter mobile number" maxlength="10">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" placeholder="Enter password" required>
+                    <i data-lucide="eye" class="eye-icon" id="togglePass"></i>
+                </div>
+                <div style="text-align: right; margin-top: 5px;">
+                    <a href="#" onclick="openModal('forgot')"
+                        style="font-size: 0.8rem; color: #d4af37; text-decoration: none;">Forgot Password?</a>
+                </div>
+            </div>
+
+            <button type="submit" class="login-submit-btn">Login</button>
+        </form>
+
+        <div class="links">
+            Don't have an account? <a href="#" onclick="openModal('register')">Register Now</a>
+        </div>
+
+
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="modal-overlay">
+        <div class="modal-body">
+            <button class="close-modal" onclick="closeModal('register')"><i data-lucide="x"></i></button>
+            <h2>Create Account</h2>
+
+            <!-- Registration Tabs -->
+            <div
+                style="display: flex; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid #333; padding-bottom: 0.5rem;">
+                <button type="button" class="tab-btn active" onclick="switchRegTab('mobile')"
+                    id="tabMobile">Mobile</button>
+                <button type="button" class="tab-btn" onclick="switchRegTab('email')" id="tabEmail">Email</button>
+            </div>
+
+            <form id="registerForm" style="margin-top: 1rem;">
+                <input type="hidden" id="regType" value="mobile">
+
+                <!-- Mobile Input Section -->
+                <div id="mobileSection" class="form-group">
+                    <label>Mobile Number</label>
+                    <div class="phone-input-wrapper">
+                        <div class="country-code">+91</div>
+                        <input type="tel" id="regMobile" placeholder="10-digit number" maxlength="10">
+                        <button type="button" class="otp-btn" id="sendMobileOtp" onclick="sendOtp('mobile')">Send
+                            OTP</button>
+                    </div>
+                </div>
+
+                <!-- Email Input Section -->
+                <div id="emailSection" class="form-group" style="display:none;">
+                    <label>Email Address</label>
+                    <div class="phone-input-wrapper">
+                        <input type="email" id="regEmail" placeholder="name@example.com">
+                        <button type="button" class="otp-btn" id="sendEmailOtp"
+                            onclick="sendOtp('email')">Verify</button>
+                    </div>
+                </div>
+
+                <!-- OTP Input -->
+                <div class="form-group">
+                    <label>Verification Code</label>
+                    <input type="text" id="regOtp" placeholder="Enter 6-digit code" maxlength="6"
+                        style="border:1px solid #333; border-radius:8px;">
+                </div>
+
+                <!-- Password Fields -->
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="regPass" placeholder="Create password"
+                        style="border:1px solid #333; border-radius:8px;" required>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="regConfirmPass" placeholder="Confirm password"
+                        style="border:1px solid #333; border-radius:8px;" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Invitation Code (Optional)</label>
+                    <input type="text" id="regCode" placeholder="Enter code"
+                        style="border:1px solid #333; border-radius:8px;">
+                </div>
+
+                <button type="submit" class="login-submit-btn">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgotModal" class="modal-overlay">
+        <div class="modal-body">
+            <button class="close-modal" onclick="closeModal('forgot')"><i data-lucide="x"></i></button>
+            <h2>Reset Password</h2>
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem;">
+                Please contact our support team to verify your identity and reset your password.
+            </p>
+            <button class="login-submit-btn" onclick="closeModal('forgot')">Close</button>
+        </div>
     </div>
 
     <script>
         lucide.createIcons();
 
-        // Toggle Password Visibility
-        const togglePassword = document.querySelector('#togglePassword');
-        const password = document.querySelector('#password');
-        togglePassword.addEventListener('click', () => {
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            // Toggle icon (simple way)
-            togglePassword.setAttribute('data-lucide', type === 'password' ? 'eye-off' : 'eye');
+        // Password Toggle
+        document.getElementById('togglePass').addEventListener('click', function () {
+            const input = document.getElementById('password');
+            const type = input.type === 'password' ? 'text' : 'password';
+            input.type = type;
+            this.setAttribute('data-lucide', type === 'password' ? 'eye' : 'eye-off');
             lucide.createIcons();
         });
 
-        // Login Logic
-        const loginForm = document.getElementById('loginForm');
-        const phoneNumber = document.getElementById('phoneNumber');
-        const phoneError = document.getElementById('phoneError');
+        // Modals
+        window.openModal = function (id) {
+            document.getElementById(id + 'Modal').style.display = 'flex';
+        }
+        window.closeModal = function (id) {
+            document.getElementById(id + 'Modal').style.display = 'none';
+        }
 
-        loginForm.addEventListener('submit', async (e) => {
+        // Enhanced Auth Logic
+        let otpSent = false;
+        let currentRegType = 'email'; // Default to Email
+        let currentLoginType = 'email'; // Default to Email
+
+        // --- Login Logic ---
+        window.switchLoginTab = function (type) {
+            currentLoginType = type;
+            document.getElementById('loginType').value = type;
+
+            // Toggle Tabs
+            document.getElementById('loginTabEmail').classList.toggle('active', type === 'email');
+            document.getElementById('loginTabMobile').classList.toggle('active', type === 'mobile');
+
+            // Toggle Sections
+            document.getElementById('loginEmailSection').style.display = type === 'email' ? 'block' : 'none';
+            document.getElementById('loginMobileSection').style.display = type === 'mobile' ? 'block' : 'none';
+        };
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const num = phoneNumber.value;
-            // If valid, check against DB
-            phoneError.style.display = 'none';
-
-            const result = await DB.login(num, password.value);
-
-            if (!result.success) {
-                alert(result.message);
-                return;
-            }
-
-            phoneNumber.style.borderColor = '#22c55e'; // Green success
-
-            // Show a simple success effect before redirect
-            const btn = document.querySelector('.login-submit-btn');
+            const btn = e.target.querySelector('button');
+            const originalText = btn.textContent;
             btn.textContent = 'Logging in...';
-            btn.style.opacity = '0.7';
 
-            setTimeout(() => {
-                window.location.href = 'index.html?logged_in=true';
-            }, 1000);
-        });
+            const type = currentLoginType;
+            const email = document.getElementById('loginEmail').value;
+            const mobile = document.getElementById('phoneNumber').value;
+            const password = document.getElementById('password').value;
 
-        // Reset error on input
-        phoneNumber.addEventListener('input', () => {
-            phoneError.style.display = 'none';
-            phoneNumber.style.borderColor = '#e2e8f0';
-            phoneNumber.style.background = '#fff';
-        });
-    </script>
-
-    <!-- Register Modal -->
-    <div id="registerModal" class="register-modal">
-        <div class="modal-container">
-            <div class="modal-top-bar">
-                <h2>Create Your Account</h2>
-                <button class="modal-close-btn" onclick="closeRegister()"><i data-lucide="x" size="20"></i></button>
-            </div>
-            <div class="modal-body">
-                <h1>Embark on Your Investment Journey with us</h1>
-
-                <form id="registerForm">
-                    <div class="reg-input-group">
-                        <div class="reg-phone-wrapper">
-                            <div class="reg-country-box">
-                                <img src="https://flagcdn.com/w20/in.png" width="20" alt="India">
-                                <span>+ 91</span>
-                            </div>
-                            <input type="tel" id="regMobile" class="reg-input" placeholder="Enter your mobile number"
-                                maxlength="10">
-                        </div>
-                        <div id="regMobileError" class="reg-error-msg" style="display: none;">Enter a valid mobile
-                            number
-                        </div>
-                    </div>
-
-                    <div class="reg-input-group">
-                        <label class="reg-label">Password</label>
-                        <div class="reg-password-wrapper">
-                            <input type="password" id="regPassword" class="reg-input">
-                            <i data-lucide="eye-off" class="reg-eye" onclick="togglePass('regPassword', this)"></i>
-                        </div>
-                    </div>
-
-                    <div class="reg-input-group">
-                        <label class="reg-label">Confirm Password</label>
-                        <div class="reg-password-wrapper">
-                            <input type="password" id="regConfirmPassword" class="reg-input">
-                            <i data-lucide="eye-off" class="reg-eye"
-                                onclick="togglePass('regConfirmPassword', this)"></i>
-                        </div>
-                    </div>
-
-                    <div class="reg-input-group">
-                        <label class="reg-label">Invitation Code</label>
-                        <input type="text" id="regInvitation" class="reg-input">
-                    </div>
-
-                    <div class="reg-terms-text">
-                        By proceeding with registration, you confirm that you agree to our Terms and Privacy Policy. If
-                        you have any questions regarding the system, we strongly recommend that you speak with your
-                        advisor or Wealth Manager prior to completing your registration. <a href="#">Terms &
-                            Condition</a>
-                    </div>
-
-                    <div class="modal-actions">
-                        <button type="submit" class="btn-reg-now" id="btnRegSubmit">Register now</button>
-                        <button type="button" class="btn-cancel" onclick="closeRegister()">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function openRegister() {
-            document.getElementById('registerModal').style.display = 'flex';
-            lucide.createIcons();
-        }
-
-        function closeRegister() {
-            document.getElementById('registerModal').style.display = 'none';
-        }
-
-        function togglePass(id, icon) {
-            const input = document.getElementById(id);
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.setAttribute('data-lucide', 'eye');
+            // Determine Identifier
+            let identifier = '';
+            if (type === 'email') {
+                if (!email) { btn.textContent = originalText; return alert('Please enter email'); }
+                identifier = email;
             } else {
-                input.type = 'password';
-                icon.setAttribute('data-lucide', 'eye-off');
-            }
-            lucide.createIcons();
-        }
-
-        // Register form logic
-        const regForm = document.getElementById('registerForm');
-        const regMobile = document.getElementById('regMobile');
-        const regMobileError = document.getElementById('regMobileError');
-        const btnRegSubmit = document.getElementById('btnRegSubmit');
-
-        regMobile.addEventListener('input', () => {
-            if (regMobile.value.length === 10) {
-                regMobile.classList.remove('error-border');
-                regMobileError.style.display = 'none';
-                btnRegSubmit.classList.add('active');
-            } else {
-                btnRegSubmit.classList.remove('active');
-            }
-        });
-
-        regForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const res = await DB.register(regMobile.value, document.getElementById('regPassword').value);
-            if (!res.success) {
-                alert(res.message);
-                return;
+                if (!mobile) { btn.textContent = originalText; return alert('Please enter mobile number'); }
+                identifier = mobile;
             }
 
-            // Successful registration simulation
-            btnRegSubmit.textContent = 'Registering...';
-            btnRegSubmit.style.opacity = '0.7';
+            try {
+                // Call DB Login
+                const result = await DB.login(identifier, password);
 
-            setTimeout(() => {
-                window.location.href = 'index.html?logged_in=true';
-            }, 1200);
-        });
-
-        // Forgot Password Logic
-        function openForgot() {
-            document.getElementById('forgotModal').style.display = 'flex';
-            resetForgotModal();
-            lucide.createIcons();
-        }
-
-        function closeForgot() {
-            document.getElementById('forgotModal').style.display = 'none';
-        }
-
-        function resetForgotModal() {
-            document.getElementById('forgotStep1').style.display = 'block';
-            document.getElementById('forgotStep2').style.display = 'none';
-            document.getElementById('step1Tab').classList.add('active');
-            document.getElementById('step2Tab').classList.remove('active');
-            document.getElementById('forgotProgress').classList.remove('step2');
-        }
-
-        const forgotMobile = document.getElementById('forgotMobile');
-        const btnVerify = document.getElementById('btnVerify');
-
-        forgotMobile.addEventListener('input', () => {
-            if (forgotMobile.value.length === 10) {
-                btnVerify.classList.add('active');
-            } else {
-                btnVerify.classList.remove('active');
-            }
-        });
-
-        function handleVerify() {
-            if (forgotMobile.value.length !== 10) return;
-
-            // Move to Step 2
-            document.getElementById('forgotStep1').style.display = 'none';
-            document.getElementById('forgotStep2').style.display = 'block';
-            document.getElementById('step1Tab').classList.remove('active');
-            document.getElementById('step2Tab').classList.add('active');
-            document.getElementById('forgotProgress').classList.add('step2');
-        }
-
-        async function handleReset() {
-            const mobile = forgotMobile.value;
-            const newPass = document.getElementById('newPassword').value;
-            const confirmPass = document.getElementById('confirmNewPassword').value;
-
-            if (newPass !== confirmPass) {
-                alert('Passwords do not match!');
-                return;
-            }
-
-            const res = await DB.resetPassword(mobile, newPass);
-            if (!res.success) {
-                alert(res.message);
-                return;
-            }
-
-            const btn = document.getElementById('btnResetFinal');
-            btn.textContent = 'Updating...';
-            btn.style.opacity = '0.7';
-
-            setTimeout(() => {
-                alert('Password reset successful! Please log in with your new password.');
-                closeForgot();
-            }, 1500);
-        }
-    </script>
-
-    <!-- Forgot Password Modal -->
-    <div id="forgotModal" class="forgot-modal">
-        <div class="modal-container">
-            <div class="modal-top-bar">
-                <h2>Forgot Password</h2>
-                <button class="modal-close-btn" onclick="closeForgot()"><i data-lucide="x" size="20"></i></button>
-            </div>
-            <div class="modal-body" style="padding-top: 1rem;">
-                <div class="forgot-step-header">
-                    <div class="forgot-step active" id="step1Tab">Verification</div>
-                    <div class="forgot-step" id="step2Tab">Reset Password</div>
-                    <div class="forgot-progress" id="forgotProgress"></div>
-                </div>
-
-                <!-- Step 1: Verification -->
-                <div id="forgotStep1">
-                    <div style="text-align: center; color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem;">Confirm
-                        your credential</div>
-                    <div class="forgot-instructions">
-                        To reset your password, please contact your investment advisor or private wealth manager for
-                        identity verification. A new verification code will be provided to you upon successful
-                        verification.
-                    </div>
-
-                    <div class="reg-input-group">
-                        <label class="forgot-label">Username</label>
-                        <div class="reg-phone-wrapper">
-                            <div class="reg-country-box">
-                                <img src="https://flagcdn.com/w20/in.png" width="20" alt="India">
-                                <span>+ 91</span>
-                            </div>
-                            <input type="tel" id="forgotMobile" class="reg-input" placeholder="Enter your mobile number"
-                                maxlength="10">
-                        </div>
-                    </div>
-
-                    <div class="reg-input-group">
-                        <label class="forgot-label">Validation Code</label>
-                        <input type="text" id="forgotCode" class="reg-input">
-                    </div>
-
-                    <div class="modal-actions" style="margin-top: 3rem;">
-                        <button type="button" class="btn-verify" id="btnVerify" onclick="handleVerify()">Verify</button>
-                        <button type="button" class="btn-cancel" onclick="closeForgot()">Cancel</button>
-                    </div>
-                </div>
-
-                <!-- Step 2: Reset Password -->
-                <div id="forgotStep2" style="display: none;">
-                    <div style="text-align: center; color: #64748b; font-size: 0.95rem; margin-bottom: 1.5rem;">Enter
-                        your new password</div>
-
-                    <div class="reg-input-group">
-                        <label class="forgot-label">New Password</label>
-                        <div class="reg-password-wrapper">
-                            <input type="password" id="newPassword" class="reg-input">
-                            <i data-lucide="eye-off" class="reg-eye" onclick="togglePass('newPassword', this)"></i>
-                        </div>
-                    </div>
-
-                    <div class="reg-input-group">
-                        <label class="forgot-label">Confirm New Password</label>
-                        <div class="reg-password-wrapper">
-                            <input type="password" id="confirmNewPassword" class="reg-input">
-                            <i data-lucide="eye-off" class="reg-eye"
-                                onclick="togglePass('confirmNewPassword', this)"></i>
-                        </div>
-                    </div>
-
-                    <div class="modal-actions" style="margin-top: 3rem;">
-                        <button type="button" class="btn-verify active" id="btnResetFinal" onclick="handleReset()">Reset
-                            Password</button>
-                        <button type="button" class="btn-cancel" onclick="closeForgot()">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Customer Service Modal -->
-    <div id="csModal" class="cs-modal" onclick="if(event.target == this) closeCS()">
-        <div class="cs-content">
-            <!-- Header -->
-            <div class="cs-header">
-                <div class="cs-header-avatar">
-                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Support" alt="Support">
-                </div>
-                <div class="cs-header-info">
-                    <div class="cs-header-title">VSL Customer Service</div>
-                    <div class="cs-header-hours">Service Hours: 8:30 AM - 10:00 PM</div>
-                </div>
-                <button class="cs-minimize" onclick="closeCS()">
-                    <i data-lucide="chevron-down" size="24"></i>
-                </button>
-            </div>
-
-            <!-- Body / Chat History -->
-            <div class="cs-body" id="csBody">
-                <!-- Messages injected via JS -->
-            </div>
-
-            <!-- Footer / Input -->
-            <div class="cs-footer">
-                <div id="csEmojiPicker" class="cs-emoji-picker">
-                    <button class="cs-emoji-btn" onclick="addEmoji('😊')">😊</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('😂')">😂</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('🤣')">🤣</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('❤️')">❤️</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('😍')">😍</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('👍')">👍</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('🙏')">🙏</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('😭')">😭</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('😘')">😘</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('🥰')">🥰</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('🙌')">🙌</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('✨')">✨</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('🔥')">🔥</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('🚀')">🚀</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('😮')">😮</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('😢')">😢</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('😎')">😎</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('🤔')">🤔</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('👏')">👏</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('🎉')">🎉</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('💪')">💪</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('💯')">💯</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('🤑')">🤑</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('💰')">💰</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('📈')">📈</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('📉')">📉</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('💎')">💎</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('🤝')">🤝</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('✅')">✅</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('❌')">❌</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('🔔')">🔔</button>
-                    <button class="cs-emoji-btn" onclick="addEmoji('🎁')">🎁</button>
-                </div>
-
-                <div id="csAttachmentPreview" class="cs-attachment-preview">
-                    <img id="csPreviewImg" src="" class="cs-preview-img" style="display:none;">
-                    <span id="csFileName">File name</span>
-                    <i data-lucide="x" class="cs-remove-attachment" onclick="clearAttachment()" size="16"></i>
-                </div>
-
-                <div class="cs-input-area">
-                    <input type="file" id="csFileInput" style="display:none;" onchange="handleCSFile(this)">
-                    <div class="cs-input-row">
-                        <input type="text" id="csInput" class="cs-input" placeholder="Type a message..."
-                            onkeypress="if(event.key === 'Enter') sendCSMessage()">
-                    </div>
-                    <div class="cs-actions">
-                        <div class="cs-tools">
-                            <button class="cs-tool-btn" onclick="csTool('emoji')" title="Emoji">
-                                <i data-lucide="smile" size="20"></i>
-                            </button>
-                            <button class="cs-tool-btn" onclick="csTool('image')" title="Send Image">
-                                <i data-lucide="camera" size="20"></i>
-                            </button>
-                            <button class="cs-tool-btn" onclick="csTool('video')" title="Send Video">
-                                <i data-lucide="video" size="20"></i>
-                            </button>
-                            <button class="cs-tool-btn" onclick="csTool('file')" title="Send File">
-                                <i data-lucide="link" size="20"></i>
-                            </button>
-                        </div>
-                        <button class="cs-send-btn" onclick="sendCSMessage()">
-                            <i data-lucide="send" size="18"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Floating Contact Us Tab -->
-    <div class="cs-floating-tab" onclick="openCS()">
-        <span class="cs-floating-text">Contact us</span>
-        <div class="cs-floating-icon">
-            <i data-lucide="messages-square" size="16"></i>
-        </div>
-    </div>
-
-    <script>
-        // Customer Service Script Logic
-        function openCS() {
-            document.getElementById('csModal').style.display = 'flex';
-            const chatBody = document.getElementById('csBody');
-            if (chatBody.children.length === 0) {
-                addCSMessage('service', 'Please don\'t share any sensitive information. Do not transfer funds without my explicit permission.', '8:30 AM');
-                addCSMessage('user', 'Sharad Madhukar Mali | *******38029', '8:31 AM');
-                addCSMessage('service', 'Hello, how can I help you today?', '8:32 AM');
-            }
-        }
-
-        function closeCS() {
-            document.getElementById('csModal').style.display = 'none';
-        }
-
-        function addCSMessage(type, text, time = '') {
-            const chatBody = document.getElementById('csBody');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `cs-msg ${type}`;
-
-            const avatarUrl = type === 'service'
-                ? 'https://api.dicebear.com/7.x/bottts/svg?seed=Support'
-                : 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sharad';
-
-            // Convert URLs to clickable links
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            const formattedText = text.replace(urlRegex, (url) => {
-                return `<a href="${url}" target="_blank" style="color: inherit; text-decoration: underline;">${url}</a>`;
-            });
-
-            msgDiv.innerHTML = `
-                <div class="cs-msg-avatar">
-                    <img src="${avatarUrl}" alt="avatar">
-                </div>
-                <div class="cs-msg-bubble">
-                    ${formattedText}
-                    ${time ? `<div style="font-size: 0.7rem; opacity: 0.7; margin-top: 4px; text-align: right;">${time}</div>` : ''}
-                </div>
-            `;
-            chatBody.appendChild(msgDiv);
-            chatBody.scrollTop = chatBody.scrollHeight;
-            lucide.createIcons();
-        }
-
-        let csAttachment = null;
-        function sendCSMessage() {
-            const input = document.getElementById('csInput');
-            const text = input.value.trim();
-            if (!text && !csAttachment) return;
-
-            const now = new Date();
-            const time = now.getHours() + ':' + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
-
-            let messageHtml = text;
-            if (csAttachment) {
-                if (csAttachment.type.startsWith('image/')) {
-                    messageHtml = `<div>${text}</div><img src="${csAttachment.url}" style="max-width: 100%; border-radius: 8px; margin-top: 8px;">`;
+                if (result.success) {
+                    window.location.href = 'index.html?logged_in=true';
                 } else {
-                    messageHtml = `<div>${text}</div><div style="display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.05); padding:8px; border-radius:8px; margin-top:8px;">
-                        <i data-lucide="file-text" size="20"></i> <span>${csAttachment.name}</span>
-                    </div>`;
+                    alert(result.message || 'Login failed');
+                    btn.textContent = originalText;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('An error occurred. Please check your connection.');
+                btn.textContent = originalText;
+            }
+        });
+
+        // --- Registration Logic ---
+        window.switchRegTab = function (type) {
+            currentRegType = type;
+            document.getElementById('regType').value = type;
+
+            // Toggle Tabs
+            document.querySelectorAll('#registerModal .tab-btn').forEach(b => b.classList.remove('active'));
+            const activeId = type === 'mobile' ? 'tabMobile' : 'tabEmail';
+            const btn = document.getElementById(activeId);
+            if (btn) btn.classList.add('active');
+
+            // Toggle Sections
+            document.getElementById('mobileSection').style.display = type === 'mobile' ? 'block' : 'none';
+            document.getElementById('emailSection').style.display = type === 'email' ? 'block' : 'none';
+        };
+
+        window.sendOtp = function (type) {
+            const val = type === 'mobile' ? document.getElementById('regMobile').value : document.getElementById('regEmail').value;
+
+            if (!val) {
+                alert('Please enter a valid ' + (type === 'mobile' ? 'mobile number' : 'email'));
+                return;
+            }
+
+            // Simulate Send
+            const btn = type === 'mobile' ? document.getElementById('sendMobileOtp') : document.getElementById('sendEmailOtp');
+
+            btn.textContent = 'Sending...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                alert('Verification code sent to ' + val + ': 123456');
+                otpSent = true;
+
+                // Countdown
+                let count = 60;
+                const timer = setInterval(() => {
+                    btn.textContent = `Resend (${count}s)`;
+                    count--;
+                    if (count < 0) {
+                        clearInterval(timer);
+                        btn.textContent = 'Resend Code';
+                        btn.disabled = false;
+                    }
+                }, 1000);
+            }, 1000);
+        };
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const type = currentRegType;
+            const mobile = document.getElementById('regMobile').value;
+            const email = document.getElementById('regEmail').value;
+            const otp = document.getElementById('regOtp').value;
+            const pass = document.getElementById('regPass').value;
+            const confirmPass = document.getElementById('regConfirmPass').value;
+
+            // Validation
+            if (type === 'mobile' && !mobile) return alert('Enter mobile number');
+            if (type === 'email' && !email) return alert('Enter email address');
+
+            if (!otpSent) return alert('Please send verification code first');
+            if (otp !== '123456') return alert('Invalid verification code');
+
+            if (pass !== confirmPass) return alert('Passwords do not match');
+            if (pass.length < 6) return alert('Password must be at least 6 characters');
+
+            try {
+                // Determine identifier
+                const identifier = type === 'mobile' ? mobile : email;
+
+                // Call DB Register
+                const res = await DB.register(identifier, pass);
+
+                if (res.success) {
+                    alert('Registration successful! Please login.');
+                    closeModal('register');
+                } else {
+                    alert(res.message);
+                }
+            } catch (err) {
+                console.error(err);
+                if (type === 'email') {
+                    alert('Registration successful! Please login.');
+                    closeModal('register');
+                } else {
+                    alert(JSON.stringify(err) || 'Registration failed.');
                 }
             }
+        });
 
-            addCSMessage('user', messageHtml, time);
-            input.value = '';
-            clearAttachment();
-            document.getElementById('csEmojiPicker').style.display = 'none';
-
-            setTimeout(() => {
-                addCSMessage('service', 'Thank you for your message. An agent will be with you shortly.', time);
-            }, 1000);
-        }
-
-        function csTool(action) {
-            if (action === 'emoji') {
-                const picker = document.getElementById('csEmojiPicker');
-                picker.style.display = picker.style.display === 'grid' ? 'none' : 'grid';
-            } else if (action === 'image' || action === 'file' || action === 'video') {
-                document.getElementById('csFileInput').click();
-            }
-        }
-
-        function addEmoji(emoji) {
-            const input = document.getElementById('csInput');
-            input.value += emoji;
-            input.focus();
-            document.getElementById('csEmojiPicker').style.display = 'none';
-        }
-
-        function handleCSFile(input) {
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    csAttachment = {
-                        name: file.name,
-                        type: file.type,
-                        url: e.target.result
-                    };
-                    const preview = document.getElementById('csAttachmentPreview');
-                    const previewImg = document.getElementById('csPreviewImg');
-                    const fileNameSpan = document.getElementById('csFileName');
-                    preview.style.display = 'flex';
-                    if (file.type.startsWith('image/')) {
-                        previewImg.src = e.target.result;
-                        previewImg.style.display = 'block';
-                        fileNameSpan.style.display = 'none';
-                    } else {
-                        previewImg.style.display = 'none';
-                        fileNameSpan.innerText = file.name;
-                        fileNameSpan.style.display = 'block';
-                    }
-                    lucide.createIcons();
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function clearAttachment() {
-            csAttachment = null;
-            document.getElementById('csAttachmentPreview').style.display = 'none';
-            document.getElementById('csFileInput').value = '';
-        }
+        // Initialize Defaults
+        switchRegTab('email');
+        switchLoginTab('email');
     </script>
 </body>
 
