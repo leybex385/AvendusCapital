@@ -1,4 +1,3 @@
-
 /**
  * Trading Logic - Close Order / Sell Trade
  */
