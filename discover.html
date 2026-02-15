@@ -3838,8 +3838,8 @@
                 <div class="p-btn-row">
                     <button class="p-btn deposit" onclick="window.location.href='deposit.html'"><i
                             data-lucide="arrow-up-circle"></i> Deposit</button>
-                    <button class="p-btn withdraw" onclick="window.location.href='withdraw.html'"><i
-                            data-lucide="arrow-down-circle"></i> Withdraw</button>
+                    <button class="p-btn withdraw" onclick="openWithdrawPage()"><i data-lucide="arrow-down-circle"></i>
+                        Withdraw</button>
                 </div>
 
                 <!-- Statistics Section -->
@@ -4178,9 +4178,79 @@
                         labels.innerHTML = data.map(d => `<span style="flex: 1; text-align: center; font-size: 0.65rem;">${d.date}</span>`).join('');
                     }
 
-                    // Initial chart load
+                    // Initial chart load & Deep Link Handling
                     document.addEventListener('DOMContentLoaded', () => {
                         switchChartData('weekly');
+
+                        // Check for Deep Link (Search Result Redirect)
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const view = urlParams.get('view');
+                        const symbol = urlParams.get('symbol');
+                        const type = urlParams.get('type') || 'stock';
+
+                        if (view === 'detail' && symbol) {
+                            // Ensure dependencies are loaded
+                            setTimeout(() => {
+                                // Polyfill openStockDetail if missing (to ensure view opens)
+                                if (typeof window.openStockDetail !== 'function') {
+                                    window.openStockDetail = function (sym, name, exchange, price, change, color, type) {
+                                        // Hide other views
+                                        if (document.getElementById('discoverView')) document.getElementById('discoverView').style.display = 'none';
+                                        if (document.getElementById('portfolioView')) document.getElementById('portfolioView').style.display = 'none';
+                                        if (document.getElementById('meView')) document.getElementById('meView').style.display = 'none';
+
+                                        // Show Detail View
+                                        const detailView = document.getElementById('stockDetailView');
+                                        if (detailView) {
+                                            detailView.style.display = 'block';
+
+                                            // Populate Data
+                                            if (document.getElementById('detName')) document.getElementById('detName').innerText = name;
+                                            if (document.getElementById('detSymbol')) document.getElementById('detSymbol').innerText = sym;
+                                            if (document.getElementById('detPrice')) document.getElementById('detPrice').innerText = price;
+
+                                            const chgEl = document.getElementById('detChange');
+                                            if (chgEl) {
+                                                chgEl.innerText = change;
+                                                // Simple color logic if not provided strictly
+                                                if (color) {
+                                                    chgEl.style.color = color;
+                                                    chgEl.className = `index-chg ${color.includes('10b981') ? 'green' : 'red'}`;
+                                                }
+                                            }
+
+                                            // Update Buy Button Context
+                                            const buyBtn = document.getElementById('buyBtn');
+                                            if (buyBtn) {
+                                                buyBtn.onclick = () => {
+                                                    // Trigger buy logic (available in trading.js or inline)
+                                                    if (typeof window.executePurchase === 'function') {
+                                                        window.executePurchase(sym, type);
+                                                    } else {
+                                                        // Fallback alert or predefined function
+                                                        alert("Buying " + sym);
+                                                    }
+                                                };
+                                            }
+
+                                            // Handle Subscribe/Buy Text
+                                            const isSub = (type === 'IPO' || type === 'OTC');
+                                            if (buyBtn) buyBtn.innerText = isSub ? 'Subscribe' : 'Buy';
+                                        }
+                                    };
+                                }
+
+                                // Trigger Selection via existing flow
+                                if (typeof window.selectStock === 'function') {
+                                    // Use the existing function which handles API or static data lookup
+                                    // We pass the name properly if we have it, else symbol
+                                    const name = urlParams.get('name') || symbol;
+                                    window.selectStock(symbol, name, type);
+                                } else {
+                                    console.error("selectStock function not found.");
+                                }
+                            }, 300);
+                        }
                     });
                 </script>
             </div>
@@ -4241,8 +4311,6 @@
                         <div class="me-p-avatar" id="meAvatarInitials">U</div>
                         <div class="me-p-info">
                             <h2 id="meUserDisplayName">User Name</h2>
-                            <p>Full Name: <span id="meFullName">-</span></p>
-                            <p>Username: <span id="meUsername">-</span></p>
                             <p style="margin-top: 0.5rem;">KYC Status: <span id="meKycStatusBadge" class="kyc-approved"
                                     style="background: #f1f5f9; color: #64748b;">Not Verified</span></p>
                         </div>
@@ -4261,7 +4329,7 @@
                         <button class="me-btn deposit" onclick="window.location.href='deposit.html'">
                             <i data-lucide="landmark"></i> Deposit
                         </button>
-                        <button class="me-btn withdraw" onclick="window.location.href='withdraw.html'">
+                        <button class="me-btn withdraw" onclick="openWithdrawPage()">
                             <i data-lucide="wallet"></i> Withdraw
                         </button>
                     </div>
@@ -4380,7 +4448,6 @@
             <div class="me-right-col">
                 <!-- Applications Card -->
                 <div class="me-card" style="height: 100%; display: flex; flex-direction: column;">
-                    <div class="me-card-tag"><i data-lucide="rotate-cw" size="18"></i></div>
                     <div class="me-apps-header">
                         <div class="me-title-row" style="margin-bottom: 0;">
                             <i data-lucide="layout-list"></i> Applications
@@ -4391,11 +4458,9 @@
                         <div class="app-pill">Awaiting</div>
                         <div class="app-pill">Approved</div>
                         <div class="app-pill">Rejected</div>
-                        <div class="app-pill">Using</div>
                         <div class="app-pill">Repayment</div>
-                        <div class="app-pill">Recycled</div>
                     </div>
-                    <div class="no-data-wrap">
+                    <div class="no-data-wrap" id="myApplicationsList">
                         <i data-lucide="inbox" size="48" stroke-width="1" style="margin-bottom: 1rem;"></i>
                         No data.
                     </div>
@@ -4756,6 +4821,10 @@
             pill.addEventListener('click', () => {
                 document.querySelectorAll('.app-pill').forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
+
+                // Fix Filtering Logic
+                window.activeLoanTab = pill.innerText.trim();
+                if (window.renderUserLoans) window.renderUserLoans();
             });
         });
 
@@ -6457,7 +6526,7 @@
             const currentBalance = parseFloat(user.balance || 0);
 
             if (currentBalance < outstanding) {
-                alert(`Insufficient balance to settle this order. You need ₹${outstanding.toLocaleString('en-IN', { minimumFractionDigits: 2 })} more. Please deposit funds first.`);
+                showIBModal(`Insufficient balance to settle this order. You need ₹${outstanding.toLocaleString('en-IN', { minimumFractionDigits: 2 })} more. Please deposit funds first.`);
                 return;
             }
 
@@ -6509,7 +6578,64 @@
         function closeHoldingDetail() {
             document.getElementById('holdingDetailModal').style.display = 'none';
         }
+
+        // Insufficient Balance Modal Logic
+        function showIBModal(msg) {
+            const modal = document.getElementById('insufficientBalanceModal');
+            const msgEl = document.getElementById('ibModalMsg');
+            if (modal && msgEl) {
+                msgEl.innerText = msg;
+                modal.style.display = 'flex';
+                if (window.lucide) lucide.createIcons();
+            } else {
+                alert(msg);
+            }
+        }
+        function closeIBModal() {
+            const modal = document.getElementById('insufficientBalanceModal');
+            if (modal) modal.style.display = 'none';
+        }
     </script>
+
+    <!-- Insufficient Balance Modal -->
+    <div id="insufficientBalanceModal" class="center-popup-modal"
+        style="display:none; z-index: 10000; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center;">
+        <div class="ib-modal-content"
+            style="background-color: #111111; border: 1px solid #d4af37; border-radius: 20px; padding: 2.5rem; max-width: 400px; text-align: center; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); animation: ibModalFadeIn 0.3s ease-out;">
+            <div class="ib-modal-icon"
+                style="color: #d4af37; margin-bottom: 1.5rem; display: flex; justify-content: center;">
+                <i data-lucide="alert-circle" size="48"></i>
+            </div>
+            <h2 class="ib-modal-title"
+                style="color: #d4af37; font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; font-family: 'Outfit', sans-serif;">
+                Insufficient Balance</h2>
+            <p id="ibModalMsg" class="ib-modal-message"
+                style="color: #e2e8f0; font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem; font-family: 'Outfit', sans-serif;">
+            </p>
+            <button class="ib-modal-btn" onclick="closeIBModal()"
+                style="background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%); color: #000; border: none; padding: 0.8rem 2.5rem; border-radius: 10px; font-weight: 800; cursor: pointer; width: 100%; font-family: 'Outfit', sans-serif;">OK</button>
+        </div>
+    </div>
+
+    <style>
+        @keyframes ibModalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .ib-modal-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+    </style>
+
     <script src="js/trading.js"></script>
 
 
@@ -6572,7 +6698,7 @@
                 <div class="settings-name" id="settingsName"
                     style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-top: 0.5rem;">User Name</div>
                 <div class="settings-phone" id="settingsPhone"
-                    style="font-size: 0.9rem; color: #64748b; margin-top: 0.2rem;">+91</div>
+                    style="font-size: 0.9rem; color: #64748b; margin-top: 0.2rem; display: none;"></div>
                 <div class="badge-row">
                     <div class="s-badge vip"><i data-lucide="shield-check" size="18"></i> VIP: 0</div>
                     <div class="s-badge credit"><i data-lucide="crown" size="18"></i> Credit Score: 100</div>
@@ -6640,23 +6766,83 @@
     </div>
 
     <!-- Customer Service Modal -->
-    <div id="csModal" class="settings-modal" onclick="if(event.target == this) closeCS()">
-        <div class="settings-content" style="max-width: 500px; height: 600px; display: flex; flex-direction: column;">
-            <button class="settings-close" onclick="closeCS()"><i data-lucide="x" size="24"></i></button>
-            <div class="settings-header" style="margin-bottom: 1rem;">
-                <h2 style="font-size: 1.5rem; font-weight: 700;">Customer Service</h2>
+    <!-- Customer Service Modal (Fixed Bottom-Right) -->
+    <div id="csModal">
+        <!-- Maximized Content -->
+        <div class="cs-modal-content">
+            <div style="position: absolute; top: 15px; right: 15px; display: flex; gap: 8px; z-index: 100;">
+                <button onclick="minimizeCS()"
+                    style="background: rgba(255,255,255,0.05); border: none; color: #d4af37; cursor: pointer; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+                    onmouseover="this.style.background='rgba(255,255,255,0.1)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                    <i data-lucide="minus" size="18"></i>
+                </button>
+                <button onclick="closeCS()"
+                    style="background: rgba(255,255,255,0.05); border: none; color: #d4af37; cursor: pointer; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+                    onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                    <i data-lucide="x" size="18"></i>
+                </button>
             </div>
+
+            <div class="settings-header"
+                style="margin-bottom: 0; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #222;">
+                <h2 style="font-size: 1.3rem; font-weight: 700; color: #d4af37; margin: 0;">Customer Service</h2>
+                <div style="height: 2px; width: 30px; background: #d4af37; margin-top: 5px;"></div>
+            </div>
+
             <div id="chatBox"
-                style="flex: 1; overflow-y: auto; padding: 1rem; background: #f8fafc; border-radius: 12px; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                style="flex: 1; overflow-y: auto; padding: 1.5rem; background: #0c0c0c; display: flex; flex-direction: column; gap: 1rem;">
             </div>
-            <div style="display: flex; gap: 0.5rem;">
+
+            <div id="csImagePreviewArea"
+                style="display: none; padding: 0.5rem 1.5rem; background: #1a1a1a; border-top: 1px solid #333; gap: 0.5rem; align-items: center;">
+            </div>
+
+            <div
+                style="display: flex; gap: 0.5rem; align-items: center; padding: 1.2rem 1.5rem; background: #111; border-top: 1px solid #222;">
+                <input type="file" id="csImageInput" accept="image/*" style="display: none;"
+                    onchange="handleCSImageUpload(this)">
+                <button onclick="document.getElementById('csImageInput').click()"
+                    style="background: none; border: none; cursor: pointer; color: #d4af37; padding: 0.5rem; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                    <i data-lucide="image" size="22"></i>
+                </button>
+                <button onclick="toggleEmojiPicker()"
+                    style="background: none; border: none; cursor: pointer; color: #d4af37; padding: 0.5rem; position: relative; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                    <i data-lucide="smile" size="22"></i>
+                    <div id="emojiPicker"
+                        style="display: none; position: absolute; bottom: 50px; left: -10px; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 0.75rem; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 180px; z-index: 100;">
+                        <span onclick="insertEmoji('👍')" style="cursor: pointer; font-size: 1.4rem;">👍</span>
+                        <span onclick="insertEmoji('👋')" style="cursor: pointer; font-size: 1.4rem;">👋</span>
+                        <span onclick="insertEmoji('😊')" style="cursor: pointer; font-size: 1.4rem;">😊</span>
+                        <span onclick="insertEmoji('😂')" style="cursor: pointer; font-size: 1.4rem;">😂</span>
+                        <span onclick="insertEmoji('❤️')" style="cursor: pointer; font-size: 1.4rem;">❤️</span>
+                        <span onclick="insertEmoji('🔥')" style="cursor: pointer; font-size: 1.4rem;">🔥</span>
+                        <span onclick="insertEmoji('🎉')" style="cursor: pointer; font-size: 1.4rem;">🎉</span>
+                        <span onclick="insertEmoji('💰')" style="cursor: pointer; font-size: 1.4rem;">💰</span>
+                    </div>
+                </button>
                 <input type="text" id="csInput" placeholder="Type a message..."
-                    style="flex: 1; padding: 0.8rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
+                    style="flex: 1; padding: 0.7rem 1rem; background: #050505; border: 1px solid #333; border-radius: 10px; color: white; outline: none; font-family: 'Outfit', sans-serif; font-size: 0.9rem;">
                 <button onclick="sendCSMessage()"
-                    style="background: #3b82f6; color: white; border: none; padding: 0 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer;">Send</button>
+                    style="background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%); color: #000; border: none; padding: 0.7rem 1.2rem; border-radius: 10px; font-weight: 800; cursor: pointer; transition: opacity 0.2s;"
+                    onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Send</button>
             </div>
         </div>
+
+        <!-- Minimized Bar -->
+        <div id="csMinimizedBar" onclick="maximizeCS()">
+            <div
+                style="position: relative; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: rgba(212,175,55,0.1); border-radius: 50%;">
+                <i data-lucide="message-circle" size="14"></i>
+            </div>
+            <span style="font-size: 0.9rem;">Customer Service</span>
+            <i data-lucide="chevron-up" size="18" style="margin-left: auto; opacity: 0.7;"></i>
+        </div>
     </div>
+
 
     <!-- Holding Details Modal -->
     <div id="holdingDetailModal" class="center-popup-modal" onclick="if(event.target == this) closeHoldingDetail()">
@@ -7070,44 +7256,7 @@
 
     <!-- Customer Service Modal -->
 
-    <div id="csModal" class="settings-modal" onclick="if(event.target == this) closeCS()">
-        <div class="settings-content" style="max-width: 500px; height: 600px; display: flex; flex-direction: column;">
-            <button class="settings-close" onclick="closeCS()"><i data-lucide="x" size="24"></i></button>
-            <div class="settings-header" style="margin-bottom: 1rem;">
-                <h2 style="font-size: 1.5rem; font-weight: 700;">Customer Service</h2>
-            </div>
-            <div id="chatBox"
-                style="flex: 1; overflow-y: auto; padding: 1rem; background: #f8fafc; border-radius: 12px; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
-            </div>
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <input type="file" id="csImageInput" accept="image/*" style="display: none;"
-                    onchange="handleCSImageUpload(this)">
-                <button onclick="document.getElementById('csImageInput').click()"
-                    style="background: none; border: none; cursor: pointer; color: #64748b; padding: 0.5rem;">
-                    <i data-lucide="image" size="20"></i>
-                </button>
-                <button onclick="toggleEmojiPicker()"
-                    style="background: none; border: none; cursor: pointer; color: #64748b; padding: 0.5rem; position: relative;">
-                    <i data-lucide="smile" size="20"></i>
-                    <div id="emojiPicker"
-                        style="display: none; position: absolute; bottom: 40px; left: 0; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.5rem; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); width: 150px;">
-                        <span onclick="insertEmoji('👍')" style="cursor: pointer; font-size: 1.2rem;">👍</span>
-                        <span onclick="insertEmoji('👋')" style="cursor: pointer; font-size: 1.2rem;">👋</span>
-                        <span onclick="insertEmoji('😊')" style="cursor: pointer; font-size: 1.2rem;">😊</span>
-                        <span onclick="insertEmoji('😂')" style="cursor: pointer; font-size: 1.2rem;">😂</span>
-                        <span onclick="insertEmoji('❤️')" style="cursor: pointer; font-size: 1.2rem;">❤️</span>
-                        <span onclick="insertEmoji('🔥')" style="cursor: pointer; font-size: 1.2rem;">🔥</span>
-                        <span onclick="insertEmoji('🎉')" style="cursor: pointer; font-size: 1.2rem;">🎉</span>
-                        <span onclick="insertEmoji('😢')" style="cursor: pointer; font-size: 1.2rem;">😢</span>
-                    </div>
-                </button>
-                <input type="text" id="csInput" placeholder="Type a message..."
-                    style="flex: 1; padding: 0.8rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
-                <button onclick="sendCSMessage()"
-                    style="background: #3b82f6; color: white; border: none; padding: 0 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer;">Send</button>
-            </div>
-        </div>
-    </div>
+    <div id="csModal_duplicate_removed" style="display: none;"></div>
 
     <!-- Reset Password Modal (Logged-In) -->
     <div id="resetPasswordModal" class="center-popup-modal" onclick="if(event.target == this) closeResetPassword()">

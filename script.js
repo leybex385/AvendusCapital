@@ -284,28 +284,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.globalSelectStock = (symbol, name, type) => {
         console.log("Global Select Stock:", symbol, name, type);
-        const product = { symbol, name, type: (type || 'stock').toLowerCase() };
 
-        if (product.type === 'stock') {
-            if (typeof window.openStockTrade === 'function') {
-                window.openStockTrade(product);
-            }
-        } else if (product.type === 'otc') {
-            if (typeof window.openOTCSubscribe === 'function') {
-                window.openOTCSubscribe(product);
-            }
-        } else if (product.type === 'ipo') {
-            if (typeof window.openIPOSubscribe === 'function') {
-                window.openIPOSubscribe(product);
-            }
-        } else {
-            // Fallback for types not explicitly caught
-            if (typeof window.openStockTrade === 'function') {
-                window.openStockTrade(product);
-            }
-        }
+        let cleanType = (type || 'stock').toLowerCase();
+        if (cleanType === 'ins.stock') cleanType = 'stock';
 
-        // Close results
+        // User requested routing:
+        // INS.STOCK -> DISCOVER BUY & SELL (discover.html with stock detail)
+        // OTC/IPO -> SUBSCRIBE PAGE (discover.html with subscribe view - same view logic)
+
+        const targetUrl = `discover.html?view=detail&symbol=${encodeURIComponent(symbol)}&type=${encodeURIComponent(cleanType)}`;
+        window.location.href = targetUrl;
+
         const globalSearchResults = document.getElementById('searchResults');
         if (globalSearchResults) globalSearchResults.style.display = 'none';
         const globalSearchInput = document.getElementById('globalSearchInput');
@@ -567,7 +556,7 @@ window.openEditNameModal = function () {
     const user = window.DB && window.DB.getCurrentUser ? window.DB.getCurrentUser() : null;
     if (!user) return;
     const input = document.getElementById('editNameInput');
-    if (input) input.value = user.full_name || user.username || '';
+    if (input) input.value = user.username || '';
     const modal = document.getElementById('editNameModal');
     if (modal) modal.style.display = 'flex';
     if (window.lucide) lucide.createIcons();
@@ -597,11 +586,9 @@ window.saveName = async function () {
         const user = window.DB && window.DB.getCurrentUser ? window.DB.getCurrentUser() : null;
         if (!user) return;
         const result = await window.DB.updateUser(user.id, {
-            full_name: newName,
             username: newName
         });
         if (result.success) {
-            user.full_name = newName;
             user.username = newName;
             localStorage.setItem(window.DB.CURRENT_USER_KEY, JSON.stringify(user));
 
@@ -919,7 +906,6 @@ window.submitKYC = async function () {
         // 1. Update User Profile (Primary data goes to 'users' table)
         const userResult = await window.DB.updateUser(user.id, {
             full_name: name,
-            username: name, // For admin panel visibility
             id_number: idNum,
             kyc: 'Pending'
         });
@@ -930,7 +916,6 @@ window.submitKYC = async function () {
 
         // Update local "Memory" (Local Storage) so data persists across refreshes
         user.full_name = name;
-        user.username = name;
         user.id_number = idNum;
         user.kyc = 'Pending';
         localStorage.setItem('avendus_current_user', JSON.stringify(user));
@@ -1024,8 +1009,28 @@ window.loadUserAssets = async function (userId) {
         // Fetch User Loans List (My Applications) - Live from DB
         if (window.fetchUserLoans) window.fetchUserLoans(userId);
 
-        // pending_settlement vs outstanding (legacy support)
-        let outstanding = (typeof dbUser.outstanding_balance !== 'undefined') ? (parseFloat(dbUser.outstanding_balance) || 0) : (parseFloat(dbUser.outstanding) || 0);
+        // --- Calculate Dynamic Outstanding (Pending Settlement) ---
+        // Requirement: Fetch all user trades/subscriptions with specific statuses and sum their amounts.
+        let dynamicOutstanding = 0;
+        if (window.DB && window.DB.getTradesByUserId) {
+            try {
+                const trades = await window.DB.getTradesByUserId(userId);
+                const pendingTrades = trades.filter(t => {
+                    const s = (t.status || "").toLowerCase();
+                    return s === 'pending' || s === 'wallet_pending' || s === 'settlement_pending';
+                });
+                dynamicOutstanding = pendingTrades.reduce((sum, trade) => {
+                    // Use total_amount (from schema) or amount (from user example)
+                    return sum + Number(trade.total_amount || trade.amount || 0);
+                }, 0);
+                console.log("Calculated Dynamic Outstanding Balance:", dynamicOutstanding);
+            } catch (err) {
+                console.error("Error calculating dynamic outstanding balance:", err);
+            }
+        }
+
+        // Final outstanding value for display
+        let outstanding = (dynamicOutstanding > 0) ? dynamicOutstanding : ((typeof dbUser.outstanding_balance !== 'undefined') ? (parseFloat(dbUser.outstanding_balance) || 0) : (parseFloat(dbUser.outstanding) || 0));
 
         // --- DOM Helpers ---
         const formatCurrency = (val) => '₹' + (val || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1090,6 +1095,11 @@ window.loadUserAssets = async function (userId) {
         updateVal('meBorrowedFunds', loan);
         updateVal('mePendingSettlement', outstanding);
 
+        // Update additional UI fields for Outstanding/Pending Settlement
+        document.querySelectorAll('.pending-settlement-value, .outstanding-balance-value').forEach(el => {
+            fitText(el, formatCurrency(outstanding));
+        });
+
         // --- Update Portfolio Page (Specific IDs) ---
         updateVal('pAvailableBalance', rawBalance);
         updateVal('pCurrentInvested', inv);
@@ -1113,8 +1123,8 @@ window.loadUserAssets = async function (userId) {
         localStorage.setItem(window.DB.CURRENT_USER_KEY, JSON.stringify(dbUser));
 
         // --- Sync Profile Information (Name & Avatar) ---
-        const fullName = dbUser.full_name || dbUser.username || 'User';
-        const initials = (fullName.charAt(0) || 'U').toUpperCase();
+        const displayName = dbUser.username || 'User';
+        const initials = (displayName.charAt(0) || 'U').toUpperCase();
 
         // Update Name Displays across pages
         const nameTargets = [
@@ -1128,16 +1138,20 @@ window.loadUserAssets = async function (userId) {
         nameTargets.forEach(el => {
             if (el) {
                 if (el.tagName === 'H3' && el.parentElement.classList.contains('user-text')) {
-                    el.textContent = 'Welcome ' + fullName;
+                    el.textContent = displayName;
                 } else if (el.id === 'meFullName') {
-                    el.textContent = dbUser.full_name || '-';
+                    el.textContent = displayName; // Use username even for this field as requested
                 } else if (el.id === 'meUsername') {
                     el.textContent = dbUser.username || '-';
                 } else {
-                    el.textContent = fullName;
+                    el.textContent = displayName;
                 }
             }
         });
+
+        // Hide phone display in settings header
+        const sPhone = document.getElementById('settingsPhone');
+        if (sPhone) sPhone.style.display = 'none';
 
         // Update Avatar Displays across pages
         const activeAvatar = dbUser.avatar_url || dbUser.profile_image;
@@ -1203,45 +1217,7 @@ window.loadUserAssets = async function (userId) {
             creditProfileInfo.innerHTML = `Based on the latest evaluation, your <b>Credit Score is ${credit}</b>. Your credit profile falls into the <b>${credit >= 90 ? 'Excellent' : (credit >= 70 ? 'Fair' : 'Low')}</b> category.`;
         }
 
-        // --- Enforce Withdrawal Restrictions ---
-        const isWithdrawDisabled = credit < 90;
-        const withdrawButtons = document.querySelectorAll('.btn-withdraw, .p-btn.withdraw, .me-btn.withdraw');
-
-        withdrawButtons.forEach(btn => {
-            if (isWithdrawDisabled) {
-                btn.classList.add('disabled-action');
-                btn.style.opacity = '0.5';
-                btn.style.cursor = 'not-allowed';
-                btn.style.pointerEvents = 'none';
-                btn.title = "Withdrawal disabled. Minimum credit score required: 90.";
-
-                // If it's a button with onclick, we might need to disable it more firmly
-                if (btn.tagName === 'BUTTON') {
-                    btn.disabled = true;
-                    btn.removeAttribute('onclick');
-                } else if (btn.tagName === 'A') {
-                    btn.onclick = (e) => { e.preventDefault(); return false; };
-                    btn.href = "javascript:void(0)";
-                }
-            } else {
-                btn.classList.remove('disabled-action');
-                btn.style.opacity = '1';
-                btn.style.cursor = 'pointer';
-                btn.style.pointerEvents = 'auto';
-                btn.title = "";
-
-                if (btn.tagName === 'BUTTON') {
-                    btn.disabled = false;
-                    // Restore onclick if it was on Me or Portfolio page
-                    if (btn.classList.contains('withdraw')) {
-                        btn.onclick = () => { window.location.href = 'withdraw.html'; };
-                    }
-                } else if (btn.tagName === 'A') {
-                    btn.href = "withdraw.html";
-                    btn.onclick = null;
-                }
-            }
-        });
+        // --- Withdrawal Restrictions logic moved to click event (openWithdrawPage) ---
         if (window.lucide) window.lucide.createIcons();
     } catch (e) {
         console.error("loadUserAssets Exception:", e);
@@ -1360,35 +1336,23 @@ if (!window.syncUserData) {
             // I'll leave the basic profile update logic here for script.js, but minimal.
             const settingsRoot = document.getElementById('settingsModal');
             const setName = settingsRoot ? settingsRoot.querySelector('.settings-name') : null;
-            if (setName) setName.textContent = user.full_name || 'Set Name';
+            if (setName) setName.textContent = user.username || 'User';
+            const sPhone = document.getElementById('settingsPhone');
+            if (sPhone) sPhone.style.display = 'none';
         }
     };
 }
 
 // --- Loan Application Logic (My Applications) ---
-window.fetchUserLoans = async function (userId) {
+// State for applications filtering
+window.userLoansData = [];
+window.activeLoanTab = "All";
+
+window.renderUserLoans = function () {
     const list = document.getElementById('myApplicationsList');
     if (!list) return;
 
-    if (!window.DB) return;
-    const client = window.DB.getClient();
-    if (!client) return;
-
-    // 5. User My Applications: SELECT * FROM loans WHERE user_id = current_user_id
-    // No caching, direct fetch.
-    const { data: loans, error } = await client
-        .from('loans')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-    if (error) {
-        console.error("Error fetching user loans:", error);
-        list.innerHTML = '<div style="padding:20px; text-align:center; color:#ef4444;">Error loading applications.</div>';
-        return;
-    }
-
-    if (!loans || loans.length === 0) {
+    if (!window.userLoansData || window.userLoansData.length === 0) {
         // Reset to "No Data" view
         list.className = "no-data-wrap";
         list.style.display = 'flex';
@@ -1400,15 +1364,40 @@ window.fetchUserLoans = async function (userId) {
         return;
     }
 
+    const filteredApplications = window.userLoansData.filter(app => {
+        const status = (app.status || 'Pending').toUpperCase().trim();
+        const activeTab = window.activeLoanTab;
+
+        if (activeTab === "All") return true;
+        if (activeTab === "Approved") return status === "APPROVED";
+        if (activeTab === "Pending") return status === "PENDING";
+        if (activeTab === "Rejected") return status === "REJECTED";
+        if (activeTab === "Awaiting") return status === "AWAITING";
+        if (activeTab === "Repayment") return status === "REPAYMENT";
+
+        return false;
+    });
+
+    if (filteredApplications.length === 0) {
+        list.className = "no-data-wrap";
+        list.style.display = 'flex';
+        list.innerHTML = `
+            <i data-lucide="inbox" size="48" stroke-width="1" style="margin-bottom: 1rem;"></i>
+            No applications in this category.
+        `;
+        if (window.lucide) window.lucide.createIcons();
+        return;
+    }
+
     // Render List
     list.className = ""; // Remove no-data centering
     list.style.display = 'block';
     list.style.overflowY = 'auto';
-    list.style.flex = '1'; // Fill space
+    list.style.flex = '1';
 
-    list.innerHTML = loans.map(loan => {
+    list.innerHTML = filteredApplications.map(loan => {
         const rawStatus = loan.status || 'Pending';
-        let statusClass = 'pending'; // Default style
+        let statusClass = 'pending';
         const s = rawStatus.toUpperCase();
         if (s === 'APPROVED') statusClass = 'approved';
         else if (s === 'REJECTED') statusClass = 'rejected';
@@ -1438,6 +1427,30 @@ window.fetchUserLoans = async function (userId) {
         `;
     }).join('');
 };
+
+window.fetchUserLoans = async function (userId) {
+    if (!window.DB) return;
+    const client = window.DB.getClient();
+    if (!client) return;
+
+    // Fetch User My Applications
+    const { data: loans, error } = await client
+        .from('loans')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error("Error fetching user loans:", error);
+        const list = document.getElementById('myApplicationsList');
+        if (list) list.innerHTML = '<div style="padding:20px; text-align:center; color:#ef4444;">Error loading applications.</div>';
+        return;
+    }
+
+    window.userLoansData = loans || [];
+    window.renderUserLoans();
+};
+
 
 // --- Message Center Logic ---
 // --- Message Center Logic (Notices) ---
@@ -1501,17 +1514,35 @@ function renderNotices(notices) {
     if (count) count.textContent = `${notices.length} Messages`;
 
     list.innerHTML = notices.map(n => {
+        let displayTitle = n.title || 'Notification';
+        let displayBody = n.message || '';
+        let displayTag = n.type || 'GENERAL';
+
+        // Detect if content is a JSON string (safely)
+        try {
+            if (displayBody && typeof displayBody === 'string' && displayBody.trim().startsWith('{')) {
+                const p = JSON.parse(displayBody);
+                if (p.title) displayTitle = p.title;
+                if (p.message) displayBody = p.message;
+                else if (p.body) displayBody = p.body;
+                else if (p.content) displayBody = p.content;
+                if (p.type) displayTag = p.type;
+            }
+        } catch (e) {
+            // Parsing failed, fallback to plain text (already in displayBody)
+        }
+
         return `
         <div class="notif-card" id="notif-${n.id}" onclick="toggleNotifView('${n.id}', event)">
             <div class="notif-timeline ${n.is_read ? '' : 'unread'}"></div>
             <div class="notif-header">
                 <div class="notif-main-info">
-                    <div class="notif-title">${n.title || 'Notification'} <span class="notif-tag" style="font-size:10px; margin-left:5px;">${n.type || 'GENERAL'}</span></div>
+                    <div class="notif-title">${displayTitle} <span class="notif-tag" style="font-size:10px; margin-left:5px;">${displayTag}</span></div>
                     <div class="notif-meta">${new Date(n.created_at).toLocaleString()}</div>
                 </div>
                 <button class="notif-delete-btn" onclick="deleteMessage('${n.id}', this); event.stopPropagation();">Delete</button>
             </div>
-            <div class="notif-body">${n.message || ''}</div>
+            <div class="notif-body">${displayBody}</div>
         </div>
         `;
     }).join('');
@@ -1686,7 +1717,11 @@ let isChatSubscribed = false;
 window.openCS = function () {
     if (window.closeSettings) window.closeSettings();
     const modal = document.getElementById('csModal');
-    if (modal) modal.style.display = 'flex';
+    if (modal) {
+        modal.style.display = 'flex';
+        // Ensure it opens maximized
+        window.maximizeCS();
+    }
     localStorage.setItem('avendus_cs_open', 'true');
     loadCSMessages();
 };
@@ -1695,6 +1730,40 @@ window.closeCS = function () {
     const modal = document.getElementById('csModal');
     if (modal) modal.style.display = 'none';
     localStorage.setItem('avendus_cs_open', 'false');
+};
+
+window.minimizeCS = function () {
+    const content = document.querySelector('#csModal .cs-modal-content');
+    const minimized = document.getElementById('csMinimizedBar');
+    if (content && minimized) {
+        content.style.display = 'none';
+        minimized.style.display = 'flex';
+        // Adjust parent container
+        const modal = document.getElementById('csModal');
+        modal.style.height = 'auto';
+        modal.style.width = '300px';
+        modal.style.background = 'transparent';
+        modal.style.pointerEvents = 'none';
+        minimized.style.pointerEvents = 'auto';
+    }
+};
+
+window.maximizeCS = function () {
+    const content = document.querySelector('#csModal .cs-modal-content');
+    const minimized = document.getElementById('csMinimizedBar');
+    if (content && minimized) {
+        content.style.display = 'flex';
+        minimized.style.display = 'none';
+        const modal = document.getElementById('csModal');
+        modal.style.height = '600px';
+        modal.style.width = '500px';
+        modal.style.background = 'transparent';
+        modal.style.pointerEvents = 'auto';
+
+        // Preserve scroll
+        const chatBox = document.getElementById('chatBox');
+        if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+    }
 };
 
 async function loadCSMessages() {
@@ -1791,17 +1860,22 @@ function appendSingleMessage(m) {
 
     const div = document.createElement('div');
     const isUser = m.sender === 'User' || m.sender === 'user';
-
     div.className = `chat-bubble ${isUser ? 'user' : 'support'}`;
 
-    // Handle JSON messages if admin sends structured data
-    let content = m.message;
+    let content = m.message || '';
     try {
         if (content.startsWith('{')) {
-            const parsed = JSON.parse(content);
-            content = `<strong>${parsed.title || ''}</strong><br>${parsed.body || parsed.message || ''}`;
+            const p = JSON.parse(content);
+            if (p.type === 'image') {
+                content = `<img src="${p.content}" style="max-width: 250px; border-radius: 8px; cursor: pointer; display: block;" onclick="window.open(this.src, '_blank')">`;
+                if (p.caption) content += `<div style="margin-top: 5px; font-size: 0.9rem;">${p.caption}</div>`;
+            } else {
+                content = p.content || p.message || p.body || content;
+            }
         }
-    } catch (e) { }
+    } catch (e) {
+        // Fallback for non-JSON or weirdly formatted message
+    }
 
     div.innerHTML = `
         <div class="message-text">${content}</div>
@@ -1816,12 +1890,30 @@ window.sendCSMessage = async () => {
     const input = document.getElementById('csInput');
     const text = input ? input.value.trim() : '';
     const user = window.DB && window.DB.getCurrentUser ? window.DB.getCurrentUser() : null;
-    if (!text || !user) return;
+    const previewArea = document.getElementById('csImagePreviewArea');
+    const hasImage = previewArea && previewArea.dataset.base64;
+
+    if (!text && !hasImage || !user) return;
 
     if (input) input.value = '';
 
+    let messageData = text;
+    if (hasImage) {
+        messageData = JSON.stringify({
+            type: 'image',
+            content: previewArea.dataset.base64,
+            caption: text
+        });
+        // Clear preview
+        if (previewArea) {
+            previewArea.innerHTML = '';
+            delete previewArea.dataset.base64;
+            previewArea.style.display = 'none';
+        }
+    }
+
     if (window.DB && window.DB.sendMessage) {
-        const { success, error } = await window.DB.sendMessage(user.id, text, 'User');
+        const { success, error } = await window.DB.sendMessage(user.id, messageData, 'User');
         if (!success) {
             console.error("Chat Error:", error);
             await window.CustomUI.alert("Message failed to send. Please try again.", "Send Error");
@@ -1839,7 +1931,11 @@ window.toggleEmojiPicker = function () {
 window.insertEmoji = function (emoji) {
     const input = document.getElementById('csInput');
     if (input) {
-        input.value += emoji;
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        const oldText = input.value;
+        input.value = oldText.substring(0, start) + emoji + oldText.substring(end);
+        input.selectionStart = input.selectionEnd = start + emoji.length;
         input.focus();
     }
     // Close picker
@@ -1859,25 +1955,33 @@ window.handleCSImageUpload = async function (input) {
         }
 
         const reader = new FileReader();
-        reader.onload = async function (e) {
+        reader.onload = function (e) {
             const base64 = e.target.result;
-            const user = window.DB && window.DB.getCurrentUser ? window.DB.getCurrentUser() : null;
-
-            if (user && window.DB && window.DB.sendMessage) {
-                // Send as an IMG tag
-                const imgMsg = `<img src="${base64}" style="max-width: 200px; border-radius: 8px; cursor: pointer;" onclick="window.open(this.src, '_blank')">`;
-
-                // Show uploading state? Or just send.
-                const { success, error } = await window.DB.sendMessage(user.id, imgMsg, 'User');
-                if (!success) {
-                    await window.CustomUI.alert("Failed to send image.", "Send Error");
-                }
+            const previewArea = document.getElementById('csImagePreviewArea');
+            if (previewArea) {
+                previewArea.dataset.base64 = base64;
+                previewArea.innerHTML = `
+                    <div style="position: relative; width: 60px; height: 60px; border-radius: 8px; overflow: hidden; border: 1px solid #d4af37;">
+                        <img src="${base64}" style="width: 100%; height: 100%; object-fit: cover;">
+                        <button onclick="window.clearCSImagePreview()" style="position: absolute; top: 0; right: 0; background: rgba(0,0,0,0.5); color: white; border: none; padding: 2px; cursor: pointer; border-radius: 0 0 0 8px;">&times;</button>
+                    </div>
+                `;
+                previewArea.style.display = 'flex';
             }
         };
         reader.readAsDataURL(file);
     }
     // Reset input so same file can be selected again if needed
     input.value = '';
+};
+
+window.clearCSImagePreview = function () {
+    const preview = document.getElementById('csImagePreviewArea');
+    if (preview) {
+        preview.innerHTML = '';
+        delete preview.dataset.base64;
+        preview.style.display = 'none';
+    }
 };
 
 function playNotificationSound() {
@@ -1959,3 +2063,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
 });
+
+async function openWithdrawPage() {
+    const user = window.DB ? window.DB.getCurrentUser() : null;
+    if (!user) {
+        if (window.CustomUI) {
+            await window.CustomUI.alert("Please login to proceed with withdrawal.", "Authentication Required");
+        } else {
+            alert("Please login to proceed.");
+        }
+        return;
+    }
+
+    const credit = parseInt(user.credit_score || 0);
+    if (credit < 90) {
+        if (window.CustomUI) {
+            await window.CustomUI.alert("Withdrawal disabled. Minimum credit score required: 90.", "Eligibility Check");
+        } else {
+            alert("Withdrawal disabled. Minimum credit score required: 90.");
+        }
+        return;
+    }
+
+    window.location.href = "withdraw.html";
+}

@@ -3874,8 +3874,8 @@
                 <div class="p-btn-row">
                     <button class="p-btn deposit" onclick="window.location.href='deposit.html'"><i
                             data-lucide="arrow-up-circle"></i> Deposit</button>
-                    <button class="p-btn withdraw" onclick="window.location.href='withdraw.html'"><i
-                            data-lucide="arrow-down-circle"></i> Withdraw</button>
+                    <button class="p-btn withdraw" onclick="openWithdrawPage()"><i data-lucide="arrow-down-circle"></i>
+                        Withdraw</button>
                 </div>
 
                 <!-- Statistics Section -->
@@ -4280,8 +4280,6 @@
                         <div class="me-p-avatar" id="meAvatarInitials">U</div>
                         <div class="me-p-info">
                             <h2 id="meUserDisplayName">User Name</h2>
-                            <p>Full Name: <span id="meFullName">-</span></p>
-                            <p>Username: <span id="meUsername">-</span></p>
                             <p style="margin-top: 0.5rem;">KYC Status: <span id="meKycStatusBadge" class="kyc-approved"
                                     style="background: #f1f5f9; color: #64748b;">Not Verified</span></p>
                         </div>
@@ -4300,7 +4298,7 @@
                         <button class="me-btn deposit" onclick="window.location.href='deposit.html'">
                             <i data-lucide="landmark"></i> Deposit
                         </button>
-                        <button class="me-btn withdraw" onclick="window.location.href='withdraw.html'">
+                        <button class="me-btn withdraw" onclick="openWithdrawPage()">
                             <i data-lucide="wallet"></i> Withdraw
                         </button>
                     </div>
@@ -4436,7 +4434,6 @@
             <div class="me-right-col">
                 <!-- Applications Card -->
                 <div class="me-card" style="height: 100%; display: flex; flex-direction: column;">
-                    <div class="me-card-tag"><i data-lucide="rotate-cw" size="18"></i></div>
                     <div class="me-apps-header">
                         <div class="me-title-row" style="margin-bottom: 0;">
                             <i data-lucide="layout-list"></i> Applications
@@ -4447,9 +4444,7 @@
                         <div class="app-pill">Awaiting</div>
                         <div class="app-pill">Approved</div>
                         <div class="app-pill">Rejected</div>
-                        <div class="app-pill">Using</div>
                         <div class="app-pill">Repayment</div>
-                        <div class="app-pill">Recycled</div>
                     </div>
                     <div class="no-data-wrap" id="myApplicationsList">
                         <i data-lucide="inbox" size="48" stroke-width="1" style="margin-bottom: 1rem;"></i>
@@ -4813,6 +4808,10 @@
             pill.addEventListener('click', () => {
                 document.querySelectorAll('.app-pill').forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
+
+                // Fix Filtering Logic
+                window.activeLoanTab = pill.innerText.trim();
+                if (window.renderUserLoans) window.renderUserLoans();
             });
         });
 
@@ -6419,6 +6418,48 @@
             openHoldingDetail('LISTING:' + symbol);
         }
 
+        async function executeSettleLogic(trade, user, outstanding, btn) {
+            const originalText = btn.innerText;
+            btn.innerText = "Settling...";
+            btn.disabled = true;
+
+            try {
+                const newBalance = (parseFloat(user.balance) || 0) - outstanding;
+                const currentInvested = parseFloat(user.invested) || 0;
+                const newInvested = currentInvested + outstanding;
+
+                // 1. Update User Financials (Decrement by the settled amount)
+                const currentOutstanding = parseFloat(user.outstanding) || 0;
+                const newOutstanding = Math.max(0, currentOutstanding - outstanding);
+                const finResult = await window.DB.updateUserFinancials(user.id, newBalance, newInvested, newOutstanding);
+
+                if (finResult.success) {
+                    // 2. Update Trade Status (Set to Pending for Admin Approval)
+                    const tradeResult = await window.DB.updateTradeStatus(trade.id, 'Pending', 'Subscribed Fully');
+
+                    if (tradeResult.success) {
+                        showModal('success', 'Success', "Successfully settled! Your subscription is now fully paid and has been moved to Pending transactions for admin approval.", async () => {
+                            document.getElementById('holdingDetailModal').style.display = 'none';
+                            await fetchUserTransactions();
+                            // Switch to Pending tab
+                            const pendingTab = document.querySelector('.d-tab-pill[onclick*="pending"]');
+                            if (pendingTab) switchTransactionTab(pendingTab, 'pending');
+                        });
+                    } else {
+                        showModal('error', 'Update Failed', "Balance deducted but failed to update trade status. Please contact support.");
+                    }
+                } else {
+                    showModal('error', 'Error', "Failed to update financials: " + (finResult.error?.message || "Unknown error"));
+                }
+            } catch (e) {
+                console.error(e);
+                showModal('error', 'Error', "An error occurred: " + e.message);
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
         async function settleOutstanding(tradeId, btnEl) {
             const trade = transactionData.all.find(t => t.id == tradeId);
             if (!trade) return;
@@ -6439,59 +6480,138 @@
             const currentBalance = parseFloat(user.balance || 0);
 
             if (currentBalance < outstanding) {
-                alert(`Insufficient balance to settle this order. You need ₹${outstanding.toLocaleString('en-IN', { minimumFractionDigits: 2 })} more. Please deposit funds first.`);
+                showIBModal(`Insufficient balance to settle this order. You need ₹${outstanding.toLocaleString('en-IN', { minimumFractionDigits: 2 })} more. Please deposit funds first.`);
                 return;
             }
 
-            if (!confirm(`Are you sure you want to settle the outstanding balance of ₹${outstanding.toLocaleString('en-IN', { minimumFractionDigits: 2 })} for ${trade.name}?`)) {
-                return;
-            }
-
-            const btn = btnEl || event.target;
-            const originalText = btn.innerText;
-            btn.innerText = "Settling...";
-            btn.disabled = true;
-
-            try {
-                const newBalance = currentBalance - outstanding;
-                const currentInvested = parseFloat(user.invested) || 0;
-                const newInvested = currentInvested + outstanding;
-
-                // 1. Update User Financials (Decrement by the settled amount)
-                const currentOutstanding = parseFloat(user.outstanding) || 0;
-                const newOutstanding = Math.max(0, currentOutstanding - outstanding);
-                const finResult = await window.DB.updateUserFinancials(user.id, newBalance, newInvested, newOutstanding);
-
-                if (finResult.success) {
-                    // 2. Update Trade Status (Set to Pending for Admin Approval)
-                    const tradeResult = await window.DB.updateTradeStatus(trade.id, 'Pending', 'Subscribed Fully');
-
-                    if (tradeResult.success) {
-                        alert("Successfully settled! Your subscription is now fully paid and has been moved to Pending transactions for admin approval.");
-                        document.getElementById('holdingDetailModal').style.display = 'none';
-                        await fetchUserTransactions();
-                        // Switch to Pending tab
-                        const pendingTab = document.querySelector('.d-tab-pill[onclick*="pending"]');
-                        switchTransactionTab(pendingTab, 'pending');
-                    } else {
-                        alert("Balance deducted but failed to update trade status. Please contact support.");
-                    }
-                } else {
-                    alert("Failed to update financials: " + (finResult.error?.message || "Unknown error"));
-                }
-            } catch (e) {
-                console.error(e);
-                alert("An error occurred: " + e.message);
-            } finally {
-                btn.innerText = originalText;
-                btn.disabled = false;
-            }
+            // Custom Settlement Confirmation Modal
+            showSettleConfirm(`Are you sure you want to settle the outstanding balance of ₹${outstanding.toLocaleString('en-IN', { minimumFractionDigits: 2 })} for ${trade.name}?`, () => {
+                executeSettleLogic(trade, user, outstanding, btnEl || event.target);
+            });
         }
 
         function closeHoldingDetail() {
             document.getElementById('holdingDetailModal').style.display = 'none';
         }
+
+        // Insufficient Balance Modal Logic
+        function showIBModal(msg) {
+            const modal = document.getElementById('insufficientBalanceModal');
+            const msgEl = document.getElementById('ibModalMsg');
+            if (modal && msgEl) {
+                msgEl.innerText = msg;
+                modal.style.display = 'flex';
+                if (window.lucide) lucide.createIcons();
+            } else {
+                alert(msg);
+            }
+        }
+        function closeIBModal() {
+            const modal = document.getElementById('insufficientBalanceModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        // Settlement Confirmation Modal Functions
+        let settleConfirmCallback = null;
+        function showSettleConfirm(msg, callback) {
+            const modal = document.getElementById('settleConfirmModal');
+            const msgEl = document.getElementById('settleConfirmMsg');
+            if (modal && msgEl) {
+                msgEl.innerText = msg;
+                settleConfirmCallback = callback;
+                modal.style.display = 'flex';
+                if (window.lucide) lucide.createIcons();
+            } else {
+                if (confirm(msg)) callback();
+            }
+        }
+        function closeSettleConfirm(confirmed) {
+            const modal = document.getElementById('settleConfirmModal');
+            if (modal) modal.style.display = 'none';
+            if (confirmed && settleConfirmCallback) {
+                settleConfirmCallback();
+            }
+            settleConfirmCallback = null;
+        }
     </script>
+
+    <!-- Insufficient Balance Modal -->
+    <div id="insufficientBalanceModal" class="center-popup-modal"
+        style="display:none; z-index: 10000; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center;">
+        <div class="ib-modal-content"
+            style="background-color: #111111; border: 1px solid #d4af37; border-radius: 20px; padding: 2.5rem; max-width: 400px; text-align: center; box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); animation: ibModalFadeIn 0.3s ease-out;">
+            <div class="ib-modal-icon"
+                style="color: #d4af37; margin-bottom: 1.5rem; display: flex; justify-content: center;">
+                <i data-lucide="alert-circle" size="48"></i>
+            </div>
+            <h2 class="ib-modal-title"
+                style="color: #d4af37; font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; font-family: 'Outfit', sans-serif;">
+                Insufficient Balance</h2>
+            <p id="ibModalMsg" class="ib-modal-message"
+                style="color: #e2e8f0; font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem; font-family: 'Outfit', sans-serif;">
+            </p>
+            <button class="ib-modal-btn" onclick="closeIBModal()"
+                style="background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%); color: #000; border: none; padding: 0.8rem 2.5rem; border-radius: 10px; font-weight: 800; cursor: pointer; width: 100%; font-family: 'Outfit', sans-serif;">OK</button>
+        </div>
+    </div>
+
+    <style>
+        @keyframes ibModalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes settleModalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .ib-modal-btn:hover,
+        .settle-btn-primary:hover,
+        .settle-btn-secondary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+    </style>
+
+    <!-- Settlement Confirmation Modal -->
+    <div id="settleConfirmModal" class="center-popup-modal"
+        style="display:none; z-index: 10001; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); align-items: center; justify-content: center;">
+        <div class="settle-modal-content"
+            style="background-color: #111111; border: 1px solid #333; border-radius: 24px; padding: 2.5rem; max-width: 420px; width: 90%; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); animation: settleModalFadeIn 0.3s ease-out;">
+            <div style="color: #d4af37; margin-bottom: 1.5rem; display: flex; justify-content: center;">
+                <i data-lucide="help-circle" size="56"></i>
+            </div>
+            <h2
+                style="color: #f8fafc; font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; font-family: 'Outfit', sans-serif;">
+                Confirm Settlement</h2>
+            <p id="settleConfirmMsg"
+                style="color: #94a3b8; font-size: 1rem; line-height: 1.6; margin-bottom: 2.5rem; font-family: 'Outfit', sans-serif;">
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button onclick="closeSettleConfirm(false)" class="settle-btn-secondary"
+                    style="flex: 1; padding: 0.8rem; background: transparent; border: 1px solid #475569; color: #94a3b8; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;">Cancel</button>
+                <button onclick="closeSettleConfirm(true)" class="settle-btn-primary"
+                    style="flex: 1; padding: 0.8rem; background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%); border: none; color: #000; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;">Settle
+                    Now</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/trading.js"></script>
 
 
@@ -6554,7 +6674,7 @@
                 <div class="settings-name" id="settingsName"
                     style="font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-top: 0.5rem;">User Name</div>
                 <div class="settings-phone" id="settingsPhone"
-                    style="font-size: 0.9rem; color: #64748b; margin-top: 0.2rem;">+91</div>
+                    style="font-size: 0.9rem; color: #64748b; margin-top: 0.2rem; display: none;"></div>
                 <div class="badge-row">
                     <div class="s-badge vip"><i data-lucide="shield-check" size="18"></i> VIP: <span
                             id="settingsVip">0</span></div>
@@ -6623,45 +6743,85 @@
         </div>
     </div>
 
-    <!-- Customer Service Modal -->
-    <div id="csModal" class="settings-modal" onclick="if(event.target == this) closeCS()">
-        <div class="settings-content" style="max-width: 500px; height: 600px; display: flex; flex-direction: column;">
-            <button class="settings-close" onclick="closeCS()"><i data-lucide="x" size="24"></i></button>
-            <div class="settings-header" style="margin-bottom: 1rem;">
-                <h2 style="font-size: 1.5rem; font-weight: 700;">Customer Service</h2>
+    <!-- Customer Service Modal (Fixed Bottom-Right) -->
+    <div id="csModal">
+        <!-- Maximized Content -->
+        <div class="cs-modal-content">
+            <div style="position: absolute; top: 15px; right: 15px; display: flex; gap: 8px; z-index: 100;">
+                <button onclick="minimizeCS()"
+                    style="background: rgba(255,255,255,0.05); border: none; color: #d4af37; cursor: pointer; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+                    onmouseover="this.style.background='rgba(255,255,255,0.1)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                    <i data-lucide="minus" size="18"></i>
+                </button>
+                <button onclick="closeCS()"
+                    style="background: rgba(255,255,255,0.05); border: none; color: #d4af37; cursor: pointer; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: all 0.2s;"
+                    onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                    <i data-lucide="x" size="18"></i>
+                </button>
             </div>
+
+            <div class="settings-header"
+                style="margin-bottom: 0; padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid #222;">
+                <h2 style="font-size: 1.3rem; font-weight: 700; color: #d4af37; margin: 0;">Customer Service</h2>
+                <div style="height: 2px; width: 30px; background: #d4af37; margin-top: 5px;"></div>
+            </div>
+
             <div id="chatBox"
-                style="flex: 1; overflow-y: auto; padding: 1rem; background: #f8fafc; border-radius: 12px; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                style="flex: 1; overflow-y: auto; padding: 1.5rem; background: #0c0c0c; display: flex; flex-direction: column; gap: 1rem;">
             </div>
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
+
+            <!-- Image Preview Area -->
+            <div id="csImagePreviewArea"
+                style="display: none; padding: 0.5rem 1.5rem; background: #1a1a1a; border-top: 1px solid #333; gap: 0.5rem; align-items: center;">
+                <!-- Preview thumbnail injected here -->
+            </div>
+
+            <div
+                style="display: flex; gap: 0.5rem; align-items: center; padding: 1.2rem 1.5rem; background: #111; border-top: 1px solid #222;">
                 <input type="file" id="csImageInput" accept="image/*" style="display: none;"
                     onchange="handleCSImageUpload(this)">
                 <button onclick="document.getElementById('csImageInput').click()"
-                    style="background: none; border: none; cursor: pointer; color: #64748b; padding: 0.5rem;">
-                    <i data-lucide="image" size="20"></i>
+                    style="background: none; border: none; cursor: pointer; color: #d4af37; padding: 0.5rem; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                    <i data-lucide="image" size="22"></i>
                 </button>
                 <button onclick="toggleEmojiPicker()"
-                    style="background: none; border: none; cursor: pointer; color: #64748b; padding: 0.5rem; position: relative;">
-                    <i data-lucide="smile" size="20"></i>
+                    style="background: none; border: none; cursor: pointer; color: #d4af37; padding: 0.5rem; position: relative; transition: transform 0.2s;"
+                    onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                    <i data-lucide="smile" size="22"></i>
                     <div id="emojiPicker"
-                        style="display: none; position: absolute; bottom: 40px; left: 0; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.5rem; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); width: 150px;">
-                        <span onclick="insertEmoji('👍')" style="cursor: pointer; font-size: 1.2rem;">👍</span>
-                        <span onclick="insertEmoji('👋')" style="cursor: pointer; font-size: 1.2rem;">👋</span>
-                        <span onclick="insertEmoji('😊')" style="cursor: pointer; font-size: 1.2rem;">😊</span>
-                        <span onclick="insertEmoji('😂')" style="cursor: pointer; font-size: 1.2rem;">😂</span>
-                        <span onclick="insertEmoji('❤️')" style="cursor: pointer; font-size: 1.2rem;">❤️</span>
-                        <span onclick="insertEmoji('🔥')" style="cursor: pointer; font-size: 1.2rem;">🔥</span>
-                        <span onclick="insertEmoji('🎉')" style="cursor: pointer; font-size: 1.2rem;">🎉</span>
-                        <span onclick="insertEmoji('😢')" style="cursor: pointer; font-size: 1.2rem;">😢</span>
+                        style="display: none; position: absolute; bottom: 50px; left: -10px; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 0.75rem; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 180px; z-index: 100;">
+                        <span onclick="insertEmoji('👍')" style="cursor: pointer; font-size: 1.4rem;">👍</span>
+                        <span onclick="insertEmoji('👋')" style="cursor: pointer; font-size: 1.4rem;">👋</span>
+                        <span onclick="insertEmoji('😊')" style="cursor: pointer; font-size: 1.4rem;">😊</span>
+                        <span onclick="insertEmoji('😂')" style="cursor: pointer; font-size: 1.4rem;">😂</span>
+                        <span onclick="insertEmoji('❤️')" style="cursor: pointer; font-size: 1.4rem;">❤️</span>
+                        <span onclick="insertEmoji('🔥')" style="cursor: pointer; font-size: 1.4rem;">🔥</span>
+                        <span onclick="insertEmoji('🎉')" style="cursor: pointer; font-size: 1.4rem;">🎉</span>
+                        <span onclick="insertEmoji('💰')" style="cursor: pointer; font-size: 1.4rem;">💰</span>
                     </div>
                 </button>
                 <input type="text" id="csInput" placeholder="Type a message..."
-                    style="flex: 1; padding: 0.8rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
+                    style="flex: 1; padding: 0.7rem 1rem; background: #050505; border: 1px solid #333; border-radius: 10px; color: white; outline: none; font-family: 'Outfit', sans-serif; font-size: 0.9rem;">
                 <button onclick="sendCSMessage()"
-                    style="background: #3b82f6; color: white; border: none; padding: 0 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer;">Send</button>
+                    style="background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%); color: #000; border: none; padding: 0.7rem 1.2rem; border-radius: 10px; font-weight: 800; cursor: pointer; transition: opacity 0.2s;"
+                    onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Send</button>
             </div>
         </div>
+
+        <!-- Minimized Bar -->
+        <div id="csMinimizedBar" onclick="maximizeCS()">
+            <div
+                style="position: relative; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: rgba(212,175,55,0.1); border-radius: 50%;">
+                <i data-lucide="message-circle" size="14"></i>
+            </div>
+            <span style="font-size: 0.9rem;">Customer Service</span>
+            <i data-lucide="chevron-up" size="18" style="margin-left: auto; opacity: 0.7;"></i>
+        </div>
     </div>
+
 
     <!-- Holding Details Modal -->
     <div id="holdingDetailModal" class="center-popup-modal" onclick="if(event.target == this) closeHoldingDetail()">
