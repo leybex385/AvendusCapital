@@ -426,6 +426,7 @@ window.DB = {
                 .from('bank_accounts')
                 .select('*')
                 .eq('user_id', userId)
+                .or('is_deleted.is.null,is_deleted.eq.false')
                 .order('created_at', { ascending: false });
 
             if (!error && data) onlineData = data;
@@ -485,8 +486,17 @@ window.DB = {
         }
 
         const client = this.getClient();
-        const { error } = await client.from('bank_accounts').delete().eq('id', id);
-        return { success: !error, error };
+        // Soft delete: set is_deleted = true
+        const { error } = await client
+            .from('bank_accounts')
+            .update({ is_deleted: true })
+            .eq('id', id);
+
+        if (error) {
+            console.error("Soft delete failed:", error);
+            return { success: false, error };
+        }
+        return { success: true };
     },
 
     // ADMIN: Get ALL bank accounts (Online + Offline)
@@ -497,6 +507,7 @@ window.DB = {
             const { data, error } = await client
                 .from('bank_accounts')
                 .select('*')
+                .or('is_deleted.is.null,is_deleted.eq.false')
                 .order('created_at', { ascending: false });
 
             if (!error && data) onlineData = data;
@@ -695,8 +706,15 @@ window.DB = {
     async deleteProduct(id) {
         const client = this.getClient();
         if (!client) return { success: false };
-        // Soft delete: update status to 'inactive'
-        const { error } = await client.from('products').update({ status: 'inactive' }).eq('id', id);
+        // Hard delete as requested to remove from admin table
+        const { error } = await client.from('products').delete().eq('id', id);
+        return { success: !error, error };
+    },
+
+    async updateProductStatus(id, newStatus) {
+        const client = this.getClient();
+        if (!client) return { success: false };
+        const { error } = await client.from('products').update({ status: newStatus }).eq('id', id);
         return { success: !error, error };
     },
 
