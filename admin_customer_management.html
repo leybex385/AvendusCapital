@@ -2538,9 +2538,17 @@
 
 
         // Main Admin Script
-        if (!window.DB.requireAdminAuth()) return;
         const adminSession = sessionStorage.getItem('admin_auth');
-        const adminData = JSON.parse(adminSession);
+        if (!adminSession) {
+            window.location.href = 'admin_login.html';
+        } else {
+            try {
+                const adminData = JSON.parse(adminSession);
+                if (!adminData || !adminData.id) window.location.href = 'admin_login.html';
+            } catch (e) {
+                window.location.href = 'admin_login.html';
+            }
+        }
         const DB = window.DB;
         lucide.createIcons();
 

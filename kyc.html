@@ -364,14 +364,12 @@
 
     <script>
         lucide.createIcons();
-        if (!DB.requireAuth()) return;
         const user = DB.getCurrentUser();
+        if (!user) window.location.href = 'login.html';
 
-        if (user) {
-            document.getElementById('mobileDisplay').value = user.mobile;
-            if (user.kyc === 'Approved' || user.kyc === 'Pending') {
-                showStatus(user.kyc);
-            }
+        document.getElementById('mobileDisplay').value = user.mobile;
+        if (user.kyc === 'Approved' || user.kyc === 'Pending') {
+            showStatus(user.kyc);
         }
 
         function nextStep(n) {

@@ -10,9 +10,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Check local admin session
-    if (!window.DB.requireAdminAuth()) return;
     const adminAuth = sessionStorage.getItem('admin_auth');
-    const adminUser = JSON.parse(adminAuth);
+    if (!adminAuth) {
+        window.location.href = 'admin_login.html';
+        return;
+    }
+
+    let adminUser;
+    try {
+        adminUser = JSON.parse(adminAuth);
+        if (!adminUser || !adminUser.id) throw new Error("Invalid admin data");
+    } catch (e) {
+        console.error("Session invalid:", e);
+        window.location.href = 'admin_login.html';
+        return;
+    }
 
     // --- Selectors ---
 

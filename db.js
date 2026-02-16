@@ -119,34 +119,6 @@ window.DB = {
         window.location.href = 'login.html';
     },
 
-    requireAuth() {
-        const user = this.getCurrentUser();
-        if (!user) {
-            window.location.href = 'login.html';
-            return false;
-        }
-        return true;
-    },
-
-    requireAdminAuth() {
-        const adminSession = sessionStorage.getItem('admin_auth');
-        if (!adminSession) {
-            window.location.href = 'admin_login.html';
-            return false;
-        }
-        try {
-            const adminData = JSON.parse(adminSession);
-            if (!adminData || !adminData.id) {
-                window.location.href = 'admin_login.html';
-                return false;
-            }
-        } catch (e) {
-            window.location.href = 'admin_login.html';
-            return false;
-        }
-        return true;
-    },
-
     // --- MESSAGES / CHAT / NOTICES ---
     async getMessages(userId) {
         const client = this.getClient();

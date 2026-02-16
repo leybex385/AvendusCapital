@@ -4,10 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deposit - Avendus Capital</title>
+    <title>News Detail - Avendus Capital</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="settings-panel-fix.css">
-    <link rel="stylesheet" href="deposit-page-fix.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -16,426 +15,197 @@
     <script src="db.js"></script>
     <style>
         body {
-            background-color: #f1f5f9;
+            background-color: var(--bg-orange);
+            /* Orange background from screenshot */
+            margin: 0;
+            font-family: 'Outfit', sans-serif;
+            color: #333;
         }
 
-        .deposit-navbar {
-            background-color: #1e56a0;
-            /* Navy blue from screenshot */
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
+        /* Back Button */
         .back-btn {
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-        }
-
-        .deposit-container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 2rem;
-        }
-
-        .left-col {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        .white-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        .notice-text {
-            font-size: 0.9rem;
-            line-height: 1.6;
-            color: #475569;
-            margin-bottom: 2rem;
-        }
-
-        .notice-text b {
-            color: #1e293b;
-        }
-
-        .support-btn {
-            display: block;
-            width: 100%;
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 0.8rem;
-            border-radius: 8px;
-            font-weight: 500;
-            text-align: center;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .records-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-
-        .records-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #1e56a0;
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        .refresh-btn {
-            background: #1e56a0;
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.5);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-        }
-
-        .filter-pills {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-            overflow-x: auto;
-            padding-bottom: 0.5rem;
-        }
-
-        .pill {
-            padding: 0.4rem 1.2rem;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: #64748b;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .pill.active {
-            background: #1e56a0;
             color: white;
-            border-color: #1e56a0;
+            cursor: pointer;
+            z-index: 100;
+            border: none;
+            backdrop-filter: blur(4px);
         }
 
-        .record-item {
-            border: 1px solid #f1f5f9;
-            border-radius: 12px;
-            padding: 1.5rem;
+        .hero-section {
+            width: 100%;
+            height: 400px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
+            align-items: flex-end;
+            justify-content: center;
         }
 
-        .record-meta {
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.8));
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            /* Centered title based on screenshot layout structure */
+            padding-bottom: 60px;
+            /* Space for the overlapping card */
+        }
+
+        .hero-title {
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 1rem 1rem 1rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-meta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Content Card */
+        .content-card {
+            background: white;
+            width: 90%;
+            max-width: 800px;
+            margin: -40px auto 40px auto;
+            /* Negative top margin to overlap */
+            border-radius: 20px;
+            padding: 2rem;
+            position: relative;
+            z-index: 20;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .author-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 1rem;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            background: #1e293b;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: 700;
+        }
+
+        .author-text h4 {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #0f172a;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .author-text span {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .article-body {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #334155;
+        }
+
+        .article-body p {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Contact/Chat Widget Placeholder from screenshot (optional but nice) */
+        .contact-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 0;
+            background: #0ea5e9;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px 0 0 8px;
+            font-weight: 600;
             display: flex;
             flex-direction: column;
-            gap: 0.2rem;
-        }
-
-        .record-date {
-            font-size: 0.85rem;
-            color: #64748b;
-        }
-
-        .record-amount-cell {
-            text-align: right;
-        }
-
-        .record-amount {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: #1e293b;
-            display: block;
-        }
-
-        .status-badge {
-            display: inline-block;
-            margin-top: 0.4rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #10b981;
-            background: #ecfdf5;
-            padding: 0.2rem 0.6rem;
-            border-radius: 4px;
-        }
-
-        .status-badge.pending {
-            color: #f59e0b;
-            background: #fffbeb;
-        }
-
-        .status-badge.rejected {
-            color: #ef4444;
-            background: #fef2f2;
-        }
-
-        .terms-col h2 {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-        }
-
-        .terms-content {
-            font-size: 0.8rem;
-            line-height: 1.5;
-            color: #475569;
-        }
-
-        .terms-section {
-            margin-bottom: 1.5rem;
-        }
-
-        .terms-section h3 {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 0.5rem;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 
 <body>
-    <header class="deposit-navbar">
-        <a href="market.html" class="back-btn"><i data-lucide="chevron-left"></i></a>
-        <h1>Deposit</h1>
-    </header>
 
-    <main class="deposit-container">
-        <div class="left-col">
-            <section class="white-card">
-                <div class="notice-text">
-                    In accordance with <b>the regulations of the Securities and Exchange Board of India (SEBI)</b>, all
-                    institutional trading funds must undergo the required audits and be deposited into approved
-                    regulatory accounts.<br><br>
-                    Before making a deposit, please book an appointment through the Custom Service section in the app or
-                    contact your dedicated relationship manager for assistance.
-                </div>
-                <a href="#" class="support-btn" onclick="openCS()">Contact support</a>
-            </section>
+    <button class="back-btn" onclick="history.back()"><i data-lucide="chevron-left"></i></button>
 
-            <section class="white-card">
-                <div class="records-header">
-                    <div class="records-title">
-                        <i data-lucide="circle-dollar-sign"></i> Deposit Records
-                    </div>
-                    <button class="refresh-btn"><i data-lucide="rotate-cw"></i></button>
-                </div>
+    <div class="hero-section" id="heroBg">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-meta">
+                <span class="badge">Business</span>
+                <span id="heroDate">16 minutes ago</span>
+            </div>
+            <h1 class="hero-title" id="articleTitle">Loading...</h1>
+        </div>
+    </div>
 
-                <div class="filter-pills">
-                    <span class="pill active">All</span>
-                    <span class="pill">Success</span>
-                    <span class="pill">Pending</span>
-                    <span class="pill">Rejected</span>
-                </div>
-
-                <div class="records-list" id="recordsList">
-                    <!-- Records will be injected here by JavaScript -->
-                </div>
-            </section>
+    <div class="content-card">
+        <div class="author-info">
+            <div class="author-avatar" id="authorInitials">TR</div>
+            <div class="author-text">
+                <h4 id="authorName">Tristan Rich</h4>
+                <span id="fullDate">Feb 6, 2026, 09:42 PM</span>
+            </div>
         </div>
 
-        <aside class="white-card terms-col">
-            <h2>Deposit Terms and Conditions</h2>
-            <div class="terms-content">
-                <div class="terms-section">
-                    <h3>Minimum Deposit Amount</h3>
-                    <p>The minimum amount required for each deposit is subject to the company's policy and may vary
-                        depending on your account type or jurisdiction. Please refer to the current minimum deposit
-                        threshold before initiating a transaction.</p>
-                </div>
-                <div class="terms-section">
-                    <h3>Deposit Time Window</h3>
-                    <p>Deposits are accepted from Monday to Friday (excluding public holidays), between 09:00 and 22:00.
-                        Transactions made outside these hours will be processed on the next working day.</p>
-                </div>
-                <div class="terms-section">
-                    <h3>Account Verification</h3>
-                    <p>All deposits must originate from a verified bank account that matches the registered name on your
-                        trading account. Deposits from third-party accounts, joint accounts, or unverified sources may
-                        be delayed, returned, or rejected in accordance with compliance requirements.</p>
-                </div>
-                <!-- ... other sections matching the screenshot ... -->
-                <div class="terms-section">
-                    <h3>Settlement Time</h3>
-                    <p>Deposits are typically credited within 24 hours of confirmation. However, actual posting times
-                        may vary depending on the remitting bank's policies, payment network congestion, and the
-                        accuracy of the information provided.</p>
-                </div>
-            </div>
-        </aside>
-    </main>
+        <div class="article-body" id="articleContent">
+            Loading content...
+        </div>
+    </div>
 
-    <script src="db.js"></script>
-    <script>
-        lucide.createIcons();
-
-        async function initDeposits() {
-
-
-            // 1. Ensure User Data is Fresh
-            const user = await DB.refreshCurrentUser();
-            if (!user) {
-                console.warn("No user logged in, cannot fetch deposits");
-                return;
-            }
-
-            console.log(`[Deposit] Initializing for User ID: ${user.id}`);
-            const client = DB.getClient();
-            if (!client) {
-                console.warn("DB Client failed to initialize");
-                return;
-            }
-
-            // Fetch function wrapper
-            const fetchData = async () => {
-                const { data, error } = await client
-                    .from('deposits')
-                    .select('*')
-                    .eq('user_id', user.id)
-                    .order('created_at', { ascending: false });
-
-                if (error) {
-                    console.error('[Deposit] Fetch Error:', error);
-                    return [];
-                }
-                console.log(`[Deposit] Fetched ${data ? data.length : 0} records.`);
-                return data || [];
-            };
-
-            // Initial Render
-            const initialData = await fetchData();
-            renderRecords(initialData);
-
-            // Realtime Listener for Deposits
-            client.channel('public:deposits:' + user.id)
-                .on('postgres_changes', {
-                    event: '*',
-                    schema: 'public',
-                    table: 'deposits',
-                    filter: `user_id=eq.${user.id}`
-                }, handleDepositUpdate)
-                .subscribe();
-
-            // Fallback Polling (Every 4s)
-            setInterval(async () => {
-                const pollData = await fetchData();
-                if (pollData) {
-                    const activePill = document.querySelector('.pill.active');
-                    const currentFilter = activePill ? activePill.textContent.trim() : 'All';
-                    renderRecords(pollData, currentFilter);
-                }
-            }, 4000);
-        }
-
-        async function handleDepositUpdate(payload) {
-            console.log('Deposit update received:', payload);
-            const user = DB.getCurrentUser();
-            if (!user) return;
-
-            const client = DB.getClient();
-            const { data: newData } = await client
-                .from('deposits')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false });
-
-            if (newData) {
-                const activePill = document.querySelector('.pill.active');
-                const currentFilter = activePill ? activePill.textContent.trim() : 'All';
-                renderRecords(newData, currentFilter);
-            }
-        }
-
-
-        function renderRecords(records, filter = 'All') {
-            const list = document.getElementById('recordsList');
-            if (!list) return;
-            list.innerHTML = '';
-
-            if (!records || records.length === 0) {
-                list.innerHTML = '<div style="padding:20px; text-align:center; color:#94a3b8;">No deposit records found.</div>';
-                return;
-            }
-
-            const filtered = filter === 'All'
-                ? records
-                : records.filter(r => {
-                    const status = (r.status || 'Pending');
-                    if (filter === 'Success' || filter === 'Approved') return status === 'Approved';
-                    return status === filter;
-                });
-
-            if (filtered.length === 0) {
-                list.innerHTML = '<div style="padding:20px; text-align:center; color:#94a3b8;">No records match this filter.</div>';
-                return;
-            }
-
-            filtered.forEach(record => {
-                const date = new Date(record.created_at).toLocaleString();
-                const status = record.status || 'Pending';
-
-                // Color mapping
-                let colorStyle = '';
-                if (status === 'Approved') colorStyle = 'background:#dcfce7; color:#166534;';
-                else if (status === 'Rejected') colorStyle = 'background:#fee2e2; color:#991b1b;';
-                else colorStyle = 'background:#fef3c7; color:#92400e;';
-
-                const item = document.createElement('div');
-                item.className = 'record-item';
-                item.innerHTML = `
-                    <div class="record-meta">
-                        <span class="record-date">${date}</span>
-                        <div style="font-size:0.75rem; color:#64748b; margin-top:2px;">Ref: #${record.id}</div> 
-                    </div>
-                    <div class="record-amount-cell">
-                        <span class="record-amount">₹${parseFloat(record.amount).toLocaleString()}</span>
-                        <span style="padding:4px 8px; border-radius:4px; font-size:0.75rem; font-weight:600; ${colorStyle}">${status}</span>
-                    </div>
-                `;
-                list.appendChild(item);
-            });
-        }
-
-        const pills = document.querySelectorAll('.pill');
-        pills.forEach(pill => {
-            pill.addEventListener('click', async () => {
-                pills.forEach(p => p.classList.remove('active'));
-                pill.classList.add('active');
-                const user = DB.getCurrentUser();
-                if (user) {
-                    const client = DB.getClient();
-                    const { data } = await client.from('deposits').select('*').eq('user_id', user.id);
-                    renderRecords(data || [], pill.textContent);
-                }
-            });
-        });
-
-        initDeposits();
-    </script>
     <!-- Modals -->
     <div id="topAlertContainer" class="top-alert-container">
         <div class="top-alert">
@@ -584,10 +354,8 @@
                 style="flex: 1; overflow-y: auto; padding: 1.5rem; background: #0c0c0c; display: flex; flex-direction: column; gap: 1rem;">
             </div>
 
-            <!-- Image Preview Area -->
             <div id="csImagePreviewArea"
                 style="display: none; padding: 0.5rem 1.5rem; background: #1a1a1a; border-top: 1px solid #333; gap: 0.5rem; align-items: center;">
-                <!-- Preview thumbnail injected here -->
             </div>
 
             <div
@@ -636,13 +404,13 @@
 
 
     <!-- Reset Password Modal (Logged-In) -->
-    <div id="resetPasswordModal" class="center-popup-modal" onclick="if(event.target == this) closeResetPassword()">
-        <div class="center-popup-content" style="max-width: 450px;">
-            <div class="popup-header">
-                <h2>Reset Password</h2>
-                <button class="popup-close" onclick="closeResetPassword()"><i data-lucide="x" size="24"></i></button>
+    <div id="resetPasswordModal" class="settings-modal" onclick="if(event.target == this) closeResetPassword()">
+        <div class="settings-content" style="max-width: 450px;">
+            <button class="settings-close" onclick="closeResetPassword()"><i data-lucide="x" size="24"></i></button>
+            <div class="settings-header" style="margin-bottom: 1.5rem;">
+                <h2 style="font-size: 1.5rem; font-weight: 700; color: #1e293b;">Reset Password</h2>
             </div>
-            <div class="popup-body">
+            <div style="padding: 1rem 0;">
                 <div class="reg-input-group" style="margin-bottom: 1.5rem;">
                     <label
                         style="display: block; font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Current
@@ -683,55 +451,6 @@
                     Password</button>
                 <button class="logout-btn" style="background: #f1f5f9; color: #64748b; margin-top: 1rem;"
                     onclick="closeResetPassword()">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Withdrawal PIN Modal -->
-    <div id="withdrawalPinModal" class="center-popup-modal"
-        onclick="if(event.target == this) closeWithdrawalPinModal()">
-        <div class="center-popup-content" style="max-width: 450px;">
-            <div class="popup-header">
-                <h2 id="wpModalTitle">Withdrawal PIN</h2>
-                <button class="popup-close" onclick="closeWithdrawalPinModal()"><i data-lucide="x"
-                        size="24"></i></button>
-            </div>
-            <div class="popup-body">
-                <p id="wpModalDesc" style="font-size: 0.9rem; color: #64748b; margin-bottom: 1.5rem;">Set or update your
-                    4-6 digit withdrawal PIN.</p>
-                <div class="reg-input-group" style="margin-bottom: 1.5rem;">
-                    <label
-                        style="display: block; font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">New
-                        Withdrawal PIN (4-6 digits)</label>
-                    <input type="password" id="wpNewPin" class="reg-input" maxlength="6" pattern="\d*"
-                        inputmode="numeric" placeholder="Enter New PIN"
-                        style="width: 100%; padding: 0.8rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
-                </div>
-                <div class="reg-input-group" style="margin-bottom: 1.5rem;">
-                    <label
-                        style="display: block; font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Confirm
-                        New PIN</label>
-                    <input type="password" id="wpConfirmPin" class="reg-input" maxlength="6" pattern="\d*"
-                        inputmode="numeric" placeholder="Confirm New PIN"
-                        style="width: 100%; padding: 0.8rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
-                </div>
-                <div class="reg-input-group" style="margin-bottom: 2rem;">
-                    <label
-                        style="display: block; font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem;">Verify
-                        Login Password</label>
-                    <div class="reg-password-wrapper" style="position: relative;">
-                        <input type="password" id="wpLoginPass" class="reg-input" placeholder="Enter Login Password"
-                            style="width: 100%; padding: 0.8rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; outline: none;">
-                        <i data-lucide="eye-off"
-                            style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer;"
-                            onclick="toggleInternalPass('wpLoginPass', this)"></i>
-                    </div>
-                </div>
-                <button id="wpSubmitBtn" class="logout-btn" style="background: #fb923c;"
-                    onclick="handleWithdrawalPinSubmit()">Update
-                    Withdrawal PIN</button>
-                <button class="logout-btn" style="background: #f1f5f9; color: #64748b; margin-top: 1rem;"
-                    onclick="closeWithdrawalPinModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -800,6 +519,179 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+        // Safe decode utility
+        function safeDecode(str) {
+            try {
+                return decodeURIComponent(str);
+            } catch (e) {
+                return str;
+            }
+        }
+
+        // News Data Repository
+        const newsData = {
+            "1": {
+                title: "Nifty 50 Hits Lifetime High of 25,600+ Amid Global Bull Run",
+                author: "Market Desk",
+                date: "2 hours ago",
+                img: "https://images.unsplash.com/photo-1611974765270-ca1258634369?auto=format&fit=crop&q=80&w=1200",
+                badge: "MARKET UPDATE",
+                content: "India's benchmark index continues its upward trajectory as institutional investors show renewed confidence in Indian equities following global easing signals. Analysts expect a period of consolidation before the next leg of the rally towards 26,000. Domestic retail participation remains at record levels, providing a strong cushion against FII outflows."
+            },
+            "2": {
+                title: "Reliance Announces ₹75,000 Cr Roadmap for Green Hydrogen",
+                author: "Business Correspondent",
+                date: "5 hours ago",
+                img: "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&q=80&w=1200",
+                badge: "RELIANCE INC",
+                content: "The conglomerate focuses on massive energy transition aiming for net-zero emissions by 2035 with cutting-edge tech investments. Chairman Mukesh Ambani highlighted that the green hydrogen ecosystem will not only help India meet its climate goals but also position the country as a global exporter of sustainable energy solutions."
+            },
+            "3": {
+                title: "RBI Maintains Repo Rate at 6.5%, Focuses on Inflation Target",
+                author: "Monetary Desk",
+                date: "8 hours ago",
+                img: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=1200",
+                badge: "RBI POLICY",
+                content: "Governor Shaktikanta Das emphasizes price stability while supporting sustainable growth in the latest MPC meeting. The committee decided to maintain its stance on 'withdrawal of accommodation' to ensure that inflation progressively aligns with the target while supporting growth. Food inflation remains a key monitorable for the central bank."
+            },
+            "4": {
+                title: "Banking Stocks Surge as NPA Levels Hit Decade Low",
+                author: "Financial Analyst",
+                date: "10 hours ago",
+                img: "https://images.unsplash.com/photo-1501167786227-4cba60f6d58f?auto=format&fit=crop&q=80&w=1200",
+                badge: "BANKING",
+                content: "Private and public sector banks witness strong credit growth as domestic demand stays resilient across rural markets. The improvement in asset quality across the banking sector has been largely driven by lower slippages and healthy recoveries. Market experts believe the current credit cycle has more room to grow given the infrastructure push by the government."
+            },
+            "5": {
+                title: "2026 Financial Outlook: Trends to Watch",
+                author: "Wealth Management",
+                date: "1 day ago",
+                img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=1200",
+                badge: "STRATEGY",
+                content: "Explore the latest trends and predictions for the 2026 financial markets, including interest rate projections and sector-specific growth opportunities. Experts suggest a shift towards defensive stocks in the latter half of the year, while maintaining exposure to high-growth emerging tech sectors."
+            },
+            "6": {
+                title: "Top 5 High-Yield Dividend Stocks for Passive Income",
+                author: "Income Specialist",
+                date: "2 days ago",
+                img: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&q=80&w=1200",
+                badge: "DIVIDENDS",
+                content: "Discover the most reliable dividend-paying companies in India that provide consistent returns and long-term stability for your portfolio. This list focuses on companies with a track record of increasing dividends even during market downturns, ensuring a steady stream of income for retail investors."
+            },
+            "7": {
+                title: "The Green Energy Revolution: Multi-bagger Opportunities",
+                author: "Eco-Invest",
+                date: "2 days ago",
+                img: "https://images.unsplash.com/photo-1466611653911-954ffea112cd?auto=format&fit=crop&q=80&w=1200",
+                badge: "ENERGY",
+                content: "As India pivots to renewable energy, these companies are well-positioned to lead the transition and deliver exceptional market returns. Massive government subsidies and international environmental commitments are driving unprecedented local investment into wind, solar, and green hydrogen infrastructure."
+            },
+            "8": {
+                title: "Tech Giants: Assessing Valuation in a High-Rate Environment",
+                author: "Tech Desk",
+                date: "3 days ago",
+                img: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200",
+                badge: "TECHNOLOGY",
+                content: "A deep dive into the mega-cap tech stocks and whether their current valuations are sustainable given the changing economic landscape. While AI continues to be a massive tailwind, investors are becoming increasingly discerning about actual revenue growth versus speculative hype."
+            },
+            "9": {
+                title: "Small-cap Hidden Gems with Massive Potential",
+                author: "Alpha Hunter",
+                date: "4 days ago",
+                img: "https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&q=80&w=1200",
+                badge: "GROWTH",
+                content: "Identify under-the-radar small-cap companies with strong fundamentals and innovative products that could be the next market leaders. These companies operate in niche segments with high entry barriers and are currently trading at significant discounts to their larger peers."
+            },
+            "10": {
+                title: "Gold vs Stocks: Where to Hedge against Inflation?",
+                author: "Commodity Desk",
+                date: "5 days ago",
+                img: "https://images.unsplash.com/photo-1589758438368-0ad531db3366?auto=format&fit=crop&q=80&w=1200",
+                badge: "COMMODITIES",
+                content: "Comparing the performance of yellow metal against equities during inflationary periods to help you build a resilient investment portfolio. Historically, gold has acted as a safe haven, but certain equity sectors like energy and real estate have also shown strong correlation with inflation."
+            },
+            "11": {
+                title: "Real Estate REITs: Stable Returns in Volatile Markets",
+                author: "Real Estate Expert",
+                date: "1 week ago",
+                img: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=1200",
+                badge: "REITS",
+                content: "Understanding Real Estate Investment Trusts and how they offer exposure to premium commercial property with the liquidity of common stocks. Commercial occupancy rates in top-tier cities are at five-year highs, driving rental yields and dividend distributions for REIT holders."
+            },
+            "12": {
+                title: "Consumer Goods Surge: Rural Demand Picks Up",
+                author: "Retail Analyst",
+                date: "1 week ago",
+                img: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=1200",
+                badge: "CONSUMER",
+                content: "The FMCG sector is witnessing a strong rebound as rural consumption patterns improve following a healthy monsoon and government support. Companies with strong supply chain networks in tire-2 and tier-3 cities are outperforming expectations as consumer sentiment reaches pre-pandemic levels."
+            },
+            "13": {
+                title: "EV Infrastructure Growth: Charging the Future",
+                author: "Auto Analyst",
+                date: "2 weeks ago",
+                img: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&q=80&w=1200",
+                badge: "AUTOMOBILE",
+                content: "Investigating the companies building India's electric vehicle charging network and the long-term prospects for the EV ecosystem. With new policy frameworks coming into place, the scale-up of charging stations is expected to accelerate dramatically over the next 24 months."
+            },
+            "14": {
+                title: "Pharma Sector: New R&D Breakthroughs",
+                author: "Healtcare Desk",
+                date: "2 weeks ago",
+                img: "https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&q=80&w=1200",
+                badge: "PHARMA",
+                content: "India's pharmaceutical leaders are pivoting from generics to complex molecules, opening up significant value creation opportunities for long-term investors. Higher R&D spending is beginning to show results in specialized therapy areas like oncology and rare diseases."
+            }
+        };
+
+        // Parse URL params
+        const params = new URLSearchParams(window.location.search);
+        const newsId = params.get('id');
+
+        // Lookup from newsId or fallback to query params
+        let finalData = newsData[newsId] || {
+            title: safeDecode(params.get('title') || 'Market Notice'),
+            author: safeDecode(params.get('author') || 'Admin'),
+            date: safeDecode(params.get('date') || 'Just now'),
+            img: safeDecode(params.get('img') || 'https://images.unsplash.com/photo-1611974765270-ca1258634369?auto=format&fit=crop&q=80&w=1200'),
+            badge: safeDecode(params.get('badge') || 'Business'),
+            content: safeDecode(params.get('content') || '')
+        };
+
+        // Render Data
+        document.title = finalData.title + " - Avendus";
+        document.getElementById('articleTitle').textContent = finalData.title;
+        document.getElementById('authorName').textContent = finalData.author;
+        document.getElementById('heroDate').textContent = finalData.date;
+        document.getElementById('fullDate').textContent = finalData.date;
+
+        // Handle image loading and placeholder fallback
+        const heroBg = document.getElementById('heroBg');
+        const imgUrl = finalData.img;
+
+        if (heroBg) {
+            const testImg = new Image();
+            testImg.onload = () => {
+                heroBg.style.backgroundImage = `url('${imgUrl}')`;
+            };
+            testImg.onerror = () => {
+                console.warn("News image failed to load, using placeholder.");
+                heroBg.style.backgroundImage = `url('https://images.unsplash.com/photo-1611974765270-ca1258634369?auto=format&fit=crop&q=80&w=1200')`;
+            };
+            testImg.src = imgUrl;
+        }
+
+        // Initials
+        const names = finalData.author.split(' ');
+        let initials = names[0][0];
+        if (names.length > 1) initials += names[names.length - 1][0];
+        document.getElementById('authorInitials').textContent = initials;
+
+        // Content
+        const defaultText = `Market analysis suggests ongoing resilience...`;
+        document.getElementById('articleContent').innerHTML = (finalData.content || defaultText).replace(/\n/g, '<br><br>');
+    </script>
 </body>
 
 </html>
