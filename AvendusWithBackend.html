@@ -1473,7 +1473,9 @@
     </div>
 
     <script>
-        if (sessionStorage.getItem('admin_auth') !== 'true') window.location.href = 'admin_login.html';
+        if (!window.DB.requireAdminAuth()) return;
+        const adminSession = sessionStorage.getItem('admin_auth');
+        const adminData = adminSession ? JSON.parse(adminSession) : null;
         lucide.createIcons();
 
         const PAGE_NAMES = {

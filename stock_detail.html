@@ -467,15 +467,14 @@
         }
 
         window.onload = function () {
-            // Check Auth
+            // Public viewing allowed
+            document.getElementById('stockContent').style.display = 'flex';
+            document.getElementById('authCheck').style.display = 'none';
+
             const user = window.DB.getCurrentUser();
-            if (!user) {
-                document.getElementById('stockContent').style.display = 'none';
-                document.getElementById('authCheck').style.display = 'block';
-                return;
-            } else {
-                document.getElementById('stockContent').style.display = 'flex';
+            if (user) {
                 syncBalance();
+                loadHoldings();
             }
 
             // Parse URL
@@ -488,7 +487,7 @@
                 initPage(sym, name, type);
             } else {
                 alert("No stock specified.");
-                window.location.href = 'market.html';
+                // window.location.href = 'market.html';
             }
 
             loadHoldings();

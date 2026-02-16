@@ -861,12 +861,10 @@
                                 };
 
                                 document.addEventListener('DOMContentLoaded', async () => {
+                                    if (!DB.requireAuth()) return;
                                     const user = DB.getCurrentUser();
 
-                                    if (!user) {
-                                        window.location.href = 'login.html';
-                                        return;
-                                    }
+
 
                                     // Sync User Data & Balance
                                     await syncWithdrawalPage();

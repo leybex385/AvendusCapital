@@ -297,11 +297,9 @@
 
 
             // 1. Ensure User Data is Fresh
+            if (!DB.requireAuth()) return;
             const user = await DB.refreshCurrentUser();
-            if (!user) {
-                console.warn("No user logged in, cannot fetch deposits");
-                return;
-            }
+            if (!user) return; // Should be handled by requireAuth but refresh might fail
 
             console.log(`[Deposit] Initializing for User ID: ${user.id}`);
             const client = DB.getClient();

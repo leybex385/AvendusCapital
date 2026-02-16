@@ -824,11 +824,8 @@
         // --- Existing Logic Updated ---
 
         async function init() {
+            if (!DB.requireAuth()) return;
             const user = DB.getCurrentUser();
-            if (!user) {
-                window.location.href = 'login.html';
-                return;
-            }
             lucide.createIcons();
             await loadAccounts();
         }
