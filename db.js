@@ -656,7 +656,17 @@ window.DB = {
 
     async updateUser(id, updateData) {
         const client = this.getClient();
-        const { data, error } = await client.from('users').update(updateData).eq('id', id);
+        let query = client.from('users').update(updateData);
+
+        // Safety: Detect if id is UUID (Supabase auth_id) or Numeric (internal id)
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+        if (isUuid) {
+            query = query.eq('auth_id', id);
+        } else {
+            query = query.eq('id', id);
+        }
+
+        const { data, error } = await query;
         return { success: !error, error };
     },
 
