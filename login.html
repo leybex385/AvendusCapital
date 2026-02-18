@@ -627,19 +627,16 @@
             }
 
             try {
-                logDebug("Initializing Security Check...");
+                logDebug("Loading Security Check...");
 
-                // VISIBLE RECAPTCHA
+                // VISIBLE RECAPTCHA - Pass DOM Element directly
                 window.recaptchaVerifier = new RecaptchaVerifier(auth, container, {
                     'size': 'normal',
                     'callback': (response) => {
-                        logDebug("Security Check Passed!");
+                        logDebug("Security Check Passed! You can now send OTP.");
                     },
                     'expired-callback': () => {
-                        logDebug("Check Expired. Please reload.");
-                        window.recaptchaVerifier.clear();
-                        window.recaptchaVerifier = null;
-                        container.innerHTML = '';
+                        logDebug("Expired. Reloading...");
                         window.initRecaptcha();
                     }
                 });
