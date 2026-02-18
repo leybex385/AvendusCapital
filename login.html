@@ -478,23 +478,38 @@
                 <input type="hidden" id="regType" value="mobile">
 
                 <!-- Mobile Input Section -->
-                <div class="input-group">
-                    <label>Mobile Number</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" value="+91" readonly style="width: 60px; text-align: center;"
-                            class="input-field">
-                        <input type="number" id="regMobile" class="input-field" placeholder="10-digit number"
-                            style="flex-grow: 1;">
+                <div id="mobileSection">
+                    <div class="input-group">
+                        <label>Mobile Number</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" value="+91" readonly style="width: 60px; text-align: center;"
+                                class="input-field">
+                            <input type="number" id="regMobile" class="input-field" placeholder="10-digit number"
+                                style="flex-grow: 1;">
+                        </div>
                     </div>
-                </div>
 
-                <!-- Visible Recaptcha Container -->
-                <div id="recaptcha-container" style="margin-bottom: 15px; display: flex; justify-content: center;">
-                </div>
+                    <!-- Visible Recaptcha Container -->
+                    <div style="text-align:center; margin-bottom:10px;">
+                        <button type="button" onclick="window.initRecaptcha()"
+                            style="font-size:0.7rem; color:#f97316; background:none; border:none; text-decoration:underline; cursor:pointer;">
+                            (Click here if captcha doesn't appear)
+                        </button>
+                    </div>
 
-                <div class="input-group" style="text-align: right;">
-                    <button type="button" id="sendMobileOtp" class="vsl-btn-small" onclick="sendOtp('mobile')"
-                        style="background: #eab308; color: black; font-weight: 700;">Send OTP</button>
+                    <div id="recaptcha-container"
+                        style="margin-bottom: 15px; display: flex; justify-content: center; min-height: 80px; background: #111; border-radius: 4px; align-items: center;">
+                        <span style="color: #666; font-size: 0.8rem;">Security Check Loading...</span>
+                    </div>
+
+                    <div id="firebase-debug"
+                        style="color: red; font-size: 0.7rem; text-align: center; margin-bottom: 10px; display: none;">
+                    </div>
+
+                    <div class="input-group" style="text-align: right;">
+                        <button type="button" id="sendMobileOtp" class="vsl-btn-small" onclick="sendOtp('mobile')"
+                            style="background: #eab308; color: black; font-weight: 700;">Send OTP</button>
+                    </div>
                 </div>
 
                 <!-- Email Input Section -->
@@ -576,42 +591,66 @@
             console.error("Firebase Initialization Error. Please check your config:", e);
         }
 
+        // Helper to log to screen
+        function logDebug(msg) {
+            console.log(msg);
+            const el = document.getElementById('firebase-debug');
+            if (el) {
+                el.style.display = 'block';
+                el.innerText = msg;
+            }
+        }
+
         // Global variable to store confirmation result
         window.confirmationResult = null;
         window.recaptchaVerifier = null;
 
         // Make functions globally available
-        window.initRecaptcha = () => {
-            if (!auth) return;
-            if (window.recaptchaVerifier) return; // Already initialized
+        window.initRecaptcha = async () => {
+            if (!auth) {
+                logDebug("Auth not init");
+                return;
+            }
 
-            // Ensure container exists
+            // Check container
             const container = document.getElementById('recaptcha-container');
-            if (!container) return;
+            if (!container) {
+                console.error("No container");
+                return;
+            }
+
+            // Always clear old instance if exists
+            if (window.recaptchaVerifier) {
+                try { window.recaptchaVerifier.clear(); } catch (e) { }
+                window.recaptchaVerifier = null;
+                container.innerHTML = '';
+            }
 
             try {
+                logDebug("Initializing Security Check...");
+
                 // VISIBLE RECAPTCHA
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                    'size': 'normal', // Changed from invisible to normal
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, container, {
+                    'size': 'normal',
                     'callback': (response) => {
-                        // reCAPTCHA solved, allow signInWithPhoneNumber.
-                        console.log("Recaptcha Verified");
-                        // Enable Send OTP button if needed
+                        logDebug("Security Check Passed!");
                     },
                     'expired-callback': () => {
-                        // Response expired. Ask user to solve reCAPTCHA again.
-                        console.log("Recaptcha Expired");
-                        if (window.recaptchaVerifier) window.recaptchaVerifier.clear();
+                        logDebug("Check Expired. Please reload.");
+                        window.recaptchaVerifier.clear();
                         window.recaptchaVerifier = null;
+                        container.innerHTML = '';
+                        window.initRecaptcha();
                     }
                 });
 
-                // Render immediately to confirm it works
-                window.recaptchaVerifier.render().then((widgetId) => {
-                    window.recaptchaWidgetId = widgetId;
-                });
+                // Render immediately
+                const widgetId = await window.recaptchaVerifier.render();
+                window.recaptchaWidgetId = widgetId;
+                logDebug("Please complete the security check.");
 
             } catch (err) {
+                logDebug("Init Error: " + err.message);
                 console.error("Recaptcha Init Error:", err);
             }
         };
