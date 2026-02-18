@@ -540,6 +540,109 @@
         </div>
     </div>
 
+    <!-- Firebase SDKs (Modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // 🚨 REPLACE WITH YOUR ACTUAL FIREBASE CONFIG
+        // Go to Firebase Console -> Project Settings -> General -> Your Apps -> SDK Setup and Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCsUwZmNNCCYmc2cOg0iGEXCAzICK3VNTw",
+            authDomain: "avendus-otp.firebaseapp.com",
+            projectId: "avendus-otp",
+            storageBucket: "avendus-otp.firebasestorage.app",
+            messagingSenderId: "699673946343",
+            appId: "1:699673946343:web:7fdd4a5306fc8cbfe55a42",
+            measurementId: "G-J4GDHXYM7M"
+        };
+
+        // Initialize Firebase
+        let app, auth;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            auth.useDeviceLanguage(); // Set language to default device preference
+        } catch (e) {
+            console.error("Firebase Initialization Error. Please check your config:", e);
+        }
+
+        // Global variable to store confirmation result
+        window.confirmationResult = null;
+        window.recaptchaVerifier = null;
+
+        // Make functions globally available
+        window.initRecaptcha = () => {
+            if (!auth) return;
+            if (window.recaptchaVerifier) return; // Already initialized
+
+            try {
+                // Invisible Recaptcha or usage of a specific container
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-wrapper', {
+                    'size': 'invisible',
+                    'callback': (response) => {
+                        // reCAPTCHA solved, allow signInWithPhoneNumber.
+                        console.log("Recaptcha Verified");
+                    },
+                    'expired-callback': () => {
+                        // Response expired. Ask user to solve reCAPTCHA again.
+                        console.log("Recaptcha Expired");
+                        if (window.recaptchaVerifier) window.recaptchaVerifier.clear();
+                        window.recaptchaVerifier = null;
+                    }
+                });
+            } catch (err) {
+                console.error("Recaptcha Init Error:", err);
+            }
+        };
+
+        window.firebaseSendOtp = async (phoneNumber) => {
+            if (!auth) {
+                alert("Firebase not configured! Please update firebaseConfig in login.html");
+                return { success: false, message: "Firebase Config Missing" };
+            }
+
+            // Ensure Recaptcha is ready
+            if (!window.recaptchaVerifier) window.initRecaptcha();
+
+            try {
+                const appVerifier = window.recaptchaVerifier;
+                const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+
+                // Store result globally for verification step
+                window.confirmationResult = confirmationResult;
+
+                return { success: true };
+            } catch (error) {
+                console.error("SMS Send Error:", error);
+                // Reset recaptcha on error so user can try again
+                if (window.recaptchaVerifier) {
+                    window.recaptchaVerifier.clear();
+                    window.recaptchaVerifier = null;
+                }
+                return { success: false, message: error.message };
+            }
+        };
+
+        window.firebaseVerifyOtp = async (code) => {
+            if (!window.confirmationResult) {
+                return { success: false, message: "No OTP sent. Please request code first." };
+            }
+
+            try {
+                const result = await window.confirmationResult.confirm(code);
+                const user = result.user;
+                // User signed in successfully.
+                return { success: true, user: user, authId: user.uid };
+            } catch (error) {
+                console.error("OTP Verify Error:", error);
+                return { success: false, message: "Invalid Verification Code" };
+            }
+        };
+    </script>
+
+    <div id="recaptcha-wrapper"></div>
+
     <script>
         lucide.createIcons();
 
@@ -766,26 +869,49 @@
                     btn.disabled = false;
                 });
             } else {
-                // Original Mobile Logic
+                // REAL FIREBASE SMS LOGIC
+                // Must explicitly add country code if missing
+                let phoneNumber = val;
+                if (!phoneNumber.startsWith('+')) {
+                    phoneNumber = '+91' + phoneNumber; // Default to India if no code
+                }
+
                 btn.textContent = 'Sending...';
                 btn.disabled = true;
 
-                setTimeout(() => {
-                    showAlert('success', 'Verification code sent to ' + val + ': 123456');
-                    otpSent = true;
+                // Call global Firebase function from module
+                if (typeof window.firebaseSendOtp !== 'function') {
+                    showAlert('error', 'Firebase SDK not initialized. Check console.');
+                    btn.disabled = false;
+                    btn.textContent = 'Send OTP';
+                    return;
+                }
 
-                    // Countdown
-                    let count = 60;
-                    const timer = setInterval(() => {
-                        btn.textContent = `Resend (${count}s)`;
-                        count--;
-                        if (count < 0) {
-                            clearInterval(timer);
-                            btn.textContent = 'Resend Code';
-                            btn.disabled = false;
-                        }
-                    }, 1000);
-                }, 1000);
+                window.firebaseSendOtp(phoneNumber).then(res => {
+                    if (res.success) {
+                        showAlert('success', 'SMS sent to ' + phoneNumber + '. Enter code below.');
+                        otpSent = true;
+
+                        // Enable Inputs
+                        document.getElementById('regOtp').disabled = false;
+
+                        // Countdown
+                        let count = 60;
+                        const timer = setInterval(() => {
+                            btn.textContent = `Resend (${count}s)`;
+                            count--;
+                            if (count < 0) {
+                                clearInterval(timer);
+                                btn.textContent = 'Resend Code';
+                                btn.disabled = false;
+                            }
+                        }, 1000);
+                    } else {
+                        showAlert('error', res.message || 'Failed to send SMS.', 'SMS Error');
+                        btn.disabled = false;
+                        btn.textContent = 'Send OTP';
+                    }
+                });
             }
         };
 
@@ -825,10 +951,23 @@
                         return showAlert('error', verifyRes.message || 'Invalid verification code.', 'Verification Failed');
                     }
                     authId = verifyRes.authId;
-                } else if (type === 'mobile' && otpCode !== '123456') {
-                    submitBtn.textContent = originalBtnText;
-                    submitBtn.disabled = false;
-                    return showAlert('warning', 'Invalid verification code');
+                } else if (type === 'mobile') {
+                    // Firebase Verify
+                    if (typeof window.firebaseVerifyOtp !== 'function') {
+                        throw new Error("Firebase SDK missing");
+                    }
+
+                    const verifyRes = await window.firebaseVerifyOtp(otpCode);
+
+                    if (!verifyRes.success) {
+                        submitBtn.textContent = originalBtnText;
+                        submitBtn.disabled = false;
+                        return showAlert('error', verifyRes.message || 'Invalid SMS Code.', 'Verification Failed');
+                    }
+
+                    // Success!
+                    authId = verifyRes.authId; // Firebase UID
+                    console.log("Firebase Verified User:", authId);
                 }
 
                 // Call DB Register to sync with public.users table
