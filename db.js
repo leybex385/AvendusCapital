@@ -127,6 +127,48 @@ window.DB = {
         return { success: true, authId: data?.user?.id };
     },
 
+    // --- MOBILE OTP (Real Supabase Auth) ---
+    async sendMobileOtp(mobile) {
+        const client = this.getClient();
+        if (!client) return { success: false, message: 'Database connecting...' };
+
+        // Format mobile number: Ensure it has + prefix. Assuming input is strict or handling it here.
+        // User input often excludes +91 if hardcoded in UI. 
+        // We'll rely on the UI passing the full number with country code OR prepend it if needed.
+        // For now, assume UI passes full number with +, or we handle it in UI.
+
+        console.log("Supabase sendMobileOtp for:", mobile);
+        const { error } = await client.auth.signInWithOtp({
+            phone: mobile
+        });
+
+        if (error) {
+            console.error("Supabase OTP Send Error:", error);
+            return { success: false, message: error.message };
+        }
+
+        return { success: true };
+    },
+
+    async verifyMobileOtp(mobile, token) {
+        const client = this.getClient();
+        if (!client) return { success: false, message: 'Database connecting...' };
+
+        console.log("Supabase verifyMobileOtp for:", mobile);
+        const { data, error } = await client.auth.verifyOtp({
+            phone: mobile,
+            token: token,
+            type: 'sms'
+        });
+
+        if (error) {
+            console.error("Supabase OTP Verify Error:", error);
+            return { success: false, message: error.message };
+        }
+
+        return { success: true, authId: data?.user?.id };
+    },
+
     async resetPassword(mobile, newPassword) {
         const client = this.getClient();
         const { data, error } = await client
