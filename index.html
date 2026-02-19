@@ -1743,6 +1743,24 @@
             </div>
         </div>
     </div>
+    <script>
+        // Fix homepage redirect logic
+        (function () {
+            // Check if user is logged in
+            const user = window.DB && window.DB.getCurrentUser ? window.DB.getCurrentUser() : null;
+
+            if (user) {
+                // Only redirect to market if:
+                // 1. No referrer (direct visit)
+                // 2. AND we are not avoiding redirects explicitly
+
+                if (!document.referrer) {
+                    // Optional: Redirect to market for direct visits by logged-in users
+                    // window.location.href = 'market.html';
+                }
+            }
+        })();
+    </script>
 </body>
 
 </html>

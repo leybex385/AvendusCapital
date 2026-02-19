@@ -383,7 +383,8 @@
 </head>
 
 <body>
-    <header class="navbar"><a href="market.html" class="back-btn"><i data-lucide="chevron-left"></i></a>
+    <header class="navbar"><a href="#" class="back-btn" onclick="goBackToMarket()"><i
+                data-lucide="chevron-left"></i></a>
         <h1>Withdraw</h1>
     </header>
     <main class="container">
@@ -1172,6 +1173,20 @@
                                     }
                                 }
 
+                            </script>
+                            <script>
+                                function goBackToMarket() {
+                                    const params = new URLSearchParams(window.location.search);
+                                    const from = params.get("from");
+
+                                    if (from === "homepage") {
+                                        window.location.href = "index.html";
+                                        return;
+                                    }
+
+                                    const view = params.get("view") || "market";
+                                    window.location.href = `market.html?view=${view}`;
+                                }
                             </script>
 </body>
 

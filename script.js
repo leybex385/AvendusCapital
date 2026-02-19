@@ -1265,6 +1265,31 @@ window.loadUserAssets = async function (userId) {
             creditProfileInfo.innerHTML = `Based on the latest evaluation, your <b>Credit Score is ${credit}</b>. Your credit profile falls into the <b>${credit >= 90 ? 'Excellent' : (credit >= 70 ? 'Fair' : 'Low')}</b> category.`;
         }
 
+        // --- Update KYC Status (Me Page) ---
+        const kycBadge = document.getElementById('meKycStatusBadge');
+        if (kycBadge) {
+            const rawKyc = (dbUser.kyc || '').toLowerCase();
+            let label = 'Not Verified';
+            let badgeClass = 'kyc-not-verified';
+
+            if (rawKyc === 'approved') {
+                label = 'Verified';
+                badgeClass = 'kyc-approved';
+            } else if (rawKyc === 'pending') {
+                label = 'Pending';
+                badgeClass = 'kyc-pending';
+            } else if (rawKyc === 'rejected') {
+                label = 'Rejected';
+                badgeClass = 'kyc-rejected';
+            }
+
+            kycBadge.textContent = label;
+            kycBadge.className = badgeClass;
+            // Clear inline styles from market.html to allow CSS classes to take over
+            kycBadge.style.background = '';
+            kycBadge.style.color = '';
+        }
+
         // --- Withdrawal Restrictions logic moved to click event (openWithdrawPage) ---
         if (window.lucide) window.lucide.createIcons();
     } catch (e) {
@@ -1283,7 +1308,7 @@ window.syncVipCredit = async function () {
     try {
         const { data, error } = await client
             .from('users')
-            .select('vip, credit_score')
+            .select('vip, credit_score, kyc')
             .eq('id', user.id)
             .single();
 
@@ -1295,8 +1320,33 @@ window.syncVipCredit = async function () {
         if (data) {
             const vip = data.vip || 0;
             const credit = data.credit_score || 0;
+            const rawKyc = data.kyc || '';
 
-            console.log("Fresh VIP/Credit fetched:", { vip, credit });
+            console.log("Fresh VIP/Credit/KYC fetched:", { vip, credit, rawKyc });
+
+            // Update KYC Status mapping
+            const kycBadge = document.getElementById('meKycStatusBadge');
+            if (kycBadge) {
+                const sk = rawKyc.toLowerCase();
+                let label = 'Not Verified';
+                let bClass = 'kyc-not-verified';
+
+                if (sk === 'approved') {
+                    label = 'Verified';
+                    bClass = 'kyc-approved';
+                } else if (sk === 'pending') {
+                    label = 'Pending';
+                    bClass = 'kyc-pending';
+                } else if (sk === 'rejected') {
+                    label = 'Rejected';
+                    bClass = 'kyc-rejected';
+                }
+
+                kycBadge.textContent = label;
+                kycBadge.className = bClass;
+                kycBadge.style.background = '';
+                kycBadge.style.color = '';
+            }
 
             // Update display elements
             const targets = {
@@ -2133,5 +2183,13 @@ async function openWithdrawPage() {
         return;
     }
 
-    window.location.href = "withdraw.html";
+    const currentPath = window.location.pathname;
+    const params = new URLSearchParams(window.location.search);
+
+    if (currentPath.includes("market.html")) {
+        const view = params.get("view") || "market";
+        window.location.href = `withdraw.html?from=market&view=${view}`;
+    } else {
+        window.location.href = `withdraw.html?from=homepage`;
+    }
 }
