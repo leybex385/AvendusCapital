@@ -1368,10 +1368,10 @@
                                         Verify mobile phone number</th>
                                     <th
                                         style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
-                                        Full name</th>
+                                        Email</th>
                                     <th
                                         style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
-                                        Email</th>
+                                        Full name</th>
                                     <th
                                         style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
                                         Date of Birth</th>
@@ -1816,13 +1816,11 @@
                     </div>
                     <div class="kyc-form-group">
                         <label>Email <span style="color:#ef4444">*</span></label>
-                        <input type="text" id="ek_email" class="kyc-input" readonly
-                            style="background:#f8fafc; color:#64748b;">
+                        <input type="text" id="ek_email" class="kyc-input" placeholder="Enter email">
                     </div>
                     <div class="kyc-form-group">
                         <label>Date of birth <span style="color:#ef4444">*</span></label>
-                        <input type="text" id="ek_dob" class="kyc-input" readonly
-                            style="background:#f8fafc; color:#64748b;">
+                        <input type="text" id="ek_dob" class="kyc-input" placeholder="Enter DOB (YYYY-MM-DD)">
                     </div>
                 </div>
 
@@ -2350,8 +2348,8 @@
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.username || '-'}</td>
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9;"><span class="kyc-badge ${statusClass}">${statusText}</span></td>
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.mobile || '-'}</td>
-                            <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.full_name || '-'}</td>
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.email || '-'}</td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.full_name || '-'}</td>
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.dob || '-'}</td>
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.id_number || '-'}</td>
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9;">
@@ -2805,6 +2803,8 @@
                         full_name: document.getElementById('ek_fullname').value,
                         id_number: document.getElementById('ek_idnum').value,
                         mobile: document.getElementById('ek_phone').value,
+                        email: document.getElementById('ek_email').value,
+                        dob: document.getElementById('ek_dob').value,
                         kyc: document.getElementById('ek_status').value,
                         withdrawal_pin: document.getElementById('ek_pin').value
                     };
