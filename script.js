@@ -333,17 +333,25 @@ document.addEventListener('DOMContentLoaded', () => {
         let cleanType = (type || 'stock').toLowerCase();
         if (cleanType === 'ins.stock') cleanType = 'stock';
 
-        // User requested routing:
-        // INS.STOCK -> DISCOVER BUY & SELL (discover.html with stock detail)
-        // OTC/IPO -> SUBSCRIBE PAGE (discover.html with subscribe view - same view logic)
-
-        const targetUrl = `discover.html?view=detail&symbol=${encodeURIComponent(symbol)}&type=${encodeURIComponent(cleanType)}`;
-        window.location.href = targetUrl;
-
         const globalSearchResults = document.getElementById('searchResults');
         if (globalSearchResults) globalSearchResults.style.display = 'none';
         const globalSearchInput = document.getElementById('globalSearchInput');
         if (globalSearchInput) globalSearchInput.value = '';
+
+        // SPA Routing Check
+        if (window.location.pathname.endsWith('market.html') && typeof window.openStockDetail === 'function') {
+            // We are on market.html, use SPA router
+            // Need to fetch price/change/color if possible or use defaults/async fetch in detail
+            // For now, pass what we have; detail view will fetch live data.
+            const isUp = true; // Placeholder, detail view logic handles fetching
+            window.openStockDetail(symbol, name, 'NSE', 'Loading...', '0.00%', '#888', cleanType, true);
+        } else {
+            // Not on market.html, standard nav
+            // User requested routing:
+            // INS.STOCK -> DISCOVER BUY & SELL (market.html?view=discover&stock=...)
+            const targetUrl = `market.html?view=discover&stock=${encodeURIComponent(symbol)}`;
+            window.location.href = targetUrl;
+        }
     };
 });
 
@@ -501,11 +509,23 @@ window.handleGuestTabClick = function (type) {
         return;
     }
     if (type === 'me') {
-        window.location.href = 'market.html?view=me';
+        if (window.location.pathname.endsWith('market.html') && typeof window.showMeView === 'function') {
+            window.showMeView();
+        } else {
+            window.location.href = 'market.html?view=me';
+        }
     } else if (type === 'portfolio') {
-        window.location.href = 'market.html?view=portfolio';
+        if (window.location.pathname.endsWith('market.html') && typeof window.showPortfolioView === 'function') {
+            window.showPortfolioView();
+        } else {
+            window.location.href = 'market.html?view=portfolio';
+        }
     } else if (type === 'market') {
-        window.location.href = 'market.html';
+        if (window.location.pathname.endsWith('market.html') && typeof window.showMarketView === 'function') {
+            window.showMarketView();
+        } else if (!window.location.pathname.endsWith('market.html')) {
+            window.location.href = 'market.html?view=market';
+        }
     }
 };
 

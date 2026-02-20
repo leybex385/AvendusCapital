@@ -2667,7 +2667,7 @@
                 </div>
             </div>
             <nav class="nav">
-                <a href="index.html?logged_in=true" class="nav-item" id="navHome" onclick="setActiveNav(this)"><i
+                <a href="index.html" class="nav-item" id="navHome" onclick="setActiveNav(this)"><i
                         data-lucide="home"></i> Home</a>
                 <a href="javascript:void(0)" class="nav-item active" id="navMarket"
                     onclick="showMarketView(); setActiveNav(this)"><i data-lucide="trending-up"></i> Market</a>
@@ -4646,9 +4646,35 @@
         function openStockDetail(symbol, name, exchange, price, change, color, type = 'stock', push = true) {
             if (push) {
                 const params = new URLSearchParams(window.location.search);
-                const view = params.get("view") || "market";
+                let view = params.get("view");
+
+                // If view is missing or empty in URL, infer from visible DOM elements
+                if (!view) {
+                    const dView = document.getElementById('discoverView');
+                    const pView = document.getElementById('portfolioView');
+                    const meView = document.getElementById('meView');
+
+                    // Check inline style first (most reliable for direct toggles) then computed style
+                    if (dView && dView.style.display !== 'none') view = 'discover';
+                    else if (pView && pView.style.display !== 'none') view = 'portfolio';
+                    else if (meView && meView.style.display !== 'none') view = 'me';
+                    else if (dView && getComputedStyle(dView).display !== 'none') view = 'discover';
+                    else if (pView && getComputedStyle(pView).display !== 'none') view = 'portfolio';
+                    else if (meView && getComputedStyle(meView).display !== 'none') view = 'me';
+                    else view = 'market';
+
+                    // Update current state to include the view context before navigating deeper.
+                    // We explicitly set it even for 'market' to ensure the back button works predictably.
+                    try {
+                        history.replaceState({}, "", `?view=${view}`);
+                    } catch (e) { console.error("History replace failed", e); }
+                }
+
                 params.set("stock", symbol);
-                history.pushState({}, "", `?view=${view}&stock=${symbol}`);
+                // Ensure the view param is included in the new history entry
+                try {
+                    history.pushState({}, "", `?view=${view || 'market'}&stock=${symbol}`);
+                } catch (e) { console.error("History push failed", e); }
             }
 
             document.getElementById('mainDashboard').style.display = 'none';
@@ -4770,9 +4796,38 @@
         }
 
         function closeStockDetail() {
-            window.history.back();
+            history.replaceState({}, '', 'market.html?view=discover');
+            showDiscoverView();
         }
         window.closeStockDetail = closeStockDetail;
+
+        // Handle Browser Back Button for SPA Routing
+        window.addEventListener('popstate', (event) => {
+            const params = new URLSearchParams(window.location.search);
+            const view = params.get('view');
+            const stock = params.get('stock');
+
+            if (stock) {
+                // If popping back TO a stock state, re-open detail (handled by load logic usually, but here for completeness)
+                // However, usually we handle loading state on page load.
+                // The more common case is popping OUT of stock detail.
+            } else {
+                // Close stock detail and show relevant view
+                document.getElementById('stockDetailView').style.display = 'none';
+                document.getElementById('stockDetailHeader').style.display = 'none';
+                document.querySelector('.header').style.display = 'flex';
+
+                if (view === 'discover') {
+                    showDiscoverView(false);
+                } else if (view === 'portfolio') {
+                    showPortfolioView(false);
+                } else if (view === 'me') {
+                    showMeView(false);
+                } else {
+                    showMarketView(false);
+                }
+            }
+        });
 
         // View Switching Logic (Market / Discover / Portfolio / Me)
         function showMarketView(push = true) {
@@ -5383,6 +5438,8 @@
                 const freshUser = await window.DB.refreshCurrentUser();
                 if (!freshUser) {
                     alert("Session expired. Please login again.");
+                    // Store intended destination
+                    sessionStorage.setItem('postLoginRedirect', 'market.html?view=discover');
                     window.location.href = 'login.html';
                     return;
                 }

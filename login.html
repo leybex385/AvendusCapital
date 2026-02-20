@@ -939,7 +939,13 @@
                 const result = await DB.login(identifier, password);
 
                 if (result.success) {
-                    window.location.href = 'index.html?logged_in=true';
+                    const redirectUrl = sessionStorage.getItem('postLoginRedirect');
+                    if (redirectUrl) {
+                        sessionStorage.removeItem('postLoginRedirect');
+                        window.location.replace(redirectUrl);
+                    } else {
+                        window.location.replace('index.html');
+                    }
                 } else {
                     showAlert('error', result.message || 'Invalid mobile or password.', 'Login Failed');
                     btn.textContent = originalText;
