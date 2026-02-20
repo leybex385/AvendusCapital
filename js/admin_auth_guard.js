@@ -79,7 +79,10 @@
             'btn_stock057',
             'btn_messages',        // Notification Center
             'btn_livechat',        // Customer Service Support
-            'btn_account_settings' // Account Settings
+            'btn_account_settings', // Account Settings
+            'btn_products',        // Product Management
+            'btn_transaction',     // Transaction Records (was IPO Management for CSR)
+            'transactionSub'       // Transaction Records Sub-menu
         ];
 
         restrictedIds.forEach(id => {
@@ -102,15 +105,7 @@
             if (el) el.remove();
         });
 
-        // Rename Transaction Records to IPO Management for CSR
-        const transBtn = document.getElementById('btn_transaction');
-        if (transBtn) {
-            transBtn.innerHTML = '<i data-lucide="repeat" size="18"></i> IPO Management';
-            transBtn.onclick = () => switchPage('ipo');
-            // Remove the sub-menu if it exists
-            const transSub = document.getElementById('transactionSub');
-            if (transSub) transSub.remove();
-        }
+        // Transaction Records removal is now handled by restrictedIds
 
         // --- NEW: CSR TOP DROPDOWN LOCK (Instruction 3) ---
         const dropdown = document.querySelector('.admin-dropdown');
@@ -131,16 +126,15 @@
 
         // Global removal of specific action buttons/admin tools for CSR
         const restrictedSelectors = [
-            // 'button[onclick*="openAddProductModal"]', // Removed (Instruction 2)
             '.btn-delete',
-            // '.btn-delete-outline', // Removed so CSR can see Delete in Product Management (Instruction 2)
             '.btn-red',
-            // 'button[onclick*="delete"]', // Removed so CSR can see Delete in Product Management
             'button[onclick*="toggleAdminStatus"]',
             'button[onclick*="deleteAdmin"]',
             'button[onclick*="openAddAdminModal"]',
             'button[onclick*="createAdmin"]',
-            'button[onclick*="changeRole"]'
+            'button[onclick*="changeRole"]',
+            'div[onclick*="switchPage(\'products\')"]',
+            'div[onclick*="switchPage(\'ipo\')"]'
         ];
         restrictedSelectors.forEach(sel => {
             document.querySelectorAll(sel).forEach(el => el.remove());

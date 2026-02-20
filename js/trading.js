@@ -149,6 +149,11 @@ window.handleSellTrade = async function (tradeId, sellPrice, netReturn) {
         if (fetchErr || !trade) throw new Error("Could not find the original trade record.");
         if (trade.status === 'Sold') throw new Error("This position is already closed.");
 
+        // --- TRADING FREEZE GUARD ---
+        if (user.trading_frozen) {
+            throw new Error("Trading functions are temporarily unavailable. Please check your account status or try again later.");
+        }
+
         // 2. Re-fetch real-time price
         const me = window.MarketEngine || {};
         const livePriceData = me.getProduct ? me.getProduct(trade.symbol) : null;
