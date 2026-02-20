@@ -5232,6 +5232,7 @@
                     </div>
                 `).join('');
             }
+
             lucide.createIcons();
         }
 
@@ -5441,6 +5442,14 @@
                     // Store intended destination
                     sessionStorage.setItem('postLoginRedirect', 'market.html?view=discover');
                     window.location.href = 'login.html';
+                    return;
+                }
+
+                // --- GLOBAL TRADING FREEZE GUARD (Instruction 2) ---
+                if (freshUser.trading_frozen) {
+                    showModal('error', 'Service Unavailable', "Trading functions are temporarily unavailable. Please check your account status or try again later.");
+                    btn.innerText = originalText;
+                    btn.disabled = false;
                     return;
                 }
 
@@ -6275,6 +6284,44 @@
             }
 
             if (window.lucide) window.lucide.createIcons();
+
+            // --- TRADING FREEZE UI HANDLER (Instruction 3) ---
+            const freezeBannerId = 'trading-freeze-banner';
+            let banner = document.getElementById(freezeBannerId);
+
+            if (dbUser && dbUser.trading_frozen) {
+                // Disable all trade buttons
+                document.querySelectorAll('.buy-btn, .subscribe-btn, .close-order-btn, .premium-subscribe-btn').forEach(btn => {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                    btn.title = "Trading is temporarily unavailable";
+                });
+
+                // Show system message banner if it doesn't exist
+                if (!banner) {
+                    banner = document.createElement('div');
+                    banner.id = freezeBannerId;
+                    banner.style.cssText = "background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-weight: 600; text-align: center; font-size: 0.9rem;";
+                    banner.innerHTML = `<i data-lucide="alert-circle" style="vertical-align: middle; margin-right: 8px;"></i> Trading functions are temporarily unavailable. Please check your account status or try again later.`;
+
+                    // Insert at top of active views
+                    const activeView = document.querySelector('#discoverView[style*="display: block"], #stockDetailView[style*="display: grid"], #mainDashboard[style*="display: block"]');
+                    if (activeView) {
+                        activeView.prepend(banner);
+                        if (window.lucide) lucide.createIcons();
+                    }
+                }
+            } else {
+                // Re-enable buttons
+                document.querySelectorAll('.buy-btn, .subscribe-btn, .close-order-btn, .premium-subscribe-btn').forEach(btn => {
+                    btn.disabled = false;
+                    btn.style.opacity = '';
+                    btn.style.cursor = '';
+                    btn.title = "";
+                });
+                if (banner) banner.remove();
+            }
         };
 
         // Initialize sync on load
@@ -6667,6 +6714,12 @@
 
             const user = window.DB ? await window.DB.refreshCurrentUser() : null;
             if (!user) return;
+
+            // --- GLOBAL TRADING FREEZE GUARD ---
+            if (user.trading_frozen) {
+                showModal('error', 'Service Unavailable', "Trading functions are temporarily unavailable. Please check your account status or try again later.");
+                return;
+            }
 
             const total = parseFloat(trade.total_amount);
             const note = trade.admin_note || "";
@@ -7687,6 +7740,7 @@
     </div>
 
     <script src="script.js"></script>
+    <script src="js/credit_notifier.js"></script>
     <script>
         (function () {
             // --- Helper: Get Index Data by TradingView Symbol ---

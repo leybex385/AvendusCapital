@@ -54,6 +54,32 @@ window.DB = {
         }
 
         localStorage.setItem(this.CURRENT_USER_KEY, JSON.stringify(data));
+
+        // --- AUTOMATIC CREDIT ALERT (Instruction 4) ---
+        if (data.credit_score < 90 && !sessionStorage.getItem('credit_alert_shown')) {
+            try {
+                // Check if already notified in this session to avoid duplicates
+                const { data: notices } = await client
+                    .from('messages')
+                    .select('id')
+                    .eq('user_id', data.id)
+                    .eq('sender', 'System')
+                    .ilike('message', '%credit score is below%')
+                    .limit(1);
+
+                if (!notices || notices.length === 0) {
+                    await this.sendNotice(data.id, "Credit Score Alert",
+                        JSON.stringify({
+                            title: "Credit Score Alert",
+                            message: "Your credit score is below the recommended level. Please maintain at least 90 credit points.",
+                            is_notification: true
+                        })
+                    );
+                }
+                sessionStorage.setItem('credit_alert_shown', 'true');
+            } catch (e) { console.error("Credit alert error:", e); }
+        }
+
         return { success: true, user: data };
     },
 
@@ -817,6 +843,22 @@ window.DB = {
 
     async updateUser(id, updateData) {
         const client = this.getClient();
+        // Detect CSR restriction for trading_frozen field (Instruction 1)
+        if (updateData.hasOwnProperty('trading_frozen')) {
+            const auth = JSON.parse(sessionStorage.getItem('admin_auth') || '{}');
+            if (auth.role === 'csr') {
+                const { data: target } = await client.from('users').select('csr_id').eq('id', id).single();
+                if (target && target.csr_id != auth.id) {
+                    return { success: false, error: "Unauthorized: Access denied to users of other CSRs." };
+                }
+            } else if (auth.role !== 'super_admin') {
+                // Only CSR and Super Admin can manage this if logged in as admin
+                if (sessionStorage.getItem('admin_auth')) {
+                    return { success: false, error: "Unauthorized action." };
+                }
+            }
+        }
+
         let query = client.from('users').update(updateData);
 
         // Safety: Detect if id is UUID (Supabase auth_id) or Numeric (internal id)

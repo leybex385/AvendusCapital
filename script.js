@@ -109,6 +109,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check Login & Update UI
     checkLoginStatus();
 
+    // --- GLOBAL KYC PAGE GUARD ---
+    const user = window.DB && window.DB.getCurrentUser ? window.DB.getCurrentUser() : null;
+    if (user && user.kyc === 'Pending') {
+        const path = window.location.pathname.toLowerCase();
+        const isRestrictedPage = path.includes('market.html') ||
+            path.includes('deposit.html') ||
+            path.includes('withdraw.html') ||
+            path.includes('bank_accounts.html') ||
+            path.includes('loan_application.html');
+
+        if (isRestrictedPage) {
+            // Check if we already have a flag to prevent infinite loops (though usually home is not restricted)
+            window.location.href = 'index.html?kyc_popup=true';
+        }
+    }
+
+    // Handle KYC Popup from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('kyc_popup') === 'true') {
+        setTimeout(() => {
+            window.CustomUI.alert("KYC verification in progress.", "Verification Required");
+        }, 500);
+    }
+
     // Initialize Carousel
     initCarousel();
 
@@ -489,6 +513,11 @@ window.handleInternalReset = async function () {
 window.handleGuestClick = async function (url) {
     const user = window.DB && window.DB.getCurrentUser ? window.DB.getCurrentUser() : null;
     if (user) {
+        // --- KYC RESTRICTION RULE ---
+        if (user.kyc === 'Pending') {
+            await window.CustomUI.alert("KYC verification in progress.", "Verification Required");
+            return;
+        }
         if (url && url !== '#') window.location.href = url;
     } else {
         // Show Top Alert
@@ -508,6 +537,14 @@ window.handleGuestTabClick = function (type) {
         window.handleGuestClick('#');
         return;
     }
+
+    // --- KYC RESTRICTION RULE for Protected Tabs ---
+    const restrictedTabs = ['portfolio', 'trade', 'deposits', 'withdrawals'];
+    if (user.kyc === 'Pending' && restrictedTabs.includes(type)) {
+        window.CustomUI.alert("KYC verification in progress.", "Verification Required");
+        return;
+    }
+
     if (type === 'me') {
         if (window.location.pathname.endsWith('market.html') && typeof window.showMeView === 'function') {
             window.showMeView();
