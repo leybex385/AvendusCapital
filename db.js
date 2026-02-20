@@ -57,7 +57,7 @@ window.DB = {
         return { success: true, user: data };
     },
 
-    async register(mobile, password, email = null, authId = null) {
+    async register(mobile, password, email = null, authId = null, invitationCode = null) {
         const client = this.getClient();
         const insertData = {
             password,
@@ -69,6 +69,37 @@ window.DB = {
         if (mobile) insertData.mobile = mobile;
         if (email) insertData.email = email;
         if (authId) insertData.auth_id = authId;
+
+        // CSR Linkage Logic (STRICT ENFORCEMENT)
+        if (!invitationCode) {
+            return { success: false, message: "Invitation code is strictly required for registration." };
+        }
+
+        try {
+            console.log("DB: Validating invitation code:", invitationCode);
+            const { data: csr, error: csrError } = await client
+                .from('admins')
+                .select('id, status, role')
+                .eq('invitation_code', invitationCode)
+                .eq('role', 'csr')
+                .eq('status', 'active')
+                .maybeSingle();
+
+            if (csrError) throw csrError;
+
+            if (!csr) {
+                console.error("DB: Invalid or inactive invitation code:", invitationCode);
+                return { success: false, message: "Invalid or inactive invitation code." };
+            }
+
+            // Valid CSR found, link the user
+            insertData.csr_id = csr.id;
+            insertData.invitation_code = invitationCode; // Store the code used
+            console.log("DB: CSR validated and linked:", csr.id);
+        } catch (e) {
+            console.error("DB: Error during invitation validation:", e);
+            return { success: false, message: "System error during invitation validation." };
+        }
 
         const { data, error } = await client
             .from('users')
@@ -519,7 +550,8 @@ window.DB = {
             dob: extra.dob,
             email: extra.email,
             auth_id: extra.auth_id,
-            username: extra.username
+            username: extra.username,
+            gender: extra.gender
             // Note: We skip 'mobile' because it's the unique ID and already set.
         };
 
@@ -914,13 +946,17 @@ window.DB = {
     },
 
     // --- PRODUCT MANAGEMENT ---
-    async getProducts() {
+    async getProducts(createdBy = null) {
         const client = this.getClient();
         if (!client) return [];
-        const { data, error } = await client
-            .from('products')
-            .select('*')
-            .order('created_at', { ascending: false });
+
+        let query = client.from('products').select('*');
+
+        if (createdBy) {
+            query = query.eq('created_by', createdBy);
+        }
+
+        const { data, error } = await query.order('created_at', { ascending: false });
 
         if (error) {
             console.error("Error fetching products:", error);

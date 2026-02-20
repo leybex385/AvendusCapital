@@ -14,6 +14,7 @@
     <script>const supabasejs = window.supabase;</script>
     <script src="db.js"></script>
     <script src="db_patch.js"></script>
+    <script src="js/admin_auth_guard.js"></script>
     <style>
         :root {
             --sidebar-bg: #ffffff;
@@ -170,6 +171,14 @@
             padding: 20px;
             min-height: 100%;
             box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .vsl-table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 10px;
         }
 
         /* Unified Buttons */
@@ -1374,6 +1383,9 @@
                                         Full name</th>
                                     <th
                                         style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
+                                        Gender</th>
+                                    <th
+                                        style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
                                         Date of Birth</th>
                                     <th
                                         style="padding:12px; font-size:0.7rem; color:#1e293b; border-bottom:1px solid #e2e8f0;">
@@ -1821,6 +1833,15 @@
                     <div class="kyc-form-group">
                         <label>Date of birth <span style="color:#ef4444">*</span></label>
                         <input type="text" id="ek_dob" class="kyc-input" placeholder="Enter DOB (YYYY-MM-DD)">
+                    </div>
+                    <div class="kyc-form-group">
+                        <label>Gender <span style="color:#ef4444">*</span></label>
+                        <select id="ek_gender" class="kyc-input">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
                 </div>
 
@@ -2350,6 +2371,7 @@
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.mobile || '-'}</td>
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.email || '-'}</td>
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.full_name || '-'}</td>
+                            <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.gender || '-'}</td>
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.dob || '-'}</td>
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9; font-size:0.75rem;">${x.id_number || '-'}</td>
                             <td style="padding:12px; border-bottom:1px solid #f1f5f9;">
@@ -2749,6 +2771,7 @@
                 document.getElementById('ek_phone').value = user.mobile || '';
                 document.getElementById('ek_email').value = user.email || '';
                 document.getElementById('ek_dob').value = user.dob || '';
+                document.getElementById('ek_gender').value = user.gender || '';
                 document.getElementById('ek_status').value = kyc ? kyc.status : 'Pending';
                 document.getElementById('ek_pin').value = user.withdrawal_pin || '';
                 document.getElementById('ek_notes').value = kyc ? (kyc.rejection_reason || '') : '';
@@ -2805,6 +2828,7 @@
                         mobile: document.getElementById('ek_phone').value,
                         email: document.getElementById('ek_email').value,
                         dob: document.getElementById('ek_dob').value,
+                        gender: document.getElementById('ek_gender').value,
                         kyc: document.getElementById('ek_status').value,
                         withdrawal_pin: document.getElementById('ek_pin').value
                     };

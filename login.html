@@ -482,6 +482,16 @@
                     <input type="date" id="regDob" style="color-scheme: dark;">
                 </div>
                 <div class="form-group">
+                    <label>Gender</label>
+                    <select id="regGender"
+                        style="color-scheme: dark; background: #1a1a1a; color: #fff; width: 100%; padding: 0.75rem; border: 1px solid #333; border-radius: 8px;">
+                        <option value="" disabled selected>Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Mobile Number</label>
                     <div class="phone-input-wrapper">
                         <div class="country-code">
@@ -516,8 +526,8 @@
                     <input type="password" id="regConfirmPass" placeholder="Confirm password" required>
                 </div>
                 <div class="form-group">
-                    <label>Invitation Code (Optional)</label>
-                    <input type="text" id="regInviteCode" placeholder="Enter code">
+                    <label>Invitation Code (Required)</label>
+                    <input type="text" id="regInviteCode" placeholder="Enter code" required>
                 </div>
                 <button class="login-submit-btn" onclick="goToStep3()">Next</button>
                 <div style="text-align: center; margin-top: 10px;">
@@ -683,6 +693,11 @@
                 <div class="form-group">
                     <label>Mobile Number</label>
                     <input type="text" id="confMobile" readonly
+                        style="color: #94a3b8; cursor: not-allowed; background: #0a0a0a; border: 1px solid #333;">
+                </div>
+                <div class="form-group">
+                    <label>Gender</label>
+                    <input type="text" id="confGender" readonly
                         style="color: #94a3b8; cursor: not-allowed; background: #0a0a0a; border: 1px solid #333;">
                 </div>
 
@@ -987,15 +1002,18 @@
         window.goToStep2 = function () {
             const name = document.getElementById('regName').value;
             const dob = document.getElementById('regDob').value;
+            const gender = document.getElementById('regGender').value;
             const mobile = document.getElementById('regMobile').value;
 
             if (!name) return showAlert('warning', 'Please enter your full name.');
             if (!dob) return showAlert('warning', 'Please enter your date of birth.');
+            if (!gender) return showAlert('warning', 'Please select your gender.');
             if (!mobile || mobile.length < 10) return showAlert('warning', 'Please enter a valid 10-digit mobile number.');
 
             // Store Data
             regData.name = name;
             regData.dob = dob;
+            regData.gender = gender;
             regData.mobile = mobile;
 
             showStep(2);
@@ -1049,22 +1067,45 @@
             if (pass !== confirmPass) return showAlert('warning', 'Passwords do not match.');
             if (pass.length < 6) return showAlert('warning', 'Password must be at least 6 characters.');
 
-            // Verify OTP
+            // --- STRICT INVITATION VALIDATION (Instruction 4) ---
+            const invitationCode = inviteCode.trim();
+            if (!invitationCode) {
+                return showAlert('warning', 'Invitation code is required.');
+            }
+
             const btn = event.target;
             const originalText = btn.innerText;
-            btn.innerText = 'Verifying...';
+            btn.innerText = 'Validating...';
             btn.disabled = true;
 
             try {
+                const client = DB.getClient();
+                const { data: csr, error: csrErr } = await client
+                    .from('admins')
+                    .select('id')
+                    .eq('invitation_code', invitationCode)
+                    .eq('role', 'csr')
+                    .eq('status', 'active')
+                    .maybeSingle();
+
+                if (csrErr) throw csrErr;
+
+                if (!csr) {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    return showAlert('error', 'Invalid or inactive invitation code.');
+                }
+
+                // If valid, proceed to verify OTP
+                btn.innerText = 'Verifying...';
+
                 // Verify Email OTP using Supabase via DB helper
                 const res = await DB.verifyEmailOtp(email, otp);
                 if (res.success) {
-                    // Success
                     regData.email = email;
                     regData.password = pass;
                     regData.inviteCode = inviteCode;
                     regData.authId = res.authId; // Store Auth ID
-
                     showStep(3);
                 } else {
                     showAlert('error', 'Invalid OTP or expired. Please try again.');
@@ -1089,6 +1130,7 @@
             document.getElementById('confName').value = regData.name;
             document.getElementById('confDob').value = regData.dob;
             document.getElementById('confMobile').value = '+91' + regData.mobile;
+            document.getElementById('confGender').value = regData.gender;
 
             showStep('3B');
         };
@@ -1113,13 +1155,14 @@
 
             try {
                 // 1. Create User Account (Basic Registration)
-                let regRes = await DB.register(regData.mobile, regData.password, regData.email, regData.authId);
+                let regRes = await DB.register(regData.mobile, regData.password, regData.email, regData.authId, regData.inviteCode);
 
-                if (!regRes.success) {
-                    console.warn("USER CREATION FAILED (Checking for existing record):", regRes.message);
+                // STRICT EXECUTION CONTROL (Instruction 3)
+                if (regRes.success !== true) {
+                    console.log("Registration blocked due to invalid invitation");
 
-                    // If conflict, try to fetch the existing user record linked to this session
-                    if (regRes.message.includes("duplicate key") && regData.authId) {
+                    // Duplicate key recovery (Only if valid registration attempt but record exists)
+                    if (regRes.message && regRes.message.includes("duplicate key") && regData.authId) {
                         const client = DB.getClient();
                         const { data: existingUser } = await client
                             .from('users')
@@ -1138,9 +1181,13 @@
                     } else {
                         btn.innerText = originalText;
                         btn.disabled = false;
-                        return showAlert('error', regRes.message || 'Registration failed.', 'Error');
+                        return showAlert('error', regRes.message || 'Registration failed.', 'Registration Error');
                     }
                 }
+
+                // If code reaches here, regRes.success is guaranteed to be true
+                if (regRes.success !== true) return;
+
 
                 const userId = regRes.user.id;
                 console.log("USER ID READY:", userId, regRes);
@@ -1184,7 +1231,8 @@
                         status: 'active',
                         auth_id: activeAuthId,
                         username: regData.name || regData.mobile,
-                        id_type: idType
+                        id_type: idType,
+                        gender: regData.gender
                     }
                 );
 

@@ -14,6 +14,7 @@
     <script>const supabasejs = window.supabase;</script>
     <script src="db.js"></script>
     <script src="db_patch.js"></script>
+    <script src="js/admin_auth_guard.js"></script>
     <style>
         :root {
             --sidebar-bg: #ffffff;
@@ -320,12 +321,17 @@
                 Real-name authentication</a>
             <a href="admin_customer_management.html" class="menu-item"><i data-lucide="users" size="18"></i> Customer
                 Management</a>
-            <a href="admin_customer_management.html" class="menu-item"><i data-lucide="credit-card" size="18"></i> Bank
+            <a href="admin_customer_management.html" class="menu-item" id="btn_bank_accounts"><i
+                    data-lucide="credit-card" size="18"></i> Bank
                 Accounts</a>
             <a href="admin_customer_management.html" class="menu-item"><i data-lucide="box" size="18"></i> Product
                 Management</a>
-            <a href="admin_customer_management.html" class="menu-item"><i data-lucide="trending-up" size="18"></i>
+            <a href="admin_customer_management.html" class="menu-item" id="btn_stock057"><i data-lucide="trending-up"
+                    size="18"></i>
                 Institutional Stock 057</a>
+            <a href="admin_settings_account.html" class="menu-item active" id="btn_account_settings"
+                style="display: none;"><i data-lucide="settings" size="18"></i>
+                Account Settings</a>
 
             <style>
                 .admin-user-menu {
