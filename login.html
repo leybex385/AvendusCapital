@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <title>Sign in to Avendus Capital</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -402,11 +403,21 @@
 
     <div class="login-header">
         <div class="login-logo">Avendus Capital</div>
-        <a href="index.html" class="home-btn"><i data-lucide="home" width="20"></i></a>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div class="lang-switcher" style="pointer-events: auto;">
+                <button class="lang-btn" onclick="switchLang('en')" data-lang="en"
+                    style="background:none; border:none; cursor:pointer; font-size:1.2rem;"
+                    title="English">🇺🇸</button>
+                <button class="lang-btn" onclick="switchLang('cn')" data-lang="cn"
+                    style="background:none; border:none; cursor:pointer; font-size:1.2rem;"
+                    title="Chinese">🇨🇳</button>
+            </div>
+            <a href="index.html" class="home-btn"><i data-lucide="home" width="20"></i></a>
+        </div>
     </div>
 
     <div class="login-card">
-        <h1>Sign in</h1>
+        <h1 data-i18n="login_title">Sign in</h1>
 
         <!-- Mobile Login Only (Instruction 1) -->
 
@@ -415,19 +426,21 @@
 
             <!-- Mobile Login (Instruction 3) -->
             <div id="loginMobileSection" class="form-group">
-                <label>Mobile Number</label>
+                <label data-i18n="lbl_phone">Mobile Number</label>
                 <div class="phone-input-wrapper">
                     <div class="country-code">
                         <img src="https://flagcdn.com/w20/in.png" width="20"> +91
                     </div>
-                    <input type="tel" id="phoneNumber" placeholder="Enter mobile number" maxlength="10">
+                    <input type="tel" id="phoneNumber" placeholder="Enter mobile number" maxlength="10"
+                        data-i18n="ph_enter_phone">
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Password</label>
+                <label data-i18n="lbl_password">Password</label>
                 <div class="password-wrapper">
-                    <input type="password" id="password" placeholder="Enter password" required>
+                    <input type="password" id="password" placeholder="Enter password" required
+                        data-i18n="ph_enter_password">
                     <button type="button" id="togglePass" class="eye-icon"
                         style="background: none; border: none; padding: 0;">
                         <i data-lucide="eye"></i>
@@ -435,15 +448,17 @@
                 </div>
                 <div style="text-align: right; margin-top: 5px;">
                     <a href="#" onclick="openModal('forgot')"
-                        style="font-size: 0.8rem; color: #d4af37; text-decoration: none;">Forgot Password?</a>
+                        style="font-size: 0.8rem; color: #d4af37; text-decoration: none;"
+                        data-i18n="lnk_forgot_password">Forgot Password?</a>
                 </div>
             </div>
 
-            <button type="submit" class="login-submit-btn">Login</button>
+            <button type="submit" class="login-submit-btn" data-i18n="btn_login">Login</button>
         </form>
 
         <div class="links">
-            Don't have an account? <a href="#" onclick="openModal('register')">Register Now</a>
+            <span data-i18n="no_account_hint">Don't have an account?</span> <a href="#" onclick="openModal('register')"
+                data-i18n="lnk_register">Register Now</a>
         </div>
 
 
@@ -454,66 +469,72 @@
         <div class="modal-body" style="max-width: 600px;">
             <button class="close-modal" onclick="closeModal('register')"><i data-lucide="x"></i></button>
             <div id="regTitleContainer">
-                <h2 id="regTitle">Create Account</h2>
+                <h2 id="regTitle" data-i18n="modal_create_account">Create Account</h2>
             </div>
 
             <!-- STEP 1: Registration -->
             <div id="regStep1">
                 <div class="form-group">
-                    <label>Mobile Number</label>
+                    <label data-i18n="lbl_phone">Mobile Number</label>
                     <div class="phone-input-wrapper">
                         <div class="country-code">
                             <img src="https://flagcdn.com/w20/in.png" width="20"> +91
                         </div>
-                        <input type="tel" id="regMobile" placeholder="10-digit number" maxlength="10">
+                        <input type="tel" id="regMobile" placeholder="10-digit number" maxlength="10"
+                            data-i18n="ph_10_digit">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Create Password</label>
+                    <label data-i18n="lbl_create_pass">Create Password</label>
                     <div class="password-wrapper">
-                        <input type="password" id="regPass" placeholder="Create password" required>
+                        <input type="password" id="regPass" placeholder="Create password" required
+                            data-i18n="ph_create_pass">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Confirm Password</label>
+                    <label data-i18n="lbl_confirm_pass">Confirm Password</label>
                     <div class="password-wrapper">
-                        <input type="password" id="regConfirmPass" placeholder="Confirm password" required>
+                        <input type="password" id="regConfirmPass" placeholder="Confirm password" required
+                            data-i18n="ph_confirm_pass">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Invitation Code (MANDATORY)</label>
-                    <input type="text" id="regInviteCode" placeholder="Enter code" required>
+                    <label data-i18n="lbl_invite_code">Invitation Code (MANDATORY)</label>
+                    <input type="text" id="regInviteCode" placeholder="Enter code" required data-i18n="ph_enter_code">
                 </div>
-                <button class="login-submit-btn" onclick="goToStep2()">Next</button>
+                <button class="login-submit-btn" onclick="goToStep2()" data-i18n="btn_next">Next</button>
             </div>
 
             <!-- STEP 2: Email Binding -->
             <div id="regStep2" style="display:none;">
                 <div class="form-group">
-                    <label>Email Address</label>
+                    <label data-i18n="lbl_email">Email Address</label>
                     <div class="phone-input-wrapper">
-                        <input type="email" id="regEmail" placeholder="name@example.com">
-                        <button type="button" class="otp-btn" id="sendEmailOtpBtn" onclick="triggerEmailOtp()">Send
+                        <input type="email" id="regEmail" placeholder="name@example.com" data-i18n="ph_enter_email">
+                        <button type="button" class="otp-btn" id="sendEmailOtpBtn" onclick="triggerEmailOtp()"
+                            data-i18n="btn_send_otp">Send
                             OTP</button>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Verification Code</label>
-                    <input type="text" id="regOtpInput" placeholder="Enter 6-digit code" maxlength="6">
+                    <label data-i18n="lbl_ver_code">Verification Code</label>
+                    <input type="text" id="regOtpInput" placeholder="Enter 6-digit code" maxlength="6"
+                        data-i18n="ph_enter_otp">
                 </div>
-                <button class="login-submit-btn" onclick="finishStep2()">Next</button>
+                <button class="login-submit-btn" onclick="finishStep2()" data-i18n="btn_next">Next</button>
                 <div style="text-align: center; margin-top: 10px;">
-                    <a href="#" onclick="showStep(1)"
-                        style="color: #64748b; font-size: 0.9rem; text-decoration: none;">Back</a>
+                    <a href="#" onclick="showStep(1)" style="color: #64748b; font-size: 0.9rem; text-decoration: none;"
+                        data-i18n="btn_back">Back</a>
                 </div>
             </div>
 
             <!-- STEP 3: KYC Agreement -->
             <div id="regStep3" style="display:none;">
-                <h2 style="margin-bottom: 0.5rem; color: #d4af37;">Know Your Customer (KYC)</h2>
+                <h2 style="margin-bottom: 0.5rem; color: #d4af37;" data-i18n="lbl_kyc">Know Your Customer (KYC)</h2>
 
-                <div
-                    style="background: #050505; padding: 1.5rem; border-radius: 8px; height: 350px; overflow-y: auto; border: 1px solid #333; margin-bottom: 1.5rem; font-size: 0.85rem; line-height: 1.6; color: #cbd5e1; text-align: left;">
+                <div id="kycAgreementText"
+                    style="background: #050505; padding: 1.5rem; border-radius: 8px; height: 350px; overflow-y: auto; border: 1px solid #333; margin-bottom: 1.5rem; font-size: 0.85rem; line-height: 1.6; color: #cbd5e1; text-align: left;"
+                    data-i18n="kyc_agreement_content">
                     <h3 style="color: #fff; margin-top: 0;">Identity Verification Agreement</h3>
 
                     <h4 style="color: #94a3b8; margin: 1rem 0 0.5rem;">1. Introduction</h4>
@@ -610,44 +631,46 @@
                     style="margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 10px; background: #0a0a0a; padding: 10px; border-radius: 4px;">
                     <input type="checkbox" id="agreeCheckbox"
                         style="width: 20px; height: 20px; margin-top: 2px; accent-color: #d4af37;">
-                    <label for="agreeCheckbox" style="font-size: 0.9rem; margin: 0; color: #e2e8f0; cursor: pointer;">I
+                    <label for="agreeCheckbox" style="font-size: 0.9rem; margin: 0; color: #e2e8f0; cursor: pointer;"
+                        data-i18n="agree_kyc_hint">I
                         agree to the KYC agreement</label>
                 </div>
 
-                <button class="login-submit-btn" onclick="goToStep4()">Agree & Continue</button>
+                <button class="login-submit-btn" onclick="goToStep4()" data-i18n="btn_agree_continue">Agree &
+                    Continue</button>
                 <button class="tab-btn" style="width: 100%; margin-top: 1rem; color: #64748b;"
-                    onclick="closeModal('register')">I don't agree</button>
+                    onclick="closeModal('register')" data-i18n="btn_dont_agree">I don't agree</button>
             </div>
 
             <!-- STEP 4: Basic Information -->
             <div id="regStep4" style="display:none;">
-                <h2 style="margin-bottom: 1.5rem; color: #d4af37;">Basic Information</h2>
+                <h2 style="margin-bottom: 1.5rem; color: #d4af37;" data-i18n="lbl_basic_info">Basic Information</h2>
                 <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="regName" placeholder="Full Legal Name">
+                    <label data-i18n="lbl_full_name">Full Name</label>
+                    <input type="text" id="regName" placeholder="Full Legal Name" data-i18n="ph_enter_fullname">
                 </div>
                 <div class="form-group">
-                    <label>Date of Birth</label>
+                    <label data-i18n="lbl_dob">Date of Birth</label>
                     <input type="date" id="regDob" style="color-scheme: dark;">
                 </div>
                 <div class="form-group">
-                    <label>Gender</label>
+                    <label data-i18n="lbl_gender">Gender</label>
                     <select id="regGender"
                         style="color-scheme: dark; background: #1a1a1a; color: #fff; width: 100%; padding: 0.75rem; border: 1px solid #333; border-radius: 8px;">
-                        <option value="" disabled selected>Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
+                        <option value="" disabled selected data-i18n="ph_select_gender">Select Gender</option>
+                        <option value="Male" data-i18n="opt_male">Male</option>
+                        <option value="Female" data-i18n="opt_female">Female</option>
+                        <option value="Other" data-i18n="opt_other">Other</option>
                     </select>
                 </div>
-                <button class="login-submit-btn" onclick="goToStep5()">Next</button>
+                <button class="login-submit-btn" onclick="goToStep5()" data-i18n="btn_next">Next</button>
             </div>
 
             <!-- STEP 5: Identification -->
             <div id="regStep5" style="display:none;">
-                <h2 style="margin-bottom: 1.5rem; color: #d4af37;">Identification</h2>
+                <h2 style="margin-bottom: 1.5rem; color: #d4af37;" data-i18n="lbl_identification">Identification</h2>
                 <div class="form-group">
-                    <label>ID Type</label>
+                    <label data-i18n="lbl_id_type">ID Type</label>
                     <div
                         style="padding: 0.75rem; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #fff; font-weight: 600;">
                         PAN Card
@@ -655,13 +678,14 @@
                     <input type="hidden" id="regIdType" value="PAN">
                 </div>
                 <div class="form-group">
-                    <label>ID Number</label>
-                    <input type="text" id="regIdNumber" placeholder="Enter ID number">
+                    <label data-i18n="lbl_id_card">ID Number</label>
+                    <input type="text" id="regIdNumber" placeholder="Enter ID number" data-i18n="ph_enter_idnum">
                 </div>
                 <div class="form-group">
-                    <label>ID Photo (Front)</label>
+                    <label data-i18n="lbl_front_id">ID Photo (Front)</label>
                     <div id="kycFrontPreview"
-                        style="width: 120px; height: 80px; background: #0a0a0a; border: 1px solid #333; border-radius: 4px; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 0.75rem; color: #64748b;">
+                        style="width: 120px; height: 80px; background: #0a0a0a; border: 1px solid #333; border-radius: 4px; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 0.75rem; color: #64748b;"
+                        data-i18n="ph_not_selected">
                         No image selected
                     </div>
                     <input type="file" id="kycDocId" accept="image/*"
@@ -669,16 +693,18 @@
                         style="padding: 10px; background: #0a0a0a; border: 1px dashed #333; width: 100%; color: transparent;">
                 </div>
                 <div class="form-group">
-                    <label>ID Photo (Back)</label>
+                    <label data-i18n="lbl_back_id">ID Photo (Back)</label>
                     <div id="kycBackPreview"
-                        style="width: 120px; height: 80px; background: #0a0a0a; border: 1px solid #333; border-radius: 4px; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 0.75rem; color: #64748b;">
+                        style="width: 120px; height: 80px; background: #0a0a0a; border: 1px solid #333; border-radius: 4px; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 0.75rem; color: #64748b;"
+                        data-i18n="ph_not_selected">
                         No image selected
                     </div>
                     <input type="file" id="kycDocIdBack" accept="image/*"
                         onchange="previewKycImage(this, 'kycBackPreview')"
                         style="padding: 10px; background: #0a0a0a; border: 1px dashed #333; width: 100%; color: transparent;">
                 </div>
-                <button class="login-submit-btn" onclick="submitFinalKYC()">Submit KYC</button>
+                <button class="login-submit-btn" onclick="submitFinalKYC()" data-i18n="btn_submit_kyc">Submit
+                    KYC</button>
             </div>
 
             <!-- Final State: Under Review -->
@@ -687,12 +713,13 @@
                     style="width: 80px; height: 80px; background: rgba(212, 175, 55, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: #d4af37;">
                     <i data-lucide="clock" style="width: 40px; height: 40px;"></i>
                 </div>
-                <h2 style="color: #d4af37; margin-bottom: 1rem;">KYC Under Review</h2>
-                <p style="color: #94a3b8; line-height: 1.6; margin-bottom: 2rem;">
+                <h2 style="color: #d4af37; margin-bottom: 1rem;" data-i18n="kyc_under_review">KYC Under Review</h2>
+                <p style="color: #94a3b8; line-height: 1.6; margin-bottom: 2rem;" data-i18n="kyc_review_hint">
                     Your documents have been submitted. Our compliance team is reviewing them — please allow up to 48
                     hours.
                 </p>
-                <button class="login-submit-btn" onclick="window.location.reload()">Return to Home</button>
+                <button class="login-submit-btn" onclick="window.location.reload()" data-i18n="btn_back_home">Return to
+                    Home</button>
             </div>
         </div>
     </div>
@@ -701,11 +728,11 @@
     <div id="forgotModal" class="modal-overlay">
         <div class="modal-body">
             <button class="close-modal" onclick="closeModal('forgot')"><i data-lucide="x"></i></button>
-            <h2>Reset Password</h2>
-            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem;">
+            <h2 data-i18n="modal_reset_password">Reset Password</h2>
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1rem;" data-i18n="reset_pass_hint">
                 Please contact our support team to verify your identity and reset your password.
             </p>
-            <button class="login-submit-btn" onclick="closeModal('forgot')">Close</button>
+            <button class="login-submit-btn" onclick="closeModal('forgot')" data-i18n="btn_close">Close</button>
         </div>
     </div>
 
