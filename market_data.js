@@ -110,6 +110,8 @@
                         listingDate: p.listing_date || 'TBD',
                         level: (parseFloat(p.min_invest) > 100000) ? 'Lv ≥ 2' : 'Lv ≥ 1',
                         type: p.type || 'IPO',
+                        totalShares: p.total_shares || 0,
+                        availableShares: p.available_shares || 0,
                         change: 0
                     }));
                     this.notifyListeners();
@@ -158,6 +160,22 @@
 
                 this.notifyListeners();
             }, 1000);
+        }
+
+        addListener(callback) {
+            if (typeof callback === 'function') {
+                this.listeners.push(callback);
+            }
+        }
+
+        notifyListeners() {
+            this.listeners.forEach(cb => {
+                try {
+                    cb();
+                } catch (e) {
+                    console.error("MarketEngine listener error:", e);
+                }
+            });
         }
 
         search(query) {

@@ -405,6 +405,9 @@ function checkLoginStatus() {
 
         // Ensure user data is synced globally on load
         if (window.syncUserData) window.syncUserData();
+
+        // Sync Loan Eligibility (Backend Rule Integration)
+        if (typeof syncLoanEligibility === 'function') syncLoanEligibility();
     } else {
         // Show Login Buttons
         if (promoActions) promoActions.style.display = 'flex';
@@ -2248,5 +2251,34 @@ async function openWithdrawPage() {
         window.location.href = `withdraw.html?from=market&view=${view}`;
     } else {
         window.location.href = `withdraw.html?from=homepage`;
+    }
+}
+async function syncLoanEligibility() {
+    const user = window.DB && window.DB.getCurrentUser ? window.DB.getCurrentUser() : null;
+    if (!user) return;
+
+    try {
+        const client = window.DB.getClient();
+        if (!client) return;
+
+        const { data, error } = await client
+            .from('users')
+            .select('loan_enabled')
+            .eq('id', user.id)
+            .single();
+
+        if (!error && data) {
+            // Update local user object cached in session/local storage
+            const updatedUser = { ...user, loan_enabled: !!data.loan_enabled };
+            localStorage.setItem(window.DB.CURRENT_USER_KEY, JSON.stringify(updatedUser));
+
+            // Ensure the Loan Offer Card is always visible even if loan_enabled = false
+            const loanCard = document.getElementById('loanOfferCard');
+            if (loanCard) {
+                loanCard.style.display = 'flex';
+            }
+        }
+    } catch (e) {
+        console.error("Loan Eligibility Sync Error:", e);
     }
 }

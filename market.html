@@ -3693,7 +3693,7 @@
 
             <div class="detail-right" style="margin-top: 1.5rem;">
                 <section class="buy-widget">
-                    <div class="input-group">
+                    <div class="input-group" id="buyQuantitySection">
                         <span class="input-label">Quantity</span>
                         <div class="quantity-input-wrapper">
                             <input type="number" id="buyQuantityInput" class="q-input" value="0" min="1">
@@ -3704,7 +3704,7 @@
                             required: ₹0.00</div>
                     </div>
 
-                    <div style="margin: 1rem 0;">
+                    <div style="margin: 1rem 0;" id="buySliderSection">
                         <input type="range" id="buyRangeSlider" style="width: 100%;" min="0" max="100" value="0"
                             oninput="updateBuyFromSlider(this.value)">
                         <div style="text-align: center; color: #94a3b8; font-size: 0.75rem;" id="fundStatus">No
@@ -3819,6 +3819,8 @@
                         <div class="d-tab-pill" onclick="switchTransactionTab(this, 'sold')">Sold</div>
                         <div class="d-tab-pill" onclick="switchTransactionTab(this, 'pending')">Pending</div>
                         <div class="d-tab-pill" onclick="switchTransactionTab(this, 'pendingPayment')">Pending Payment
+                        </div>
+                        <div class="d-tab-pill" onclick="switchTransactionTab(this, 'pendingApproval')">Pending Approval
                         </div>
                         <div class="d-tab-pill" onclick="switchTransactionTab(this, 'rejected')">Rejected</div>
 
@@ -4434,7 +4436,7 @@
                     <div class="me-title-row">
                         <i data-lucide="gift"></i> Offers
                     </div>
-                    <div onclick="window.location.href='loan_application.html'"
+                    <div id="loanOfferCard" onclick="window.location.href='loan_application.html'"
                         style="background: #f8fafc; border-radius: 12px; padding: 1.25rem; border: 1px solid #e2e8f0; display: flex; gap: 1rem; align-items: center; cursor: pointer; transition: transform 0.2s;"
                         onmouseover="this.style.transform='scale(1.02)'; this.querySelector('.loan-icon-box').style.boxShadow='0 0 15px rgba(212, 175, 55, 0.4)'"
                         onmouseout="this.style.transform='scale(1)'; this.querySelector('.loan-icon-box').style.boxShadow='none'">
@@ -4713,10 +4715,27 @@
                     buyBtn.innerText = 'Subscribe';
                     buyBtn.dataset.type = type;
                     if (sellBtn) sellBtn.style.display = 'none';
+
+                    // Toggle quantity input visibility based on IPO/OTC
+                    const qtySec = document.getElementById('buyQuantitySection');
+                    const sliderSec = document.getElementById('buySliderSection');
+                    if (type === 'IPO') {
+                        if (qtySec) qtySec.style.display = 'none';
+                        if (sliderSec) sliderSec.style.display = 'none';
+                    } else {
+                        if (qtySec) qtySec.style.display = 'block';
+                        if (sliderSec) sliderSec.style.display = 'block';
+                    }
                 } else {
                     buyBtn.innerText = 'Buy';
                     buyBtn.dataset.type = 'stock';
                     if (sellBtn) sellBtn.style.display = 'block';
+
+                    // Reset visibility for normal stocks
+                    const qtySec = document.getElementById('buyQuantitySection');
+                    const sliderSec = document.getElementById('buySliderSection');
+                    if (qtySec) qtySec.style.display = 'block';
+                    if (sliderSec) sliderSec.style.display = 'block';
                 }
             }
 
@@ -5249,7 +5268,11 @@
 
             if (!qtyInput || !priceEl || !totalEl) return;
 
-            const qty = parseInt(qtyInput.value) || 0;
+            const buyBtn = document.getElementById('buyBtn');
+            const isIPO = buyBtn && buyBtn.dataset.type === 'IPO';
+
+            let qty = parseInt(qtyInput.value) || 0;
+            if (isIPO) qty = 0; // Force 0 for IPO to avoid confusion if input had remnant value
             // Parse price string like "₹1,234.56" -> 1234.56
             const priceText = priceEl.innerText.replace(/[^\d.]/g, '');
             const price = parseFloat(priceText) || 0;
@@ -5372,7 +5395,7 @@
             const exchangeText = document.getElementById('detExchange').innerText;
 
             const calc = updateBuyCalculations();
-            if (!calc || calc.qty <= 0) {
+            if (type !== 'ipo' && (!calc || calc.qty <= 0)) {
                 alert("Please enter a valid quantity.");
                 return;
             }
@@ -5474,7 +5497,8 @@
                     symbol: symbol,
                     name: stockName,
                     type: type.toLowerCase(),
-                    quantity: calc.qty,
+                    quantity: calc.qty, // Keep for legacy if needed
+                    requested_quantity: type.toLowerCase() === 'ipo' ? 0 : calc.qty,
                     price: calc.price,
                     total_amount: calc.total,
                     tax_amount: calc.tax,
@@ -5483,10 +5507,19 @@
                     status: tradeStatus
                 };
 
-                const result = await window.DB.submitTrade(tradeData);
+                let result = await window.DB.submitTrade(tradeData);
+
+                // --- SCHEMA FALLBACK LOGIC ---
+                // If the database has not been patched yet, 'requested_quantity' will cause a 404/400 error.
+                if (!result.success && result.error && result.error.message && result.error.message.includes('requested_quantity')) {
+                    console.warn("Retrying trade submission without 'requested_quantity' column...");
+                    const fallbackData = { ...tradeData };
+                    delete fallbackData.requested_quantity;
+                    result = await window.DB.submitTrade(fallbackData);
+                }
 
                 if (result.success) {
-                    if (tradeStatus === 'Holding' || isInsufficient) {
+                    if ((tradeStatus === 'Holding' || isInsufficient) && !['otc', 'ipo'].includes(type.toLowerCase())) {
                         const deduction = isInsufficient ? currentBalance : calc.total;
                         const newBalance = currentBalance - deduction;
                         const currentInvested = parseFloat(freshUser.invested) || 0;
@@ -5723,8 +5756,9 @@
             window.transactionData = {
                 all: trades,
                 holding: trades.filter(t => t.status === 'Holding' || (t.type === 'stock' && ['Settled', 'Approved', 'Confirmed'].includes(t.status))),
-                sold: trades.filter(t => t.status === 'Sold'),
-                pending: trades.filter(t => t.status === 'Pending' && !(t.admin_note || "").startsWith('OUTSTANDING')),
+                sold: trades.filter(t => t.status === 'Sold' && t.type !== 'sell' && !(t.admin_note || "").includes("Proceeds")),
+                pending: trades.filter(t => t.status === 'Pending' && !(t.admin_note || "").startsWith('OUTSTANDING') && t.type !== 'ipo' && t.type !== 'otc'),
+                pendingApproval: trades.filter(t => t.status === 'Pending' && (t.type === 'ipo' || t.type === 'otc')),
                 rejected: trades.filter(t => t.status === 'Rejected'),
                 pendingPayment: trades.filter(t => (t.status === 'Pending' && (t.admin_note || "").startsWith('OUTSTANDING')) || t.status === 'Awaiting'),
                 unsettled: trades.filter(t => !['Holding', 'Sold', 'Pending', 'Rejected'].includes(t.status))
@@ -5739,6 +5773,7 @@
             const list = document.getElementById('transList');
             // If tabName is not in keys, default to empty array
             const data = (window.transactionData && window.transactionData[tabName]) ? window.transactionData[tabName] : [];
+            console.log("Filtered Trades for " + tabName + ":", data);
 
             if (!data || data.length === 0) {
                 list.innerHTML = `<div style="color: #94a3b8; font-size: 0.9rem; margin-top: 1rem; text-align:center; padding: 2rem;">No data found.</div>`;
@@ -5814,6 +5849,54 @@
                         }
                     });
                 }, 1000);
+            } else if (tabName === 'pendingApproval') {
+                let html = `<div class="trans-grid">`;
+                data.forEach(item => {
+                    const dateStr = new Date(item.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+                    let statusText = 'Pending Approval';
+                    let infoLabel = 'Quantity';
+                    let infoValue = item.quantity;
+                    if (item.type.toLowerCase() === 'ipo') {
+                        statusText = 'Awaiting Admin Allocation';
+                        infoLabel = 'Requested';
+                        infoValue = 'Interest Submitted';
+                    } else if (item.type.toLowerCase() === 'otc') {
+                        statusText = 'Awaiting Admin Approval';
+                    }
+                    html += `
+                        <div class="t-card">
+                            <div class="t-card-head">
+                                <div style="flex: 1;">
+                                    <div class="t-stock-name">${item.name} <span style="color:#64748b; font-size:0.75rem;">(${item.symbol})</span></div>
+                                    <div style="font-size: 0.65rem; color: #94a3b8; margin-top:0.2rem;">${item.type.toUpperCase()} • ${dateStr}</div>
+                                </div>
+                                <div style="font-size:0.7rem; font-weight:700; color:#f59e0b; padding:2px 8px; border-radius:4px; background:#f59e0b15;">
+                                    Pending
+                                </div>
+                            </div>
+                            <div style="font-size: 0.8rem; font-weight: 600; color: #f59e0b; margin-top: 0.5rem; margin-bottom: 1rem;">${statusText}</div>
+                            <div class="t-card-body">
+                                <div class="t-info-col">
+                                    <div class="t-info-label">${infoLabel}</div>
+                                    <div class="t-info-val">${infoValue}</div>
+                                </div>
+                                <div class="t-info-col">
+                                    <div class="t-info-label">Price</div>
+                                    <div class="t-info-val">₹${parseFloat(item.price).toLocaleString('en-IN')}</div>
+                                </div>
+                                <div class="t-info-col">
+                                    <div class="t-info-label">Total</div>
+                                    <div class="t-info-val">₹${parseFloat(item.total_amount).toLocaleString('en-IN')}</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 1rem; border-top: 1px solid #f1f5f9; padding-top: 0.75rem;">
+                                <button class="h-btn view" style="width: 100%; border-radius: 12px; height: 38px; font-size: 0.85rem; background: #262626; color: #d4af37; border: 1px solid #d4af37;" onclick="openHoldingDetail('${item.id}')">View Details</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                list.innerHTML = html;
             } else {
                 let html = `<div class="trans-grid">`;
                 data.forEach(item => {
@@ -5849,12 +5932,12 @@
                                     <div class="t-info-val">₹${parseFloat(item.total_amount).toLocaleString('en-IN')}</div>
                                 </div>
                             </div>
-                            ${item.admin_note ? `<div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.5rem; padding: 0.5rem; background: #fff1f2; border-radius: 4px;">Note: ${item.admin_note}</div>` : ''}
-                            ${(item.type.toLowerCase() === 'otc' || item.type.toLowerCase() === 'ipo' || item.admin_note === 'OUTSTANDING_BALANCE') ? `
+                            ${(item.type.toLowerCase().includes('stock') || item.type.toLowerCase().includes('otc') || item.type.toLowerCase().includes('ipo') || (item.admin_note || "").includes('OUTSTANDING')) ? `
                                 <div style="margin-top: 1rem; border-top: 1px solid #f1f5f9; padding-top: 0.75rem;">
-                                    <button class="h-btn view" style="width: 100%; border-radius: 12px; height: 38px; font-size: 0.85rem;" onclick="openHoldingDetail('${item.id}')">View Details</button>
+                                    <button class="h-btn view" style="width: 100%; border-radius: 12px; height: 38px; font-size: 0.85rem; background: #262626; color: #d4af37; border: 1px solid #d4af37;" onclick="openHoldingDetail('${item.id}')">View</button>
                                 </div>
                             ` : ''}
+                            ${item.admin_note ? `<div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.5rem; padding: 0.5rem; background: #fff1f2; border-radius: 4px;">Note: ${item.admin_note}</div>` : ''}
                         </div>
                     `;
                 });
@@ -6171,6 +6254,7 @@
             const dbUser = DB.getCurrentUser(); // Latest state
             const formats = { minimumFractionDigits: 2 };
             const inv = parseFloat(dbUser.invested) || 0;
+            const rawBalance = parseFloat(dbUser.balance) || 0;
 
             // Updated targets for specific views
             const updateVal = (id, val) => {
@@ -7746,13 +7830,14 @@
         (function () {
             // --- Helper: Get Index Data by TradingView Symbol ---
             function getIndexByTvSymbol(tvSymbol) {
+                if (!tvSymbol) return null;
                 const indices = window.MarketEngine ? window.MarketEngine.getIndices() : [];
                 // Mapping reverse logic or simple search
                 if (tvSymbol === 'BSE:SENSEX') return indices.find(i => i.symbol === 'SENSEX');
                 if (tvSymbol === 'NSE:NIFTY') return indices.find(i => i.symbol === 'NIFTY 50');
                 if (tvSymbol === 'NSE:BANKNIFTY') return indices.find(i => i.symbol === 'NIFTY BANK');
 
-                return indices.find(i => tvSymbol.includes(i.symbol.replace(/\s/g, '')));
+                return indices.find(i => i && i.symbol && tvSymbol.includes(i.symbol.replace(/\s/g, '')));
             }
 
             // --- Override updateChart to handle dynamic cards ---

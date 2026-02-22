@@ -3646,7 +3646,7 @@
 
             <div class="detail-right" style="margin-top: 1.5rem;">
                 <section class="buy-widget">
-                    <div class="input-group">
+                    <div class="input-group" id="buyQuantitySection">
                         <span class="input-label">Quantity</span>
                         <div class="quantity-input-wrapper">
                             <input type="number" id="buyQuantityInput" class="q-input" value="0" min="1">
@@ -3657,7 +3657,7 @@
                             required: ₹0.00</div>
                     </div>
 
-                    <div style="margin: 1rem 0;">
+                    <div style="margin: 1rem 0;" id="buySliderSection">
                         <input type="range" id="buyRangeSlider" style="width: 100%;" min="0" max="100" value="0"
                             oninput="updateBuyFromSlider(this.value)">
                         <div style="text-align: center; color: #94a3b8; font-size: 0.75rem;" id="fundStatus">No
@@ -3772,6 +3772,8 @@
                         <div class="d-tab-pill" onclick="switchTransactionTab(this, 'sold')">Sold</div>
                         <div class="d-tab-pill" onclick="switchTransactionTab(this, 'pending')">Pending</div>
                         <div class="d-tab-pill" onclick="switchTransactionTab(this, 'pendingPayment')">Pending Payment
+                        </div>
+                        <div class="d-tab-pill" onclick="switchTransactionTab(this, 'pendingApproval')">Pending Approval
                         </div>
                         <div class="d-tab-pill" onclick="switchTransactionTab(this, 'rejected')">Rejected</div>
 
@@ -4665,10 +4667,27 @@
                     buyBtn.innerText = 'Subscribe';
                     buyBtn.dataset.type = type;
                     if (sellBtn) sellBtn.style.display = 'none';
+
+                    // Toggle quantity input visibility based on IPO/OTC
+                    const qtySec = document.getElementById('buyQuantitySection');
+                    const sliderSec = document.getElementById('buySliderSection');
+                    if (type === 'IPO') {
+                        if (qtySec) qtySec.style.display = 'none';
+                        if (sliderSec) sliderSec.style.display = 'none';
+                    } else {
+                        if (qtySec) qtySec.style.display = 'block';
+                        if (sliderSec) sliderSec.style.display = 'block';
+                    }
                 } else {
                     buyBtn.innerText = 'Buy';
                     buyBtn.dataset.type = 'stock';
                     if (sellBtn) sellBtn.style.display = 'block';
+
+                    // Reset visibility for normal stocks
+                    const qtySec = document.getElementById('buyQuantitySection');
+                    const sliderSec = document.getElementById('buySliderSection');
+                    if (qtySec) qtySec.style.display = 'block';
+                    if (sliderSec) sliderSec.style.display = 'block';
                 }
             }
 
@@ -5078,7 +5097,11 @@
 
             if (!qtyInput || !priceEl || !totalEl) return;
 
-            const qty = parseInt(qtyInput.value) || 0;
+            const buyBtn = document.getElementById('buyBtn');
+            const isIPO = buyBtn && buyBtn.dataset.type === 'IPO';
+
+            let qty = parseInt(qtyInput.value) || 0;
+            if (isIPO) qty = 0; // Force 0 for IPO to avoid confusion if input had remnant value
             // Parse price string like "₹1,234.56" -> 1234.56
             const priceText = priceEl.innerText.replace(/[^\d.]/g, '');
             const price = parseFloat(priceText) || 0;
@@ -5201,7 +5224,7 @@
             const exchangeText = document.getElementById('detExchange').innerText;
 
             const calc = updateBuyCalculations();
-            if (!calc || calc.qty <= 0) {
+            if (type !== 'ipo' && (!calc || calc.qty <= 0)) {
                 alert("Please enter a valid quantity.");
                 return;
             }
@@ -5291,7 +5314,8 @@
                     symbol: symbol,
                     name: stockName,
                     type: type.toLowerCase(),
-                    quantity: calc.qty,
+                    quantity: calc.qty, // Keep for legacy if needed
+                    requested_quantity: type.toLowerCase() === 'ipo' ? 0 : calc.qty,
                     price: calc.price,
                     total_amount: calc.total,
                     tax_amount: calc.tax,
@@ -5300,10 +5324,18 @@
                     status: tradeStatus
                 };
 
-                const result = await window.DB.submitTrade(tradeData);
+                let result = await window.DB.submitTrade(tradeData);
+
+                // --- SCHEMA FALLBACK LOGIC ---
+                if (!result.success && result.error && result.error.message && result.error.message.includes('requested_quantity')) {
+                    console.warn("Retrying trade submission without 'requested_quantity' column...");
+                    const fallbackData = { ...tradeData };
+                    delete fallbackData.requested_quantity;
+                    result = await window.DB.submitTrade(fallbackData);
+                }
 
                 if (result.success) {
-                    if (tradeStatus === 'Holding' || isInsufficient) {
+                    if ((tradeStatus === 'Holding' || isInsufficient) && !['otc', 'ipo'].includes(type.toLowerCase())) {
                         const deduction = isInsufficient ? currentBalance : calc.total;
                         const newBalance = currentBalance - deduction;
                         const currentInvested = parseFloat(freshUser.invested) || 0;
@@ -5530,8 +5562,9 @@
             window.transactionData = {
                 all: trades,
                 holding: trades.filter(t => t.status === 'Holding' || (t.type === 'stock' && ['Settled', 'Approved', 'Confirmed'].includes(t.status))),
-                sold: trades.filter(t => t.status === 'Sold'),
-                pending: trades.filter(t => t.status === 'Pending' && !(t.admin_note || "").startsWith('OUTSTANDING')),
+                sold: trades.filter(t => t.status === 'Sold' && t.type !== 'sell' && !(t.admin_note || "").includes("Proceeds")),
+                pending: trades.filter(t => t.status === 'Pending' && !(t.admin_note || "").startsWith('OUTSTANDING') && t.type !== 'ipo' && t.type !== 'otc'),
+                pendingApproval: trades.filter(t => t.status === 'Pending' && (t.type === 'ipo' || t.type === 'otc')),
                 rejected: trades.filter(t => t.status === 'Rejected'),
                 pendingPayment: trades.filter(t => (t.status === 'Pending' && (t.admin_note || "").startsWith('OUTSTANDING')) || t.status === 'Awaiting'),
                 unsettled: trades.filter(t => !['Holding', 'Sold', 'Pending', 'Rejected'].includes(t.status))
@@ -5546,6 +5579,7 @@
             const list = document.getElementById('transList');
             // If tabName is not in keys, default to empty array
             const data = (window.transactionData && window.transactionData[tabName]) ? window.transactionData[tabName] : [];
+            console.log("Filtered Trades for " + tabName + ":", data);
 
             if (!data || data.length === 0) {
                 list.innerHTML = `<div style="color: #94a3b8; font-size: 0.9rem; margin-top: 1rem; text-align:center; padding: 2rem;">No data found.</div>`;
@@ -5621,6 +5655,54 @@
                         }
                     });
                 }, 1000);
+            } else if (tabName === 'pendingApproval') {
+                let html = `<div class="trans-grid">`;
+                data.forEach(item => {
+                    const dateStr = new Date(item.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+                    let statusText = 'Pending Approval';
+                    let infoLabel = 'Quantity';
+                    let infoValue = item.quantity;
+                    if (item.type.toLowerCase() === 'ipo') {
+                        statusText = 'Awaiting Admin Allocation';
+                        infoLabel = 'Requested';
+                        infoValue = 'Interest Submitted';
+                    } else if (item.type.toLowerCase() === 'otc') {
+                        statusText = 'Awaiting Admin Approval';
+                    }
+                    html += `
+                        <div class="t-card">
+                            <div class="t-card-head">
+                                <div style="flex: 1;">
+                                    <div class="t-stock-name">${item.name} <span style="color:#64748b; font-size:0.75rem;">(${item.symbol})</span></div>
+                                    <div style="font-size: 0.65rem; color: #94a3b8; margin-top:0.2rem;">${item.type.toUpperCase()} • ${dateStr}</div>
+                                </div>
+                                <div style="font-size:0.7rem; font-weight:700; color:#f59e0b; padding:2px 8px; border-radius:4px; background:#f59e0b15;">
+                                    Pending
+                                </div>
+                            </div>
+                            <div style="font-size: 0.8rem; font-weight: 600; color: #f59e0b; margin-top: 0.5rem; margin-bottom: 1rem;">${statusText}</div>
+                            <div class="t-card-body">
+                                <div class="t-info-col">
+                                    <div class="t-info-label">${infoLabel}</div>
+                                    <div class="t-info-val">${infoValue}</div>
+                                </div>
+                                <div class="t-info-col">
+                                    <div class="t-info-label">Price</div>
+                                    <div class="t-info-val">₹${parseFloat(item.price).toLocaleString('en-IN')}</div>
+                                </div>
+                                <div class="t-info-col">
+                                    <div class="t-info-label">Total</div>
+                                    <div class="t-info-val">₹${parseFloat(item.total_amount).toLocaleString('en-IN')}</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 1rem; border-top: 1px solid #f1f5f9; padding-top: 0.75rem;">
+                                <button class="h-btn view" style="width: 100%; border-radius: 12px; height: 38px; font-size: 0.85rem; background: #262626; color: #d4af37; border: 1px solid #d4af37;" onclick="openHoldingDetail('${item.id}')">View Details</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                list.innerHTML = html;
             } else {
                 let html = `<div class="trans-grid">`;
                 data.forEach(item => {
@@ -5656,12 +5738,12 @@
                                     <div class="t-info-val">₹${parseFloat(item.total_amount).toLocaleString('en-IN')}</div>
                                 </div>
                             </div>
-                            ${item.admin_note ? `<div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.5rem; padding: 0.5rem; background: #fff1f2; border-radius: 4px;">Note: ${item.admin_note}</div>` : ''}
-                            ${(item.type.toLowerCase() === 'otc' || item.type.toLowerCase() === 'ipo' || item.admin_note === 'OUTSTANDING_BALANCE') ? `
+                            ${(item.type.toLowerCase().includes('stock') || item.type.toLowerCase().includes('otc') || item.type.toLowerCase().includes('ipo') || (item.admin_note || "").includes('OUTSTANDING')) ? `
                                 <div style="margin-top: 1rem; border-top: 1px solid #f1f5f9; padding-top: 0.75rem;">
-                                    <button class="h-btn view" style="width: 100%; border-radius: 12px; height: 38px; font-size: 0.85rem;" onclick="openHoldingDetail('${item.id}')">View Details</button>
+                                    <button class="h-btn view" style="width: 100%; border-radius: 12px; height: 38px; font-size: 0.85rem; background: #262626; color: #d4af37; border: 1px solid #d4af37;" onclick="openHoldingDetail('${item.id}')">View</button>
                                 </div>
                             ` : ''}
+                            ${item.admin_note ? `<div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.5rem; padding: 0.5rem; background: #fff1f2; border-radius: 4px;">Note: ${item.admin_note}</div>` : ''}
                         </div>
                     `;
                 });
@@ -6045,166 +6127,123 @@
             }
 
             if (window.lucide) window.lucide.createIcons();
+
+            // --- PORTFOLIO DASHBOARD ENHANCEMENTS (Moved inside sync for scoping) ---
+            const outstanding = parseFloat(dbUser.outstanding) || 0;
+            const formattedRawBal = '₹' + rawBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const formattedInv = '₹' + inv.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            const updatePortfolioVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    const fmt = '₹' + val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    if (typeof fitText === 'function') fitText(el, fmt);
+                    else el.textContent = fmt;
+                }
+            };
+
+            updatePortfolioVal('pAvailableBalance', rawBalance);
+            updatePortfolioVal('pCurrentInvested', inv);
+            updatePortfolioVal('pPromoCredits', bonus);
+            updatePortfolioVal('pPendingFunds', frozen);
+            updatePortfolioVal('pBorrowedFunds', loan);
+            updatePortfolioVal('pPendingSettlement', outstanding);
+
+            document.querySelectorAll('.p-asset-val').forEach(el => {
+                if (el.id) return;
+                const label = el.previousElementSibling?.textContent;
+                if (label === 'Available Balance') {
+                    el.textContent = formattedRawBal;
+                    el.setAttribute('data-val', formattedRawBal);
+                } else if (label === 'Current Investments') {
+                    el.textContent = formattedInv;
+                    el.setAttribute('data-val', formattedInv);
+                }
+            });
+
+            updateVal('pInvestedMain', inv);
+            updateVal('pPortfolioTotal', inv);
+            updateVal('pCircleText', inv);
+            updateVal('pInsStockVal', inv);
+            updateVal('pStatsInvested', inv);
+            updateVal('pStatsCurrentValue', inv);
+
+            let totalProfit = 0;
+            let tradesCount = 0;
+            if (typeof transactionData !== 'undefined' && transactionData.holding) {
+                tradesCount = transactionData.holding.length;
+                transactionData.holding.forEach(item => {
+                    const liveProd = (window.MarketEngine && window.MarketEngine.getProduct) ? window.MarketEngine.getProduct(item.symbol) : null;
+                    const currentPrice = liveProd ? liveProd.price : parseFloat(item.price);
+                    const profit = (currentPrice * item.quantity) - parseFloat(item.total_amount);
+                    totalProfit += profit;
+                });
+            }
+
+            const roiPercent = inv > 0 ? (totalProfit / inv) * 100 : 0;
+            updateVal('pProfitMain', totalProfit);
+            const roiEl = document.getElementById('pROIMain');
+            if (roiEl) {
+                roiEl.textContent = (roiPercent >= 0 ? '+' : '') + roiPercent.toFixed(2) + '%';
+                roiEl.style.color = roiPercent >= 0 ? '#10b981' : '#ef4444';
+            }
+            const tradesCountEl = document.getElementById('pTradesCount');
+            if (tradesCountEl) tradesCountEl.textContent = tradesCount;
+            updateVal('pTradesProfit', totalProfit);
+
+            const donutCircle = document.getElementById('pDonutCircle');
+            const donutPctLabel = document.getElementById('pDonutPct');
+            if (donutCircle) {
+                let profitRatio = Math.min(Math.max(totalProfit / (inv || 1), 0), 1);
+                if (totalProfit > 0 && profitRatio < 0.01) profitRatio = 0.01;
+                const offset = 251.2 * (1 - profitRatio);
+                donutCircle.style.strokeDashoffset = offset;
+                if (donutPctLabel) {
+                    const displayPct = (totalProfit / (inv || 1) * 100);
+                    donutPctLabel.textContent = (displayPct < 0.01 && totalProfit > 0 ? '<0.01' : displayPct.toFixed(displayPct < 1 ? 2 : 0)) + '%';
+                }
+            }
+
+            const gaugeNeedle = document.getElementById('pGaugeNeedle');
+            if (gaugeNeedle) {
+                let normalizedROI = (roiPercent + 10) / 20;
+                normalizedROI = Math.min(Math.max(normalizedROI, 0), 1);
+                const angle = -90 + (normalizedROI * 180);
+                gaugeNeedle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+            }
+
+            const statsROI = document.getElementById('pStatsROI');
+            if (statsROI) statsROI.textContent = (roiPercent >= 0 ? '+' : '') + roiPercent.toFixed(2) + '%';
+
+            if (typeof transactionData !== 'undefined' && transactionData.holding && transactionData.holding.length > 0) {
+                let gainer = null, loser = null;
+                let maxProfitPct = -Infinity, maxLossPct = Infinity;
+                transactionData.holding.forEach(item => {
+                    const liveProd = (window.MarketEngine && window.MarketEngine.getProduct) ? window.MarketEngine.getProduct(item.symbol) : null;
+                    const currentPrice = liveProd ? liveProd.price : parseFloat(item.price);
+                    const profit = (currentPrice * item.quantity) - parseFloat(item.total_amount);
+                    const profitPct = (profit / parseFloat(item.total_amount)) * 100;
+                    if (profitPct > maxProfitPct) { maxProfitPct = profitPct; gainer = { ...item, currentPrice, profit, profitPct }; }
+                    if (profitPct < maxLossPct) { maxLossPct = profitPct; loser = { ...item, currentPrice, profit, profitPct }; }
+                });
+                if (gainer) {
+                    const gName = document.getElementById('pGainerName'); if (gName) gName.textContent = gainer.name;
+                    updateVal('pGainerVal', gainer.currentPrice);
+                    const gPct = document.getElementById('pGainerPct'); if (gPct) gPct.innerHTML = `<i data-lucide="arrow-up" size="12"></i> ${gainer.profitPct.toFixed(2)}%`;
+                }
+                if (loser) {
+                    const lName = document.getElementById('pLoserName'); if (lName) lName.textContent = loser.name;
+                    updateVal('pLoserVal', loser.currentPrice);
+                    const lPct = document.getElementById('pLoserPct'); if (lPct) lPct.innerHTML = `<i data-lucide="arrow-down" size="12"></i> ${loser.profitPct.toFixed(2)}%`;
+                }
+            }
+            updateVal('pAllocInstVal', inv);
         };
 
         // Initialize sync on load
         if (DB.getCurrentUser()) syncUserData();
 
-        // Update Portfolio View Invested Amounts
-        const formattedRawBal = '₹' + rawBalance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        const formattedInv = '₹' + inv.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-        // Update p-asset-val elements in Portfolio view
-        // Use ID targeting for precision
-        const updatePortfolioVal = (id, val) => {
-            const el = document.getElementById(id);
-            if (el) {
-                const fmt = '₹' + val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                fitText(el, fmt);
-            }
-        };
-
-        updatePortfolioVal('pAvailableBalance', rawBalance);
-
-        updatePortfolioVal('pCurrentInvested', inv);
-        updatePortfolioVal('pPromoCredits', bonus);
-        updatePortfolioVal('pPendingFunds', frozen);
-        updatePortfolioVal('pBorrowedFunds', loan);
-        updatePortfolioVal('pPendingSettlement', outstanding);
-
-        // Legacy Loop for safety (if IDs missing on some copies)
-        // But skip elements that have IDs since we handled them above
-        document.querySelectorAll('.p-asset-val').forEach(el => {
-            if (el.id) return; // Skip if ID exists (handled above)
-
-            const label = el.previousElementSibling?.textContent;
-            if (label === 'Available Balance') {
-                el.textContent = formattedRawBal;
-                el.setAttribute('data-val', formattedRawBal);
-            } else if (label === 'Current Investments') {
-                el.textContent = formattedInv;
-                el.setAttribute('data-val', formattedInv);
-            }
-        });
-
-        updateVal('pInvestedMain', inv);
-
-        updateVal('pPortfolioTotal', inv);
-
-        updateVal('pCircleText', inv);
-
-        updateVal('pInsStockVal', inv);
-
-        updateVal('pStatsInvested', inv);
-        updateVal('pStatsCurrentValue', inv);
-
-        // --- PORTFOLIO DASHBOARD ENHANCEMENTS ---
-        // Calculate Total Profit & ROI for the charts
-        let totalProfit = 0;
-        let tradesCount = 0;
-
-        if (typeof transactionData !== 'undefined' && transactionData.holding) {
-            tradesCount = transactionData.holding.length;
-            transactionData.holding.forEach(item => {
-                // Use actual market price if available
-                const liveProd = (window.MarketEngine && window.MarketEngine.getProduct) ? window.MarketEngine.getProduct(item.symbol) : null;
-                const currentPrice = liveProd ? liveProd.price : parseFloat(item.price);
-                const profit = (currentPrice * item.quantity) - parseFloat(item.total_amount);
-                totalProfit += profit;
-            });
-        }
-
-        const roiPercent = inv > 0 ? (totalProfit / inv) * 100 : 0;
-
-        // Update Text Elements
-        updateVal('pProfitMain', totalProfit);
-
-        const roiEl = document.getElementById('pROIMain');
-        if (roiEl) {
-            roiEl.textContent = (roiPercent >= 0 ? '+' : '') + roiPercent.toFixed(2) + '%';
-            roiEl.style.color = roiPercent >= 0 ? '#10b981' : '#ef4444';
-        }
-
-        const tradesCountEl = document.getElementById('pTradesCount');
-        if (tradesCountEl) tradesCountEl.textContent = tradesCount;
-
-        updateVal('pTradesProfit', totalProfit);
-
-        // Animate Donut Chart
-        // The donut shows profit ratio relative to investment (capped at 100% for visual)
-        const donutCircle = document.getElementById('pDonutCircle');
-        const donutPctLabel = document.getElementById('pDonutPct');
-        if (donutCircle) {
-            let profitRatio = Math.min(Math.max(totalProfit / (inv || 1), 0), 1);
-            // Ensure a visual sliver if profit exists but is proportionately tiny
-            if (totalProfit > 0 && profitRatio < 0.01) profitRatio = 0.01;
-
-            const offset = 251.2 * (1 - profitRatio);
-            donutCircle.style.strokeDashoffset = offset;
-            if (donutPctLabel) {
-                const displayPct = (totalProfit / (inv || 1) * 100);
-                donutPctLabel.textContent = (displayPct < 0.01 && totalProfit > 0 ? '<0.01' : displayPct.toFixed(displayPct < 1 ? 2 : 0)) + '%';
-            }
-        }
-
-        // Animate Gauge Needle
-        // Map ROI -10% to +10% to the gauge 0-100%
-        const gaugeNeedle = document.getElementById('pGaugeNeedle');
-        if (gaugeNeedle) {
-            // Normalize ROI to a value between 0 and 1
-            // -10% (0) | 0% (0.5) | +10% (1.0)
-            let normalizedROI = (roiPercent + 10) / 20;
-            normalizedROI = Math.min(Math.max(normalizedROI, 0), 1);
-            const angle = -90 + (normalizedROI * 180);
-            gaugeNeedle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
-        }
-
-        // Sync Stats View
-        const statsROI = document.getElementById('pStatsROI');
-        if (statsROI) {
-            statsROI.textContent = (roiPercent >= 0 ? '+' : '') + roiPercent.toFixed(2) + '%';
-        }
-
-        // Calculate Top Gainer/Loser
-        if (typeof transactionData !== 'undefined' && transactionData.holding && transactionData.holding.length > 0) {
-            let gainer = null, loser = null;
-            let maxProfitPct = -Infinity, maxLossPct = Infinity;
-
-            transactionData.holding.forEach(item => {
-                const liveProd = (window.MarketEngine && window.MarketEngine.getProduct) ? window.MarketEngine.getProduct(item.symbol) : null;
-                const currentPrice = liveProd ? liveProd.price : parseFloat(item.price);
-                const profit = (currentPrice * item.quantity) - parseFloat(item.total_amount);
-                const profitPct = (profit / parseFloat(item.total_amount)) * 100;
-
-                if (profitPct > maxProfitPct) {
-                    maxProfitPct = profitPct;
-                    gainer = { ...item, currentPrice, profit, profitPct };
-                }
-                if (profitPct < maxLossPct) {
-                    maxLossPct = profitPct;
-                    loser = { ...item, currentPrice, profit, profitPct };
-                }
-            });
-
-            if (gainer) {
-                const gName = document.getElementById('pGainerName');
-                if (gName) gName.textContent = gainer.name;
-                updateVal('pGainerVal', gainer.currentPrice);
-                const gPct = document.getElementById('pGainerPct');
-                if (gPct) gPct.innerHTML = `<i data-lucide="arrow-up" size="12"></i> ${gainer.profitPct.toFixed(2)}%`;
-            }
-
-            if (loser) {
-                const lName = document.getElementById('pLoserName');
-                if (lName) lName.textContent = loser.name;
-                updateVal('pLoserVal', loser.currentPrice);
-                const lPct = document.getElementById('pLoserPct');
-                if (lPct) lPct.innerHTML = `<i data-lucide="arrow-down" size="12"></i> ${loser.profitPct.toFixed(2)}%`;
-            }
-        }
-
-        // Sync Allocation
-        updateVal('pAllocInstVal', inv);
 
 
 
@@ -6420,7 +6459,46 @@
                     if (timelineTitle) timelineTitle.innerText = 'Pending Approval';
                     document.getElementById('hdBuyTimeline').innerText = `Order Placed @ ${dateStr.replace(/\//g, '-')}`;
                 }
+            } else if (trade.status === 'Sold') {
+                const sp = parseFloat(trade.sell_price || trade.price);
+                const sv = parseFloat(trade.total_sale_value || (sp * trade.quantity));
+                const rp = parseFloat(trade.realised_profit || (sv - parseFloat(trade.total_amount)));
+                const fees = (parseFloat(trade.sell_tax || 0) + parseFloat(trade.sell_fees || 0)) || (sv * 0.0015);
+                const profitPct = (rp / parseFloat(trade.total_amount)) * 100;
+
+                document.getElementById('hdProfitLabel').innerText = 'Realised P&L';
+                document.getElementById('hdCurrPrice').innerText = '-';
+                document.getElementById('hdProfit').innerText = `₹${rp.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (${rp >= 0 ? '+' : ''}${profitPct.toFixed(2)}%)`;
+                document.getElementById('hdProfit').style.color = rp >= 0 ? '#10b981' : '#ef4444';
+
+                document.getElementById('hdNormalSellPriceRow').style.display = 'table-row';
+                document.getElementById('hdSellPrice').innerText = '₹' + sp.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+                document.getElementById('hdNormalFeesRow').style.display = 'table-row';
+                document.getElementById('hdFees').innerText = '₹' + fees.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+                if (saleValueRow) {
+                    saleValueRow.style.display = 'table-row';
+                    document.getElementById('hdTotalSaleVal').innerText = '₹' + sv.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                }
+
+                if (timelineTitle) timelineTitle.innerText = 'Trade History';
+                const sellDateStr = trade.sell_timestamp ? new Date(trade.sell_timestamp).toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : (trade.processed_at ? new Date(trade.processed_at).toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A');
+
+                document.getElementById('hdBuyTimeline').innerHTML = `
+                    <div style="margin-bottom: 0.5rem;">
+                        <span style="color: #10b981; font-weight: 700;">BUY:</span> ${dateStr.replace(/\//g, '-')} @ ₹${parseFloat(trade.price).toLocaleString('en-IN')}
+                    </div>
+                    <div>
+                        <span style="color: #ef4444; font-weight: 700;">SELL:</span> ${sellDateStr.replace(/\//g, '-')} @ ₹${sp.toLocaleString('en-IN')}
+                    </div>
+                `;
             } else {
+                document.getElementById('hdProfitLabel').innerText = 'Profit';
+                document.getElementById('hdNormalSellPriceRow').style.display = 'none';
+                document.getElementById('hdNormalFeesRow').style.display = 'none';
+                document.getElementById('hdNormalCurrPriceRow').style.display = 'table-row';
+
                 document.getElementById('hdCurrPrice').innerText = '₹' + mockCurrPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 });
                 document.getElementById('hdProfit').innerText = `₹${profitValue.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (${profitValue >= 0 ? '+' : ''}${profitPct.toFixed(2)}%)`;
                 document.getElementById('hdProfit').style.color = profitValue >= 0 ? '#10b981' : '#ef4444';
@@ -6503,9 +6581,9 @@
             document.getElementById('holdingDetailModal').style.display = 'flex';
             lucide.createIcons();
 
-            // Live Update for Modal
+            // Live Update for Modal - only for active holdings
             if (window.hdLiveInterval) clearInterval(window.hdLiveInterval);
-            if (!isPending && !isOutstanding && !isIPO) {
+            if (!isPending && !isOutstanding && !isIPO && trade.status !== 'Sold') {
                 window.hdLiveInterval = setInterval(() => {
                     if (document.getElementById('holdingDetailModal').style.display === 'none') {
                         clearInterval(window.hdLiveInterval);
@@ -7004,8 +7082,16 @@
                         <td>Current Price</td>
                         <td id="hdCurrPrice" style="color: #10b981 !important;">₹0.00</td>
                     </tr>
+                    <tr id="hdNormalSellPriceRow" style="display: none;">
+                        <td>Sell Price</td>
+                        <td id="hdSellPrice" style="color: #ef4444 !important;">₹0.00</td>
+                    </tr>
+                    <tr id="hdNormalFeesRow" style="display: none;">
+                        <td>Fees & Tax</td>
+                        <td id="hdFees" style="color: #ef4444 !important;">₹0.00</td>
+                    </tr>
                     <tr id="hdNormalProfitRow">
-                        <td>Profit</td>
+                        <td id="hdProfitLabel">Profit</td>
                         <td id="hdProfit" style="color: #10b981 !important;">₹0.00 (0.00%)</td>
                     </tr>
                 </table>
