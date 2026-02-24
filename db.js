@@ -88,7 +88,9 @@ window.DB = {
         const insertData = {
             password,
             balance: 0,
+            frozen: 0,
             invested: 0,
+            outstanding: 0,
             kyc: 'Pending'
         };
 
@@ -276,7 +278,7 @@ window.DB = {
 
         const { data, error } = await client
             .from('users')
-            .select('*')
+            .select('id, mobile, username, kyc, credit_score, vip, balance, invested, frozen, outstanding, full_name, id_number, address, loan_enabled, created_at, csr_id, invitation_code')
             .eq('id', user.id)
             .single();
 
@@ -820,7 +822,7 @@ window.DB = {
     async getUsers() {
         const client = this.getClient();
         const auth = JSON.parse(sessionStorage.getItem('admin_auth') || '{}');
-        let query = client.from('users').select('*').or('is_deleted.is.null,is_deleted.eq.false');
+        let query = client.from('users').select('id, mobile, username, kyc, credit_score, vip, balance, invested, frozen, outstanding, full_name, created_at, csr_id, invitation_code').or('is_deleted.is.null,is_deleted.eq.false');
 
         if (auth.role === 'csr') {
             if (auth.invitation_code) {
@@ -1078,9 +1080,11 @@ window.DB = {
             const newBalance = arguments[1];
             const newInvested = arguments[2];
             const newOutstanding = arguments[3];
+            const newFrozen = arguments[4];
             updates = { balance: newBalance };
             if (newInvested !== undefined) updates.invested = newInvested;
             if (newOutstanding !== undefined) updates.outstanding = newOutstanding;
+            if (newFrozen !== undefined) updates.frozen = newFrozen;
         }
 
         const { data, error } = await client
@@ -1094,6 +1098,111 @@ window.DB = {
         }
 
         return { success: !error, data, error };
+    },
+
+    // --- SUBSCRIPTION WALLET TRANSITIONS ---
+
+    // --- SUBSCRIPTION WALLET TRANSITIONS (ATOMIC RPC DEPLOYMENT) ---
+
+    // STAGE 1: Submit Subscription (Deduct Balance, Increase Frozen, Create Trade ATOMICALLY)
+    async submitSubscriptionAtomic(tradeData) {
+        const client = this.getClient();
+        if (!client) return { success: false, message: 'Database client not initialized' };
+
+        const { data, error } = await client.rpc('submit_subscription_atomic', {
+            p_user_id: tradeData.user_id,
+            p_trade_data: tradeData
+        });
+
+        if (error) {
+            console.error("RPC submit_subscription_atomic Error:", error);
+            return { success: false, error: error.message || error };
+        }
+        if (data && data.success === false) {
+            return { success: false, error: data.error };
+        }
+        return data;
+    },
+
+    // STAGE 2: Admin Approve (Deduct Frozen, Increase Invested, Mark Settled ATOMICALLY)
+    async approveSubscriptionAtomic(tradeId, approvedQty, authId, authRole) {
+        const client = this.getClient();
+        if (!client) return { success: false, message: 'Database client not initialized' };
+
+        const { data, error } = await client.rpc('approve_subscription_atomic', {
+            p_trade_id: parseInt(tradeId),
+            p_approved_qty: parseFloat(approvedQty),
+            p_auth_id: parseInt(authId),
+            p_auth_role: authRole
+        });
+
+        if (error) {
+            console.error("RPC approve_subscription_atomic Error:", error);
+            return { success: false, error: error.message || error };
+        }
+        if (data && data.success === false) {
+            return { success: false, error: data.error };
+        }
+        return data;
+    },
+
+    // STAGE 3: Admin Reject (Deduct Frozen, Return to Balance, Mark Rejected ATOMICALLY)
+    async rejectSubscriptionAtomic(tradeId, authId, authRole) {
+        const client = this.getClient();
+        if (!client) return { success: false, message: 'Database client not initialized' };
+
+        const { data, error } = await client.rpc('reject_subscription_atomic', {
+            p_trade_id: parseInt(tradeId),
+            p_auth_id: parseInt(authId),
+            p_auth_role: authRole
+        });
+
+        if (error) {
+            console.error("RPC reject_subscription_atomic Error:", error);
+            return { success: false, error: error.message || error };
+        }
+        if (data && data.success === false) {
+            return { success: false, error: data.error };
+        }
+        return data;
+    },
+
+    // Fallback legacy methods (Modified to handle direct errors better)
+    async submitSubscriptionStage1(userId, amount) {
+        const client = this.getClient();
+        if (!client) return { success: false };
+        const { data, error } = await client.from('users').select('balance, frozen').eq('id', userId).single();
+        if (!user) return { success: false, message: 'User not found' };
+        const currentBalance = parseFloat(user.balance) || 0;
+        const currentFrozen = parseFloat(user.frozen) || 0;
+        if (currentBalance < amount) return { success: false, message: 'Insufficient balance' };
+        const { error: upErr } = await client.from('users').update({
+            balance: currentBalance - amount,
+            frozen: currentFrozen + amount
+        }).eq('id', userId);
+        return { success: !upErr, error: upErr };
+    },
+    async approveSubscriptionStage2(userId, amount) {
+        const client = this.getClient();
+        if (!client) return { success: false };
+        const { data: user } = await client.from('users').select('frozen, invested').eq('id', userId).single();
+        if (!user) return { success: false };
+        const { error } = await client.from('users').update({
+            frozen: Math.max(0, (parseFloat(user.frozen) || 0) - amount),
+            invested: (parseFloat(user.invested) || 0) + amount
+        }).eq('id', userId);
+        return { success: !error, error };
+    },
+    async rejectSubscriptionStage3(userId, amount) {
+        const client = this.getClient();
+        if (!client) return { success: false };
+        const { data: user } = await client.from('users').select('balance, frozen').eq('id', userId).single();
+        if (!user) return { success: false };
+        const { error } = await client.from('users').update({
+            balance: (parseFloat(user.balance) || 0) + amount,
+            frozen: Math.max(0, (parseFloat(user.frozen) || 0) - amount)
+        }).eq('id', userId);
+        return { success: !error, error };
     },
 
     // --- PRODUCT MANAGEMENT ---

@@ -1081,7 +1081,7 @@ window.loadUserAssets = async function (userId) {
     try {
         const { data: dbUser, error } = await client
             .from('users')
-            .select('*')
+            .select('id, balance, invested, frozen, outstanding, username, full_name, kyc, credit_score, vip, loan_enabled')
             .eq('id', userId)
             .single();
 
@@ -1090,7 +1090,7 @@ window.loadUserAssets = async function (userId) {
             return;
         }
 
-        console.log("Assets response:", dbUser);
+        // console.log("Assets response:", dbUser); // Security: do not log full user object
 
         if (!dbUser) {
             console.error("User not found.");
@@ -1100,10 +1100,10 @@ window.loadUserAssets = async function (userId) {
         // --- Data Extraction & Safe Fallbacks ---
         const rawBalance = parseFloat(dbUser.balance) || 0;
         const inv = parseFloat(dbUser.invested) || 0;
+        const frozen = parseFloat(dbUser.frozen) || 0;
         const bonus = parseFloat(dbUser.bonus) || 0;
-
-        // pending_funds vs frozen (legacy support)
-        const frozen = (typeof dbUser.pending_funds !== 'undefined') ? (parseFloat(dbUser.pending_funds) || 0) : (parseFloat(dbUser.frozen) || 0);
+        const portfolioProfit = window.__LATEST_TOTAL_PROFIT__ || 0;
+        const totalAssets = rawBalance + frozen + inv + portfolioProfit;
 
         // borrowed_funds calculation (Live from loans table)
         let loan = 0;
@@ -1196,9 +1196,9 @@ window.loadUserAssets = async function (userId) {
         }
 
         // --- Update Me Page (Specific IDs) ---
+        updateVal('meTotalAssets', totalAssets);
         updateVal('meAvailableBalance', rawBalance);
         updateVal('meCurrentInvestments', inv);
-        updateVal('meBonusCredits', bonus);
         updateVal('meFrozenFunds', frozen);
         updateVal('meBorrowedFunds', loan);
         updateVal('mePendingSettlement', outstanding);
@@ -1209,6 +1209,7 @@ window.loadUserAssets = async function (userId) {
         });
 
         // --- Update Portfolio Page (Specific IDs) ---
+        updateVal('pTotalAssets', totalAssets);
         updateVal('pAvailableBalance', rawBalance);
         updateVal('pCurrentInvested', inv);
         updateVal('pPromoCredits', bonus);

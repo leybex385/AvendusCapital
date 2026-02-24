@@ -101,9 +101,11 @@
                 try {
                     const data = await window.DB.getProducts();
                     this.dbProducts = data.filter(p => p.status === 'Active').map(p => ({
+                        id: p.id,
                         symbol: p.name.split(' ')[0].toUpperCase() + '-IPO',
                         name: p.name,
                         price: parseFloat(p.price) || 0,
+                        minInvest: parseFloat(p.min_invest) || 0,
                         yield: p.profit || 'TBD',
                         subDate: p.start_date || 'TBD',
                         deadline: p.end_date || 'TBD',

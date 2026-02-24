@@ -3108,7 +3108,7 @@
         <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
         <script type="text/javascript">
             let currentWidget = null;
-            let currentActiveSymbol = 'BSE:SENSEX';
+            let currentActiveSymbol = 'NIFTY1!';
             let currentInterval = 'D';
 
             function loadWidgetWithInterval(interval, btn) {
@@ -3133,8 +3133,8 @@
                     sparkId: 'sparkSensex',
                     history: [35, 38, 30, 32, 25, 28, 20, 22, 15, 18, 20]
                 },
-                'NSE:NIFTY': {
-                    price: 25641.65,
+                'NIFTY1!': {
+                    price: 25660.25,
                     basePrice: 25776.00,
                     low: 25600.00,
                     high: 25800.00,
@@ -3164,9 +3164,66 @@
             };
 
             function loadWidget(symbol) {
+                const container = document.getElementById('tradingview_widget');
+                if (!container) return;
+                container.innerHTML = '';
+
+                // Handle Restricted Symbols with Investing.com Iframe
+                const investingPairs = {
+                    'NSE:NIFTY': '17940',
+                    'NIFTY1!': '17940',
+                    'BSE:SENSEX': '39929',
+                    'NSE:BANKNIFTY': '17923',
+                    'NSE:NIFTYBANK': '17923',
+                    'NIFTYBANK': '17923',
+                    'NSE:INDIAVIX': '17942',
+                    'NSE:MIDCPNIFTY': '18012',
+                    'NSE:NIFTYMIDCAP100': '18012',
+                    'NSE:NIFTYMIDCAP': '18012',
+                    'NSE:SMLCAP100': '17946',
+                    'NSE:NIFTYSMALLCAP100': '17946',
+                    'NSE:NIFTYSMLCAP': '17946'
+                };
+
+                if (investingPairs[symbol]) {
+                    let pairId = investingPairs[symbol];
+                    const wrapper = document.createElement('div');
+                    wrapper.style.position = 'relative';
+                    wrapper.style.width = '100%';
+                    wrapper.style.height = '100%';
+                    wrapper.style.overflow = 'hidden';
+
+                    const iframe = document.createElement('iframe');
+                    let w = container.offsetWidth || 800;
+                    let h = container.offsetHeight || 600;
+                    iframe.src = `https://ssltvc.investing.com/?pair_ID=${pairId}&height=${h}&width=${w}&interval=300&plotStyle=candles&domain_ID=56&lang_ID=56&timezone_ID=20`;
+                    iframe.style.width = '100%';
+                    iframe.style.height = '100%';
+                    iframe.style.border = 'none';
+                    iframe.style.filter = 'invert(1) hue-rotate(180deg) brightness(0.9)'; // Dark Mode Filter
+                    iframe.id = 'investing_chart';
+
+                    // Mask for the logo (now black to match dark theme)
+                    const mask = document.createElement('div');
+                    mask.style.position = 'absolute';
+                    mask.style.bottom = '42px';
+                    mask.style.left = '45px';
+                    mask.style.width = '100px';
+                    mask.style.height = '25px';
+                    mask.style.background = '#000000';
+                    mask.style.pointerEvents = 'none';
+                    mask.style.zIndex = '10';
+
+                    wrapper.appendChild(iframe);
+                    wrapper.appendChild(mask);
+                    container.appendChild(wrapper);
+                    return;
+                }
+
+                let targetSymbol = symbol;
                 currentWidget = new TradingView.widget({
                     "autosize": true,
-                    "symbol": symbol,
+                    "symbol": targetSymbol,
                     "interval": currentInterval,
                     "timezone": "Asia/Kolkata",
                     "theme": "dark",
@@ -3176,12 +3233,12 @@
                     "enable_publishing": false,
                     "allow_symbol_change": true,
                     "container_id": "tradingview_widget",
-                    "hide_side_toolbar": true,
-                    "withdateranges": false,
-                    "save_image": false,
-                    "details": false,
-                    "hotlist": false,
-                    "calendar": false,
+                    "hide_side_toolbar": false,
+                    "withdateranges": true,
+                    "save_image": true,
+                    "details": true,
+                    "hotlist": true,
+                    "calendar": true,
                     "studies": ["Volume@tv-basicstudies"],
                     "overrides": {
                         "paneProperties.background": "#0b0b0b",
@@ -3213,7 +3270,7 @@
                 document.querySelectorAll('.index-card').forEach(c => c.classList.remove('active'));
 
                 if (symbol === 'BSE:SENSEX') document.getElementById('cardSensex').classList.add('active');
-                else if (symbol === 'NSE:NIFTY') document.getElementById('cardNifty').classList.add('active');
+                else if (symbol === 'NSE:NIFTY' || symbol === 'NIFTY1!') document.getElementById('cardNifty').classList.add('active');
                 else if (symbol === 'NSE:BANKNIFTY') document.getElementById('cardNiftyBank').classList.add('active');
 
                 syncUI();
@@ -3773,7 +3830,7 @@
                         <div class="d-tab-pill" onclick="switchTransactionTab(this, 'pending')">Pending</div>
                         <div class="d-tab-pill" onclick="switchTransactionTab(this, 'pendingPayment')">Pending Payment
                         </div>
-                        <div class="d-tab-pill" onclick="switchTransactionTab(this, 'pendingApproval')">Pending Approval
+                        <div class="d-tab-pill" onclick="switchTransactionTab(this, 'pendingApproval')">Awaiting
                         </div>
                         <div class="d-tab-pill" onclick="switchTransactionTab(this, 'rejected')">Rejected</div>
 
@@ -4631,7 +4688,9 @@
         }
 
         let detailLiveTimer = null;
-        function openStockDetail(symbol, name, exchange, price, change, color, type = 'stock') {
+        let currentProductId = null;
+        let currentMinInvest = 0;
+        function openStockDetail(symbol, name, exchange, price, change, color, type = 'stock', push = true, id = null, minInvest = 0) {
             document.getElementById('mainDashboard').style.display = 'none';
             document.getElementById('discoverView').style.display = 'none';
             document.querySelector('.header').style.display = 'none';
@@ -4666,11 +4725,16 @@
                 if (type === 'OTC' || type === 'IPO') {
                     buyBtn.innerText = 'Subscribe';
                     buyBtn.dataset.type = type;
+                    buyBtn.dataset.productId = id;
+                    buyBtn.dataset.minInvest = minInvest;
+                    currentProductId = id;
+                    currentMinInvest = minInvest;
+
                     if (sellBtn) sellBtn.style.display = 'none';
 
-                    // Toggle quantity input visibility based on IPO/OTC
                     const qtySec = document.getElementById('buyQuantitySection');
                     const sliderSec = document.getElementById('buySliderSection');
+
                     if (type === 'IPO') {
                         if (qtySec) qtySec.style.display = 'none';
                         if (sliderSec) sliderSec.style.display = 'none';
@@ -4683,7 +4747,6 @@
                     buyBtn.dataset.type = 'stock';
                     if (sellBtn) sellBtn.style.display = 'block';
 
-                    // Reset visibility for normal stocks
                     const qtySec = document.getElementById('buyQuantitySection');
                     const sliderSec = document.getElementById('buySliderSection');
                     if (qtySec) qtySec.style.display = 'block';
@@ -4716,6 +4779,12 @@
                 "enable_publishing": false,
                 "allow_symbol_change": true,
                 "container_id": "tradingview_det",
+                "hide_side_toolbar": false,
+                "withdateranges": true,
+                "save_image": true,
+                "details": true,
+                "hotlist": true,
+                "calendar": true,
                 "overrides": {
                     "paneProperties.background": "#111111",
                     "paneProperties.vertGridProperties.color": "#1f1f1f",
@@ -5101,17 +5170,26 @@
             const isIPO = buyBtn && buyBtn.dataset.type === 'IPO';
 
             let qty = parseInt(qtyInput.value) || 0;
-            if (isIPO) qty = 0; // Force 0 for IPO to avoid confusion if input had remnant value
             // Parse price string like "₹1,234.56" -> 1234.56
             const priceText = priceEl.innerText.replace(/[^\d.]/g, '');
             const price = parseFloat(priceText) || 0;
 
-            const baseTotal = qty * price;
+            let baseTotal, tax, txnCharge, finalTotal;
 
-            // Realtime Market Fees (e.g. 0.12% Tax, 0.03% Txn Charge)
-            const tax = baseTotal * 0.0012;
-            const txnCharge = baseTotal * 0.0003;
-            const finalTotal = baseTotal + tax + txnCharge;
+            if (isIPO) {
+                // FIXED LOT LOGIC FOR IPO
+                const minInv = parseFloat(buyBtn.dataset.minInvest) || 15000;
+                baseTotal = minInv;
+                qty = baseTotal / (price || 1);
+                tax = 0;
+                txnCharge = 0;
+                finalTotal = baseTotal;
+            } else {
+                baseTotal = qty * price;
+                tax = baseTotal * 0.0012;
+                txnCharge = baseTotal * 0.0003;
+                finalTotal = baseTotal + tax + txnCharge;
+            }
 
             if (taxEl) taxEl.innerText = '₹' + tax.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             if (txnEl) txnEl.innerText = '₹' + txnCharge.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -5309,33 +5387,59 @@
                 let tradeStatus = 'Holding';
                 if (['otc', 'ipo'].includes(type.toLowerCase())) tradeStatus = 'Pending';
 
+                // Requirement: status = 'Pending', order_status = 'PENDING'
+                const isIPO = type.toLowerCase() === 'ipo';
                 const tradeData = {
                     user_id: freshUser.id,
+                    product_id: currentProductId,
                     symbol: symbol,
                     name: stockName,
                     type: type.toLowerCase(),
-                    quantity: calc.qty, // Keep for legacy if needed
-                    requested_quantity: type.toLowerCase() === 'ipo' ? 0 : calc.qty,
+                    quantity: calc.qty,
+                    requested_quantity: calc.qty,
                     price: calc.price,
                     total_amount: calc.total,
-                    tax_amount: calc.tax,
-                    txn_charge: calc.txnCharge,
+                    tax_amount: 0,
+                    txn_charge: 0,
                     admin_note: isInsufficient ? 'OUTSTANDING:' + currentBalance : '',
-                    status: tradeStatus
+                    status: 'Pending',
+                    order_status: isIPO ? 'PENDING' : 'OPEN'
                 };
 
-                let result = await window.DB.submitTrade(tradeData);
+                // --- RUNTIME DEBUG LOGGING ---
+                console.log("DEBUG: IPO/Trade Payload:", JSON.stringify(tradeData, null, 2));
 
-                // --- SCHEMA FALLBACK LOGIC ---
-                if (!result.success && result.error && result.error.message && result.error.message.includes('requested_quantity')) {
-                    console.warn("Retrying trade submission without 'requested_quantity' column...");
-                    const fallbackData = { ...tradeData };
-                    delete fallbackData.requested_quantity;
-                    result = await window.DB.submitTrade(fallbackData);
+                let result;
+                try {
+                    if (['otc', 'ipo'].includes(type.toLowerCase())) {
+                        result = await window.DB.submitSubscriptionAtomic(tradeData);
+                    } else {
+                        result = await window.DB.submitTrade(tradeData);
+                    }
+                    console.log("DEBUG: IPO/Trade Response:", JSON.stringify(result, null, 2));
+                } catch (rpcErr) {
+                    console.error("DEBUG: RPC Critical Failure:", rpcErr);
+                    showModal('error', 'Execution Error', "Critical failure calling the trading service.");
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    return;
                 }
 
+                if (!result || !result.success) {
+                    const errMsg = result ? result.error : "Unknown Error";
+                    console.error("DEBUG: Trade Submission Failed:", errMsg);
+                    showModal('error', 'Trade Failed', errMsg);
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    return;
+                }
+
+                // Success!
+                console.log("DEBUG: Trade Inserted Successfully! Trade ID:", result.trade_id);
+
                 if (result.success) {
-                    if ((tradeStatus === 'Holding' || isInsufficient) && !['otc', 'ipo'].includes(type.toLowerCase())) {
+                    // --- WALLET STATE TRANSITION (NON-SUBSCRIPTION) ---
+                    if (!['otc', 'ipo'].includes(type.toLowerCase()) && (tradeStatus === 'Holding' || isInsufficient)) {
                         const deduction = isInsufficient ? currentBalance : calc.total;
                         const newBalance = currentBalance - deduction;
                         const currentInvested = parseFloat(freshUser.invested) || 0;
@@ -5371,7 +5475,8 @@
                         openPurchaseModal(type, symbol, stockName, calc.qty, calc.total);
                     }
                 } else {
-                    alert("Submission failed: " + (result.error?.message || "Unknown error"));
+                    const errStr = result.error?.message || result.error || "Unknown error";
+                    alert("Submission failed: " + errStr);
                 }
             } catch (e) {
                 console.error("Trade Error:", e);
@@ -5409,7 +5514,7 @@
             btn.disabled = true;
 
             try {
-                showModal('success', 'Request Received', `Your subscription request for ${currentPurchaseData.name} has been received and is waiting for administrator approval.`, () => {
+                showModal('success', 'Request Received', `Your subscription request for ${currentPurchaseData.name} has been received and is waiting for approval.`, () => {
                     closePurchaseModal();
                     if (typeof fetchUserTransactions === 'function') fetchUserTransactions();
                 });
@@ -5481,6 +5586,7 @@
                 if (symbol && typeof window.MarketEngine !== 'undefined') {
                     const s = window.MarketEngine.getProduct(symbol);
                     if (s) {
+                        if (s.id) currentProductId = s.id; // FIX: Assign global product ID
                         openStockDetail(s.symbol, s.name, 'NSE', '₹' + s.price.toLocaleString('en-IN', { minimumFractionDigits: 2 }), (s.change >= 0 ? '+' : '') + (s.change || 0).toFixed(2) + '%', (s.change >= 0 ? '#10b981' : '#ef4444'), s.type);
                     }
                 }
@@ -5594,12 +5700,29 @@
                     const profit = (mockCurrPrice * item.quantity) - parseFloat(item.total_amount);
                     const profitPct = (profit / parseFloat(item.total_amount)) * 100;
 
+                    const now = new Date();
+                    const lockupUntil = item.lockup_until ? new Date(item.lockup_until) : null;
+                    const isLocked = lockupUntil && lockupUntil > now;
+                    let leftLabel = 'Current Price';
+                    let leftVal = '₹' + mockCurrPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+                    const lockDate = lockupUntil ? lockupUntil.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : null;
+
+                    if (isLocked) {
+                        leftLabel = 'Locked Until';
+                        leftVal = `🔒 ${lockDate}`;
+                    } else if (lockupUntil) {
+                        leftLabel = 'Locked Until';
+                        leftVal = `🔓 ${lockDate} (Expired)`;
+                    }
+
                     html += `
                         <div class="h-card">
                             <div class="h-head" style="margin-bottom: 1.5rem;">
                                 <div class="h-stock-info">
-                                    <h3 style="margin:0; font-size:1rem;">${item.name} <span style="color:#94a3b8; font-size:0.7rem;">(${item.symbol})</span></h3>
-                                    <div class="h-stock-meta">BSE • IN</div>
+                                    <h3 style="margin:0; font-size:1rem;">${item.name}${item.type?.toLowerCase() === 'ipo' ? ' <span style="color:#d4af37; font-size:0.75rem;">(IPO)</span>' : ''} <span style="color:#94a3b8; font-size:0.7rem;">(${item.symbol})</span></h3>
+                                    <div class="h-stock-meta">BSE • IN 
+                                        ${isLocked ? `<span style="color:#f59e0b; margin-left:8px; font-weight:700;">🔒 LOCKED</span>` : (lockupUntil ? `<span style="color:#10b981; margin-left:8px; font-weight:700;">🔓 LOCK EXPIRED</span>` : '')}
+                                    </div>
                                 </div>
                                 <div class="h-status-badge" style="${item.status === 'Pending' ? 'background:#fef3c7; color:#d97706;' : ''}">
                                     ${item.status === 'Pending' ? 'Processing' : 'Holding'}
@@ -5607,8 +5730,8 @@
                             </div>
                             <div class="h-stats-row">
                                 <div class="h-stat-item">
-                                    <span class="h-stat-label">Current Price</span>
-                                    <span class="h-stat-val ${profit >= 0 ? 'green' : 'red'}" id="hPrice-${item.id}">₹${mockCurrPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>
+                                    <span class="h-stat-label">${leftLabel}</span>
+                                    <span class="h-stat-val ${profit >= 0 ? 'green' : 'red'}" id="hPrice-${item.id}">${leftVal}</span>
                                 </div>
                                 <div class="h-stat-item">
                                     <span class="h-stat-label">Unrealized P&L</span>
@@ -5620,7 +5743,7 @@
                             </div>
                             <div class="h-actions">
                                 <button class="h-btn view" onclick="openHoldingDetail('${item.id}')">View Details</button>
-                                ${item.status === 'Holding' ? `<button class="h-btn close close-order-btn" data-id="${item.id}">Close Order</button>` : ''}
+                                ${item.status === 'Holding' ? (isLocked ? `<button class="h-btn close" style="background:#475569 !important; border-color: #475569 !important; cursor:not-allowed; opacity:0.8; font-size: 0.70rem;" disabled>🔒 Locked until ${lockupUntil.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</button>` : `<button class="h-btn close close-order-btn" data-id="${item.id}">Close Order</button>`) : ''}
                             </div>
                         </div>
                     `;
@@ -5659,15 +5782,15 @@
                 let html = `<div class="trans-grid">`;
                 data.forEach(item => {
                     const dateStr = new Date(item.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-                    let statusText = 'Pending Approval';
+                    let statusText = 'Awaiting';
                     let infoLabel = 'Quantity';
                     let infoValue = item.quantity;
                     if (item.type.toLowerCase() === 'ipo') {
-                        statusText = 'Awaiting Admin Allocation';
+                        statusText = 'Awaiting';
                         infoLabel = 'Requested';
-                        infoValue = 'Interest Submitted';
+                        infoValue = 'Awaiting';
                     } else if (item.type.toLowerCase() === 'otc') {
-                        statusText = 'Awaiting Admin Approval';
+                        statusText = 'Awaiting';
                     }
                     html += `
                         <div class="t-card">
@@ -6402,6 +6525,7 @@
             }
 
             const trade = transactionData.all.find(t => t.id == tradeId);
+            console.log("Opening Trade Detail:", trade);
             if (!trade) {
                 console.error("Trade not found:", tradeId);
                 return;
@@ -6456,7 +6580,7 @@
                     const estProfit = note.includes('PROFIT:') ? note.split('PROFIT:')[1].split(';')[0] : 'TBD';
                     document.getElementById('hdBuyTimeline').innerHTML += `<br><span style="margin-top:0.5rem; display:block;">Listing Date (est): ${listingInfo}</span><span style="display:block;">Estimated Profit: ${estProfit}</span>`;
                 } else {
-                    if (timelineTitle) timelineTitle.innerText = 'Pending Approval';
+                    if (timelineTitle) timelineTitle.innerText = 'Awaiting';
                     document.getElementById('hdBuyTimeline').innerText = `Order Placed @ ${dateStr.replace(/\//g, '-')}`;
                 }
             } else if (trade.status === 'Sold') {
@@ -6565,15 +6689,43 @@
                 document.getElementById('hdEstProfit').innerText = yieldVal;
 
                 document.getElementById('hdAssetName').innerText = '₹' + parseFloat(trade.price).toLocaleString('en-IN');
-                document.getElementById('hdAllocPrice').innerText = '₹' + parseFloat(trade.price).toLocaleString('en-IN');
-                document.getElementById('hdSubDate').innerText = parseNote('SUB_DATE') || (listing ? listing.subDate : dateStr.split(' ')[0]);
-                document.getElementById('hdDeadline').innerText = parseNote('DEADLINE') || (listing ? listing.deadline : 'TBD');
-                document.getElementById('hdAllocDate').innerText = parseNote('ALLOC_DATE') || (listing ? listing.allocDate : 'Pending');
-                document.getElementById('hdListingDate').innerText = parseNote('LISTING') || (listing ? listing.listingDate : 'TBD');
-
-                // Redesign labels to match Blue Arrow section
-                document.getElementById('hdAssetName').innerText = '₹' + parseFloat(trade.price).toLocaleString('en-IN');
             }
+
+            // --- UNIVERSAL LOCK-UP VISIBILITY ---
+            const hdLockupRow = document.getElementById('hdLockupRow');
+            const hdLockupStatusRow = document.getElementById('hdLockupStatusRow');
+            const hdLockupRemainingRow = document.getElementById('hdLockupRemainingRow');
+            const lockupUntil = trade.lockup_until ? new Date(trade.lockup_until) : null;
+            const now = new Date();
+
+            if (lockupUntil) {
+                const isActive = lockupUntil > now;
+                if (hdLockupRow) hdLockupRow.style.display = 'table-row';
+                if (hdLockupStatusRow) hdLockupStatusRow.style.display = 'table-row';
+                if (hdLockupRemainingRow) hdLockupRemainingRow.style.display = isActive ? 'table-row' : 'none';
+
+                document.getElementById('hdLockupUntil').innerText = lockupUntil.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
+                const statusEl = document.getElementById('hdLockupStatus');
+                statusEl.innerText = isActive ? 'ACTIVE' : 'EXPIRED';
+                statusEl.style.color = isActive ? '#f59e0b' : '#10b981';
+
+                if (isActive) {
+                    const diffTime = Math.abs(lockupUntil - now);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    document.getElementById('hdLockupRemaining').innerText = diffDays + (diffDays === 1 ? ' day' : ' days');
+                }
+            } else {
+                if (hdLockupStatusRow) {
+                    hdLockupStatusRow.style.display = 'table-row';
+                    const statusEl = document.getElementById('hdLockupStatus');
+                    statusEl.innerText = 'No Lock-up';
+                    statusEl.style.color = '#94a3b8';
+                }
+                if (hdLockupRow) hdLockupRow.style.display = 'none';
+                if (hdLockupRemainingRow) hdLockupRemainingRow.style.display = 'none';
+            }
+            document.getElementById('hdAssetName').innerText = '₹' + parseFloat(trade.price).toLocaleString('en-IN');
 
             // Set Market based on symbol if possible, else default BSE
             document.getElementById('hdMarket').innerText = trade.symbol.includes('NSE') ? 'NSE' : 'BSE';
@@ -6667,7 +6819,7 @@
                     const tradeResult = await window.DB.updateTradeStatus(trade.id, 'Pending', 'Subscribed Fully');
 
                     if (tradeResult.success) {
-                        alert("Successfully settled! Your subscription is now fully paid and has been moved to Pending transactions for admin approval.");
+                        alert("Successfully settled! Your subscription is now fully paid and has been moved to Awaiting transactions for approval.");
                         document.getElementById('holdingDetailModal').style.display = 'none';
                         await fetchUserTransactions();
                         // Switch to Pending tab
@@ -7085,6 +7237,18 @@
                     <tr id="hdNormalSellPriceRow" style="display: none;">
                         <td>Sell Price</td>
                         <td id="hdSellPrice" style="color: #ef4444 !important;">₹0.00</td>
+                    </tr>
+                    <tr id="hdLockupStatusRow" style="display: none;">
+                        <td>Lock-up Status</td>
+                        <td id="hdLockupStatus" style="font-weight:700;">-</td>
+                    </tr>
+                    <tr id="hdLockupRow" style="display: none;">
+                        <td>Expires</td>
+                        <td id="hdLockupUntil" style="color: #f59e0b !important; font-weight:700;">-</td>
+                    </tr>
+                    <tr id="hdLockupRemainingRow" style="display: none;">
+                        <td>Remaining Days</td>
+                        <td id="hdLockupRemaining" style="color: #94a3b8 !important;">-</td>
                     </tr>
                     <tr id="hdNormalFeesRow" style="display: none;">
                         <td>Fees & Tax</td>
@@ -7655,7 +7819,9 @@
                 if (activeCard) activeCard.classList.add('active');
 
                 // Load Widget
-                if (window.loadWidget) window.loadWidget(symbol);
+                let sym = symbol;
+                if (symbol === 'NSE:NIFTY') sym = 'NIFTY1!';
+                if (window.loadWidget) window.loadWidget(sym);
 
                 // Trigger immediate UI update
                 if (window.syncUI) window.syncUI();
