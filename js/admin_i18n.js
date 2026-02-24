@@ -136,6 +136,7 @@
             "th_asset": "交易资产",
             "th_volume": "成交量",
             "th_ipo_name": "申购名称",
+            "th_lockup_info": "锁定期信息",
             "th_date": "日期",
             "th_type": "交易类型",
             "th_qty": "数量",
@@ -225,6 +226,7 @@
             "lbl_end_sub": "结束认购",
             "lbl_allocation_price": "配售价格",
             "lbl_min_invest": "最低投资",
+            "lbl_lockup_days": "锁定期 (天)",
             "lbl_max_invest": "最高投资",
             "lbl_enable_premium": "启用高溢价产品",
             "lbl_product_details": "产品详情",
@@ -443,7 +445,8 @@
             "btn_logout": "退出登录",
             "msg_loan_eligibility_enabled": "用户贷款权限已启用。",
             "msg_loan_eligibility_disabled": "用户贷款权限已禁用。",
-            "lbl_delete": "删除"
+            "lbl_delete": "删除",
+            "lbl_lockup": "锁定管理"
         },
         en: {
             // Sidebar
@@ -577,6 +580,7 @@
             "th_asset": "Asset",
             "th_volume": "Volume",
             "th_ipo_name": "IPO Name",
+            "th_lockup_info": "Lock-up Info",
             "th_date": "Date",
             "th_type": "Type",
             "th_qty": "Qty",
@@ -666,6 +670,7 @@
             "lbl_end_sub": "End Subscription",
             "lbl_allocation_price": "Allocation Price",
             "lbl_min_invest": "Minimum Investment",
+            "lbl_lockup_days": "Lock-up Period (Days)",
             "lbl_max_invest": "Maximum Investment",
             "lbl_enable_premium": "Enable High Premium Product",
             "lbl_product_details": "Product Details",
@@ -748,6 +753,7 @@
             "lbl_frozen": "FROZEN",
             "lbl_review": "Review",
             "lbl_balance": "Balance",
+            "lbl_lockup": "Lock-up",
 
             // Login Page
             "admin_portal": "Admin Login Portal",
