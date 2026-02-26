@@ -11,6 +11,8 @@
             "sidebar_users": "客户管理",
             "sidebar_bank_accounts": "银行账户",
             "sidebar_products": "产品管理",
+            "lang_cn": "中文",
+            "lang_en": "英文",
             "sidebar_stock057": "机构股票057",
             "sidebar_financial": "财务管理",
             "sidebar_deposits": "充值记录",
@@ -47,6 +49,7 @@
             "title_loans": "贷款申请记录",
             "title_products": "产品配置管理",
             "title_settings": "账户安全设置",
+            "title_profile": "个人资料设置",
             "title_admin_centers": "管理员配置中心",
             "title_financial_overview": "财务数据概览",
             "lbl_dashboard_summary": "仪表盘汇总",
@@ -166,6 +169,7 @@
             "btn_update": "更新",
             "btn_save": "保存",
             "btn_send": "发送",
+            "btn_save_profile": "更新资料",
             "btn_add": "添加",
             "btn_next": "下一步",
             "btn_agree_continue": "同意并继续",
@@ -179,6 +183,7 @@
             "btn_logout": "推出登录",
             "btn_enable": "启用",
             "btn_disable": "禁用",
+            "btn_mark_fully_repaid": "标记为已还清",
 
             // Modals
             "modal_edit_kyc": "编辑实名信息",
@@ -263,6 +268,8 @@
             "status_sold": "已卖出",
             "status_holding": "持仓中",
             "status_pending": "待审核",
+            "status_repaid": "已还清",
+            "status_rejected": "已驳回",
             "status_enabled": "已启用",
             "status_disabled": "已禁用",
             "trans_deposit": "充值 (加钱)",
@@ -446,7 +453,26 @@
             "msg_loan_eligibility_enabled": "用户贷款权限已启用。",
             "msg_loan_eligibility_disabled": "用户贷款权限已禁用。",
             "lbl_delete": "删除",
-            "lbl_lockup": "锁定管理"
+            "lbl_lockup": "锁定管理",
+            "lbl_lockup_mgmt": "IPO 锁定管理",
+            "lbl_current_expiry": "当前到期日",
+            "lbl_ipo_approval": "IPO 订单审批",
+            "lbl_additional_lockup": "额外锁定期 (天)",
+            "lbl_extend": "延长",
+            "lbl_set_exact_expiry": "设置精确到期日",
+            "lbl_set_date": "确认日期",
+            "lbl_force_unlock": "强制解锁 (覆盖)",
+            "lbl_locked_until": "锁定至",
+            "lbl_lock_expired": "锁定已过期",
+            "lbl_not_set": "未设置",
+            "lbl_na": "无",
+            "status_locked": "已锁定",
+            "status_unlocked": "已解锁",
+            "err_invalid_qty": "请输入有效的批准数量。",
+            "msg_confirm_reject_trade": "您确定要驳回这笔交易吗？",
+            "lbl_confirm_reject": "确认驳回",
+            "title_confirm_repayment": "确认贷款还款",
+            "msg_confirm_repayment": "您确定要将此贷款标记为已还清吗？这将清除剩余余额并更新用户的未还金额。"
         },
         en: {
             // Sidebar
@@ -454,7 +480,9 @@
             "sidebar_kyc": "KYC Auth",
             "sidebar_users": "Users",
             "sidebar_bank_accounts": "Bank Accounts",
-            "sidebar_products": "Products",
+            "sidebar_products": "Product Management",
+            "lang_cn": "Chinese",
+            "lang_en": "English",
             "sidebar_stock057": "Stock 057",
             "sidebar_financial": "Financial",
             "sidebar_deposits": "Deposits",
@@ -491,6 +519,7 @@
             "title_loans": "Loan Application Records",
             "title_products": "Product Management",
             "title_settings": "Account Security",
+            "title_profile": "Profile Settings",
             "title_admin_centers": "Admin Configurations",
             "title_financial_overview": "Financial Overview",
             "lbl_dashboard_summary": "Dashboard Summary",
@@ -610,6 +639,7 @@
             "btn_update": "Update",
             "btn_save": "Save",
             "btn_send": "Send",
+            "btn_save_profile": "Update Profile",
             "btn_add": "Add New",
             "btn_next": "Next",
             "btn_agree_continue": "Agree & Continue",
@@ -623,6 +653,7 @@
             "btn_logout": "Logout",
             "btn_enable": "Enable",
             "btn_disable": "Disable",
+            "btn_mark_fully_repaid": "Mark as Fully Repaid",
 
             // Modals
             "modal_edit_kyc": "Edit KYC Information",
@@ -707,6 +738,8 @@
             "status_sold": "Sold",
             "status_holding": "Holding",
             "status_pending": "Pending",
+            "status_repaid": "Fully Repaid",
+            "status_rejected": "Rejected",
             "status_enabled": "ENABLED",
             "status_disabled": "DISABLED",
             "trans_deposit": "Deposit (Add)",
@@ -890,7 +923,27 @@
             "btn_logout": "Logout",
             "msg_loan_eligibility_enabled": "User loan eligibility enabled successfully.",
             "msg_loan_eligibility_disabled": "User loan eligibility disabled successfully.",
-            "lbl_delete": "Delete"
+            "lbl_delete": "Delete",
+            "lbl_lockup": "Lock-up",
+            "lbl_lockup_mgmt": "IPO Lock-up Management",
+            "lbl_current_expiry": "Current Expiry",
+            "lbl_ipo_approval": "IPO Order Approval",
+            "lbl_additional_lockup": "Additional Lock-up Days",
+            "lbl_extend": "Extend",
+            "lbl_set_exact_expiry": "Set Exact Expiry Date",
+            "lbl_set_date": "Set Date",
+            "lbl_force_unlock": "Force Unlock (Override)",
+            "lbl_locked_until": "Locked Until",
+            "lbl_lock_expired": "Lock Expired",
+            "lbl_not_set": "Not Set",
+            "lbl_na": "N/A",
+            "status_locked": "Locked",
+            "status_unlocked": "Unlocked",
+            "err_invalid_qty": "Please enter a valid approved quantity.",
+            "msg_confirm_reject_trade": "Are you sure you want to REJECT this trade?",
+            "lbl_confirm_reject": "Confirm Reject",
+            "title_confirm_repayment": "Confirm Loan Repayment",
+            "msg_confirm_repayment": "Are you sure you want to mark this loan as fully repaid? This will clear the remaining balance and update the user's outstanding amount."
         }
     };
 
@@ -926,6 +979,12 @@
                     } else {
                         el.innerText = dict[key];
                     }
+                }
+
+                // Handle title attribute if it exists
+                if (el.hasAttribute('title') || el.title) {
+                    const titleKey = el.getAttribute('data-i18n-title') || key;
+                    if (dict[titleKey]) el.title = dict[titleKey];
                 }
             }
         });
