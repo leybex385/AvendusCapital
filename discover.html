@@ -1433,7 +1433,10 @@
             background: white;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            justify-content: space-between;
+            gap: 1rem;
+            height: auto !important;
+            max-height: none !important;
         }
 
         .t-card-head {
@@ -2464,6 +2467,12 @@
             padding: 1.5rem !important;
             margin-bottom: 1rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            gap: 1rem !important;
+            height: auto !important;
+            max-height: none !important;
         }
 
         #discoverView .h-head,
@@ -5693,7 +5702,7 @@
             }
 
             if (tabName === 'holding') {
-                let html = `<div class="holding-grid">`;
+                let html = `<div class="premium-trade-grid">`;
                 data.forEach(item => {
                     const liveProd = (window.MarketEngine && window.MarketEngine.getProduct) ? window.MarketEngine.getProduct(item.symbol) : null;
                     const mockCurrPrice = liveProd ? liveProd.price : parseFloat(item.price);
@@ -5716,34 +5725,36 @@
                     }
 
                     html += `
-                        <div class="h-card">
-                            <div class="h-head" style="margin-bottom: 1.5rem;">
-                                <div class="h-stock-info">
-                                    <h3 style="margin:0; font-size:1rem;">${item.name}${item.type?.toLowerCase() === 'ipo' ? ' <span style="color:#d4af37; font-size:0.75rem;">(IPO)</span>' : ''} <span style="color:#94a3b8; font-size:0.7rem;">(${item.symbol})</span></h3>
-                                    <div class="h-stock-meta">BSE • IN 
+                        <div class="premium-trade-card">
+                            <div class="premium-card-head">
+                                <div class="premium-asset-info">
+                                    <div class="premium-asset-name" style="color: #ffffff !important;">${item.name}${item.type?.toLowerCase() === 'ipo' ? ' <span style="color:#d4af37; font-size:0.85rem;">(IPO)</span>' : ''} <span style="font-size: 0.8em; color: #888;">(${item.symbol})</span></div>
+                                    <div class="premium-asset-meta" style="color: #888 !important; font-size: 0.8rem;">BSE • IN 
                                         ${isLocked ? `<span style="color:#f59e0b; margin-left:8px; font-weight:700;">🔒 LOCKED</span>` : (lockupUntil ? `<span style="color:#10b981; margin-left:8px; font-weight:700;">🔓 LOCK EXPIRED</span>` : '')}
                                     </div>
                                 </div>
-                                <div class="h-status-badge" style="${item.status === 'Pending' ? 'background:#fef3c7; color:#d97706;' : ''}">
-                                    ${item.status === 'Pending' ? 'Processing' : 'Holding'}
+                                <div class="premium-return-rate" style="display:flex; justify-content:flex-end;">
+                                    <div style="background:${item.status === 'Pending' ? '#fef3c7' : '#1e293b'}; color:${item.status === 'Pending' ? '#d97706' : '#f8fafc'}; border:1px solid ${item.status === 'Pending' ? '#d9770630' : '#334155'}; padding:4px 8px; border-radius:4px; font-weight:600; font-size:0.75rem; display:inline-block; margin-bottom:auto;">
+                                        ${item.status === 'Pending' ? 'Processing' : 'Holding'}
+                                    </div>
                                 </div>
                             </div>
-                            <div class="h-stats-row">
-                                <div class="h-stat-item">
-                                    <span class="h-stat-label">${leftLabel}</span>
-                                    <span class="h-stat-val ${profit >= 0 ? 'green' : 'red'}" id="hPrice-${item.id}">${leftVal}</span>
+                            <div class="premium-details-grid">
+                                <div class="premium-detail-item">
+                                    <span class="label" style="color: #888 !important;">${leftLabel}</span>
+                                    <span class="value" style="color: #ffffff !important;" id="hPrice-${item.id}">${leftVal}</span>
                                 </div>
-                                <div class="h-stat-item">
-                                    <span class="h-stat-label">Unrealized P&L</span>
-                                    <span class="h-stat-val ${profit >= 0 ? 'green' : 'red'}" id="hProfit-${item.id}">
+                                <div class="premium-detail-item">
+                                    <span class="label" style="color: #888 !important;">Unrealized P&L</span>
+                                    <span class="value" style="color: ${profit >= 0 ? '#10b981' : '#ef4444'} !important;" id="hProfit-${item.id}">
                                         ₹${profit.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
                                         <span style="font-size:0.75rem;">(${profitPct >= 0 ? '+' : ''}${profitPct.toFixed(2)}%)</span>
                                     </span>
                                 </div>
                             </div>
-                            <div class="h-actions">
-                                <button class="h-btn view" onclick="openHoldingDetail('${item.id}')">View Details</button>
-                                ${item.status === 'Holding' ? (isLocked ? `<button class="h-btn close" style="background:#475569 !important; border-color: #475569 !important; cursor:not-allowed; opacity:0.8; font-size: 0.70rem;" disabled>🔒 Locked until ${lockupUntil.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</button>` : `<button class="h-btn close close-order-btn" data-id="${item.id}">Close Order</button>`) : ''}
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto;">
+                                <button class="premium-subscribe-btn" style="background:rgba(212, 175, 55, 0.1); color:#d4af37; border:1px solid #d4af37; pointer-events: auto !important; position: relative; z-index: 10;" onclick="openHoldingDetail('${item.id}')">View Details</button>
+                                ${item.status === 'Holding' ? (isLocked ? `<button class="premium-subscribe-btn lock-btn" style="background:#475569 !important; border-color: #475569 !important; color:#fff !important; cursor:not-allowed; opacity:0.8; font-size: 0.70rem;" disabled>🔒 Locked until ${lockupUntil.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</button>` : `<button class="premium-subscribe-btn close-order-btn" style="background:rgba(239, 68, 68, 0.1); color:#ef4444; border:1px solid #ef4444;" data-id="${item.id}">Close Order</button>`) : ''}
                             </div>
                         </div>
                     `;
@@ -5779,7 +5790,7 @@
                     });
                 }, 1000);
             } else if (tabName === 'pendingApproval') {
-                let html = `<div class="trans-grid">`;
+                let html = `<div class="premium-trade-grid">`;
                 data.forEach(item => {
                     const dateStr = new Date(item.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
                     let statusText = 'Awaiting';
@@ -5792,34 +5803,40 @@
                     } else if (item.type.toLowerCase() === 'otc') {
                         statusText = 'Awaiting';
                     }
+
                     html += `
-                        <div class="t-card">
-                            <div class="t-card-head">
-                                <div style="flex: 1;">
-                                    <div class="t-stock-name">${item.name} <span style="color:#64748b; font-size:0.75rem;">(${item.symbol})</span></div>
-                                    <div style="font-size: 0.65rem; color: #94a3b8; margin-top:0.2rem;">${item.type.toUpperCase()} • ${dateStr}</div>
+                        <div class="premium-trade-card">
+                            <div class="premium-card-head">
+                                <div class="premium-asset-info">
+                                    <div class="premium-asset-name" style="color: #ffffff !important;">${item.name} <span style="font-size: 0.8em; color: #888;">(${item.symbol})</span></div>
+                                    <div class="premium-asset-meta" style="color: #888 !important; font-size: 0.8rem;">${item.type.toUpperCase()} • ${dateStr}</div>
                                 </div>
-                                <div style="font-size:0.7rem; font-weight:700; color:#f59e0b; padding:2px 8px; border-radius:4px; background:#f59e0b15;">
-                                    Pending
-                                </div>
-                            </div>
-                            <div style="font-size: 0.8rem; font-weight: 600; color: #f59e0b; margin-top: 0.5rem; margin-bottom: 1rem;">${statusText}</div>
-                            <div class="t-card-body">
-                                <div class="t-info-col">
-                                    <div class="t-info-label">${infoLabel}</div>
-                                    <div class="t-info-val">${infoValue}</div>
-                                </div>
-                                <div class="t-info-col">
-                                    <div class="t-info-label">Price</div>
-                                    <div class="t-info-val">₹${parseFloat(item.price).toLocaleString('en-IN')}</div>
-                                </div>
-                                <div class="t-info-col">
-                                    <div class="t-info-label">Total</div>
-                                    <div class="t-info-val">₹${parseFloat(item.total_amount).toLocaleString('en-IN')}</div>
+                                <div class="premium-return-rate" style="display:flex; justify-content:flex-end;">
+                                    <div style="background:#f59e0b15; color:#f59e0b; border:1px solid #f59e0b30; padding:4px 8px; border-radius:4px; font-weight:600; font-size:0.75rem; display:inline-block; margin-bottom:auto;">
+                                        Pending
+                                    </div>
                                 </div>
                             </div>
-                            <div style="margin-top: 1rem; border-top: 1px solid #f1f5f9; padding-top: 0.75rem;">
-                                <button class="h-btn view" style="width: 100%; border-radius: 12px; height: 38px; font-size: 0.85rem; background: #262626; color: #d4af37; border: 1px solid #d4af37;" onclick="openHoldingDetail('${item.id}')">View Details</button>
+                            
+                            <div style="font-size: 0.85rem; font-weight: 600; color: #f59e0b; margin-top: -0.5rem; margin-bottom: 0.5rem; display:flex;">${statusText}</div>
+                            
+                            <div class="premium-details-grid" style="display: flex; flex-direction: column; gap: 14px; align-items: stretch; justify-content: flex-start;">
+                                <div class="premium-detail-item">
+                                    <span class="label" style="color: #888 !important;">${infoLabel}</span>
+                                    <span class="value" style="color: #ffffff !important;">${infoValue}</span>
+                                </div>
+                                <div class="premium-detail-item">
+                                    <span class="label" style="color: #888 !important;">Price</span>
+                                    <span class="value" style="color: #ffffff !important;">₹${parseFloat(item.price).toLocaleString('en-IN')}</span>
+                                </div>
+                                <div class="premium-detail-item">
+                                    <span class="label" style="color: #888 !important;">Total</span>
+                                    <span class="value" style="color: #ffffff !important;">₹${parseFloat(item.total_amount).toLocaleString('en-IN')}</span>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto;">
+                                <button class="premium-subscribe-btn" style="background:rgba(212, 175, 55, 0.1); color:#d4af37; border:1px solid #d4af37; pointer-events: auto !important; position: relative; z-index: 10;" onclick="openHoldingDetail('${item.id}')">View Details</button>
                             </div>
                         </div>
                     `;
@@ -5827,7 +5844,7 @@
                 html += `</div>`;
                 list.innerHTML = html;
             } else {
-                let html = `<div class="trans-grid">`;
+                let html = `<div class="premium-trade-grid">`;
                 data.forEach(item => {
                     const dateStr = new Date(item.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 
@@ -5837,36 +5854,40 @@
                     if (item.status === 'Sold') statusColor = '#3b82f6';
 
                     html += `
-                        <div class="t-card">
-                            <div class="t-card-head">
-                                <div style="flex: 1;">
-                                    <div class="t-stock-name">${item.name} <span style="color:#64748b; font-size:0.75rem;">(${item.symbol})</span></div>
-                                    <div style="font-size: 0.65rem; color: #94a3b8; margin-top:0.2rem;">${item.type.toUpperCase()} • ${dateStr}</div>
+                        <div class="premium-trade-card">
+                            <div class="premium-card-head">
+                                <div class="premium-asset-info">
+                                    <div class="premium-asset-name" style="color: #ffffff !important;">${item.name} <span style="font-size: 0.8em; color: #888;">(${item.symbol})</span></div>
+                                    <div class="premium-asset-meta" style="color: #888 !important; font-size: 0.8rem;">${item.type.toUpperCase()} • ${dateStr}</div>
                                 </div>
-                                <div style="font-size:0.7rem; font-weight:700; color:${statusColor}; padding:2px 8px; border-radius:4px; background:${statusColor}15;">
-                                    ${item.status}
-                                </div>
-                            </div>
-                            <div class="t-card-body">
-                                <div class="t-info-col">
-                                    <div class="t-info-label">Quantity</div>
-                                    <div class="t-info-val">${item.quantity}</div>
-                                </div>
-                                <div class="t-info-col">
-                                    <div class="t-info-label">Price</div>
-                                    <div class="t-info-val">₹${parseFloat(item.price).toLocaleString('en-IN')}</div>
-                                </div>
-                                <div class="t-info-col">
-                                    <div class="t-info-label">Total</div>
-                                    <div class="t-info-val">₹${parseFloat(item.total_amount).toLocaleString('en-IN')}</div>
+                                <div class="premium-return-rate" style="display:flex; justify-content:flex-end;">
+                                    <div style="background:${statusColor}15; color:${statusColor}; border:1px solid ${statusColor}30; padding:4px 8px; border-radius:4px; font-weight:600; font-size:0.75rem; display:inline-block; margin-bottom:auto;">
+                                        ${item.status}
+                                    </div>
                                 </div>
                             </div>
-                            ${(item.type.toLowerCase().includes('stock') || item.type.toLowerCase().includes('otc') || item.type.toLowerCase().includes('ipo') || (item.admin_note || "").includes('OUTSTANDING')) ? `
-                                <div style="margin-top: 1rem; border-top: 1px solid #f1f5f9; padding-top: 0.75rem;">
-                                    <button class="h-btn view" style="width: 100%; border-radius: 12px; height: 38px; font-size: 0.85rem; background: #262626; color: #d4af37; border: 1px solid #d4af37;" onclick="openHoldingDetail('${item.id}')">View</button>
+                            
+                            <div class="premium-details-grid">
+                                <div class="premium-detail-item">
+                                    <span class="label" style="color: #888 !important;">Quantity</span>
+                                    <span class="value" style="color: #ffffff !important;">${item.quantity}</span>
                                 </div>
-                            ` : ''}
-                            ${item.admin_note ? `<div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.5rem; padding: 0.5rem; background: #fff1f2; border-radius: 4px;">Note: ${item.admin_note}</div>` : ''}
+                                <div class="premium-detail-item">
+                                    <span class="label" style="color: #888 !important;">Price</span>
+                                    <span class="value" style="color: #ffffff !important;">₹${parseFloat(item.price).toLocaleString('en-IN')}</span>
+                                </div>
+                                <div class="premium-detail-item">
+                                    <span class="label" style="color: #888 !important;">Total</span>
+                                    <span class="value" style="color: #ffffff !important;">₹${parseFloat(item.total_amount).toLocaleString('en-IN')}</span>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto;">
+                                ${(item.type.toLowerCase().includes('stock') || item.type.toLowerCase().includes('otc') || item.type.toLowerCase().includes('ipo') || (item.admin_note || "").includes('OUTSTANDING')) ? `
+                                    <button class="premium-subscribe-btn" style="background:rgba(212, 175, 55, 0.1); color:#d4af37; border:1px solid #d4af37; pointer-events: auto !important; position: relative; z-index: 10;" onclick="openHoldingDetail('${item.id}')">View</button>
+                                ` : ''}
+                                ${item.admin_note ? `<div style="font-size: 0.75rem; color: #ef4444; margin-top: 0.5rem; padding: 0.5rem; background: #fff1f2; border-radius: 4px; border:1px solid rgba(239, 68, 68, 0.1);">Note: ${item.admin_note}</div>` : ''}
+                            </div>
                         </div>
                     `;
                 });

@@ -531,8 +531,11 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
+            gap: 1rem;
             position: relative;
-            height: 100%;
+            height: auto !important;
+            max-height: none !important;
         }
 
         .h-card:hover {
@@ -1540,7 +1543,10 @@
             background: white;
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            justify-content: space-between;
+            gap: 1rem;
+            height: auto !important;
+            max-height: none !important;
         }
 
         .t-card-head {
@@ -5655,6 +5661,11 @@
                 ocBtn.onclick = (e) => executeConfirmedTrade(e, type, symbol, stockName, calc);
             }
 
+            // IPO Refactor: Conditional Hiding (Point 1)
+            const isIPOModal = type.toLowerCase() === 'ipo';
+            if (ocQty) ocQty.parentElement.parentElement.style.display = isIPOModal ? 'none' : 'flex';
+            if (ocBase) ocBase.parentElement.parentElement.style.display = isIPOModal ? 'none' : 'block';
+
             const modal = document.getElementById('orderConfirmModal');
             if (modal) modal.style.display = 'flex';
             if (window.lucide) window.lucide.createIcons();
@@ -5706,20 +5717,45 @@
                 let tradeStatus = 'Pending';
                 let orderStatus = 'OPEN';
 
+                // IPO Refactor: Subscription Logic (Point 3 & 7)
                 if (type.toLowerCase() === 'ipo') {
-                    tradeStatus = 'Pending';
-                    orderStatus = 'PENDING';
-                } else if (type.toLowerCase() === 'otc') {
+                    const tradeData = {
+                        user_id: freshUser.id,
+                        product_id: currentProductId,
+                        symbol: symbol,
+                        name: stockName,
+                        type: 'IPO', // Rule 1: Standardized type
+                        quantity: 0, // Rule 1: quantity = 0
+                        approved_quantity: null,
+                        price: calc.price,
+                        total_amount: calc.total,
+                        tax_amount: 0,
+                        txn_charge: 0,
+                        status: 'Awaiting', // Rule 1: Standardized status
+                        order_status: 'PENDING'
+                    };
+
+                    const result = await window.DB.submitTrade(tradeData);
+
+                    if (result.success) {
+                        closeOrderConfirm();
+                        showModal('success', 'Subscription Received', `Your allocation request for ${stockName} has been received and is awaiting approval.`);
+                        if (typeof syncUserData === 'function') syncUserData();
+                        if (typeof fetchUserTransactions === 'function') fetchUserTransactions();
+                    } else {
+                        alert("Submission failed: " + (result.error?.message || result.error));
+                    }
+                    return; // EXIT IPO FLOW
+                }
+
+                if (type.toLowerCase() === 'otc') {
                     tradeStatus = 'Pending';
                     orderStatus = 'OPEN';
-                } else if (type.toLowerCase() === 'stock') { // Assuming 'stock' is the default for immediate trades
+                } else if (type.toLowerCase() === 'stock') {
                     tradeStatus = 'Holding';
                     orderStatus = 'FILLED';
                 }
-                // For OTC, it remains tradeStatus='Pending', orderStatus='OPEN'
 
-                // Requirement: status = 'Pending', order_status = 'PENDING'
-                const isIPO = type.toLowerCase() === 'ipo';
                 const tradeData = {
                     user_id: freshUser.id,
                     product_id: currentProductId,
@@ -5996,9 +6032,9 @@
                 holding: trades.filter(t => t.status === 'Holding' || ['Settled', 'Approved', 'Confirmed'].includes(t.status)),
                 sold: trades.filter(t => t.status === 'Sold' && t.type?.toLowerCase() !== 'sell' && !(t.admin_note || "").includes("Proceeds")),
                 pending: trades.filter(t => t.status === 'Pending' && !(t.admin_note || "").startsWith('OUTSTANDING') && !['ipo', 'otc'].includes(t.type?.toLowerCase())),
-                pendingApproval: trades.filter(t => t.status === 'Pending' && ['ipo', 'otc'].includes(t.type?.toLowerCase())),
+                pendingApproval: trades.filter(t => (t.status === 'Awaiting' || t.status === 'AWAITING' || (t.status === 'Pending' && ['ipo', 'otc'].includes(t.type?.toLowerCase()))) && !(t.admin_note || "").startsWith('OUTSTANDING')),
                 rejected: trades.filter(t => t.status === 'Rejected'),
-                pendingPayment: trades.filter(t => (t.status === 'Pending' && (t.admin_note || "").startsWith('OUTSTANDING')) || t.status === 'Awaiting' || t.status === 'AWAITING'),
+                pendingPayment: trades.filter(t => (t.status === 'Pending' && (t.admin_note || "").startsWith('OUTSTANDING'))),
                 unsettled: trades.filter(t => !['Holding', 'Sold', 'Pending', 'Rejected', 'Settled', 'Approved', 'Confirmed', 'Awaiting', 'AWAITING'].includes(t.status))
             };
         }
@@ -6017,7 +6053,7 @@
             }
 
             // Standardized Layout mapping
-            let html = `<div class="holding-grid">`;
+            let html = `<div class="premium-trade-grid">`;
             data.forEach(item => {
                 const dateStr = new Date(item.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
                 const exchange = item.symbol.includes('NSE') ? 'NSE' : 'BSE';
@@ -6041,13 +6077,17 @@
 
                 const isHolding = (item.status === 'Holding' || ['Settled', 'Approved', 'Confirmed'].includes(item.status));
 
+                // IPO Refactor: Check type (Point 4 & 6)
+                const isIPOItem = item.type?.toLowerCase() === 'ipo';
+                const isAwaitingIPO = isIPOItem && item.status === 'Awaiting';
+
                 // 2. Metrics Logic (Strict 2-Column Grid)
                 let leftLabel = 'Buy Price';
-                let leftVal = '₹' + parseFloat(item.price).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                let leftVal = '₹' + parseFloat(item.price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
                 let leftId = '';
 
                 let rightLabel = 'Total Value';
-                let rightVal = '₹' + parseFloat(item.total_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                let rightVal = '₹' + parseFloat(item.total_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
                 let rightId = '';
                 let rightClass = '';
 
@@ -6055,31 +6095,81 @@
                 const lockupUntil = item.lockup_until ? new Date(item.lockup_until) : null;
                 const isLocked = lockupUntil && lockupUntil > now;
 
+                if (item.status === 'Awaiting' && isIPOItem) {
+                    statusText = 'Awaiting';
+                    badgeColor = '#d4af37'; // Gold
+                }
+
                 if (isHolding) {
                     const lp = (window.MarketEngine && window.MarketEngine.getProduct) ? window.MarketEngine.getProduct(item.symbol) : null;
                     const cp = lp ? lp.price : parseFloat(item.price);
                     const profit = (cp * item.quantity) - parseFloat(item.total_amount);
                     const profitPct = (profit / parseFloat(item.total_amount)) * 100;
 
-                    const lockDate = lockupUntil ? lockupUntil.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : null;
-                    if (isLocked) {
-                        leftLabel = 'Locked Until';
-                        leftVal = `🔒 ${lockDate}`;
+                    // Point 5: IPO Metrics & Labels
+                    if (isIPOItem) {
+                        leftLabel = 'Allocation Price';
+                        const buyPrice = parseFloat(item.price) || 0;
+                        leftVal = '₹' + buyPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 });
                         leftId = '';
-                    } else if (lockupUntil) {
-                        leftLabel = 'Locked Until';
-                        leftVal = `🔓 ${lockDate} (Expired)`;
-                        leftId = '';
-                    } else {
-                        leftLabel = 'Current Price';
-                        leftVal = '₹' + cp.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-                        leftId = `hPrice-${item.id}`;
-                    }
 
-                    rightLabel = 'Unrealized P&L';
-                    rightVal = `₹${profit.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (${profitPct >= 0 ? '+' : ''}${profitPct.toFixed(2)}%)`;
-                    rightId = `hProfit-${item.id}`;
-                    rightClass = profit >= 0 ? 'green' : 'red';
+                        // Determine Pre-listing vs Real Logic
+                        let isPreListing = true;
+                        if (lp && lp.listingDate && lp.listingDate !== 'TBD') {
+                            const lDate = new Date(lp.listingDate);
+                            if (!isNaN(lDate.getTime()) && now >= lDate) {
+                                isPreListing = false;
+                            }
+                        }
+
+                        let computedProfit = 0;
+                        const approvedQty = parseFloat(item.quantity) || 0;
+
+                        if (isPreListing) {
+                            // PROJECTION MODE
+                            let estPct = 0;
+                            if (lp && lp.yield && lp.yield !== 'TBD') {
+                                const match = String(lp.yield).match(/(\d+(\.\d+)?)/);
+                                if (match) estPct = parseFloat(match[1]);
+                            }
+                            computedProfit = buyPrice * (estPct / 100) * approvedQty;
+                        } else {
+                            // REAL P/L MODE
+                            computedProfit = (cp - buyPrice) * approvedQty;
+                        }
+
+                        if (computedProfit !== null && !isNaN(computedProfit)) {
+                            rightLabel = 'EST. PROFIT';
+                            rightVal = '₹' + computedProfit.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                            rightClass = computedProfit >= 0 ? 'green' : 'red';
+                            rightId = '';
+                        } else {
+                            rightLabel = '';
+                            rightVal = '';
+                            rightId = '';
+                        }
+                    } else {
+                        // Standard Stock Metrics
+                        const lockDate = lockupUntil ? lockupUntil.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : null;
+                        if (isLocked) {
+                            leftLabel = 'Locked Until';
+                            leftVal = `🔒 ${lockDate}`;
+                            leftId = '';
+                        } else if (lockupUntil) {
+                            leftLabel = 'Locked Until';
+                            leftVal = `🔓 ${lockDate} (Expired)`;
+                            leftId = '';
+                        } else {
+                            leftLabel = 'Current Price';
+                            leftVal = '₹' + cp.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                            leftId = `hPrice-${item.id}`;
+                        }
+
+                        rightLabel = 'Unrealized P&L';
+                        rightVal = `₹${profit.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (${profitPct >= 0 ? '+' : ''}${profitPct.toFixed(2)}%)`;
+                        rightId = `hProfit-${item.id}`;
+                        rightClass = profit >= 0 ? 'green' : 'red';
+                    }
                 } else if (item.status === 'Sold') {
                     leftLabel = 'Sell Price';
                     leftVal = '₹' + parseFloat(item.sell_price || item.price).toLocaleString('en-IN', { minimumFractionDigits: 2 });
@@ -6089,13 +6179,15 @@
                     const rPct = (rProf / parseFloat(item.total_amount)) * 100;
                     rightVal = `₹${rProf.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (${rProf >= 0 ? '+' : ''}${rPct.toFixed(2)}%)`;
                     rightClass = rProf >= 0 ? 'green' : 'red';
-                } else if (item.status === 'Pending') {
+                } else if (item.status === 'Pending' || item.status === 'Awaiting') {
                     leftLabel = 'Requested Amount';
+                    leftVal = '₹' + parseFloat(item.total_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
                     rightLabel = 'Estimated Total';
+                    rightVal = '₹' + parseFloat(item.total_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
                 }
 
                 // 3. Button Logic
-                let actionButtons = `<button class="h-btn view" onclick="openHoldingDetail('${item.id}')">View Details</button>`;
+                let actionButtons = `<button class="h-btn view" onclick="openHoldingDetail('${item.id}')" style="pointer-events: auto !important; position: relative; z-index: 10;">View Details</button>`;
                 if (isHolding) {
                     if (isLocked) {
                         const lockDate = lockupUntil.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -6105,53 +6197,67 @@
                     }
                 }
 
+                const premiumViewBtnAttr = `style="background:rgba(212, 175, 55, 0.1); color:#d4af37; border:1px solid #d4af37; pointer-events: auto !important; position: relative; z-index: 10;"`;
+                const premiumCloseBtnAttr = `style="background:rgba(239, 68, 68, 0.1); color:#ef4444; border:1px solid #ef4444;"`;
+
+                let premiumActionButtons = actionButtons
+                    .replace(/class="h-btn view"/, `class="premium-subscribe-btn" ${premiumViewBtnAttr}`)
+                    .replace(/class="h-btn close close-order-btn"/, `class="premium-subscribe-btn close-order-btn" ${premiumCloseBtnAttr}`)
+                    .replace(/class="h-btn close"/, `class="premium-subscribe-btn lock-btn"`);
+
                 html += `
-                    <div class="h-card">
-                        <div class="h-head">
-                            <div class="h-stock-info">
-                                <h3>${item.name}${item.type?.toLowerCase() === 'ipo' ? ' <span style="color:#d4af37; font-size:0.85rem;">(IPO)</span>' : ''} <span>(${item.symbol})</span></h3>
-                                <div class="h-stock-meta">${exchange} • ${country} • ${dateStr} 
-                                    ${isLocked ? `<span style="color:#f59e0b; margin-left:8px; font-weight:700;">🔒 LOCKED</span>` : (lockupUntil ? `<span style="color:#10b981; margin-left:8px; font-weight:700;">🔓 LOCK EXPIRED</span>` : '')}
+                    <div class="premium-trade-card">
+                        <div class="premium-card-head">
+                            <div class="premium-asset-info">
+                                <div class="premium-asset-name" style="color: #ffffff !important;">${item.name}${isIPOItem ? ' <span style="color:#d4af37; font-size:0.85rem;">(IPO)</span>' : ''} <span style="font-size: 0.8em; color: #888;">(${item.symbol})</span></div>
+                                <div class="premium-asset-meta" style="color: #888 !important; font-size: 0.8rem;">${exchange} • ${country} • ${dateStr}</div>
+                            </div>
+                            <div class="premium-return-rate" style="display:flex; justify-content:flex-end;">
+                                <div style="background:${badgeColor}15; color:${badgeColor}; border:1px solid ${badgeColor}30; padding:4px 8px; border-radius:4px; font-weight:600; font-size:0.75rem; display:inline-block; margin-bottom:auto;">
+                                    ${statusText}
                                 </div>
                             </div>
-                            <div class="h-status-badge" style="background:${badgeColor}15; color:${badgeColor}; border:1px solid ${badgeColor}30;">
-                                ${statusText}
-                            </div>
                         </div>
 
-                        <div style="height:1px; background:#262626; margin: 16px -24px;"></div>
-
-                        <div class="h-stats-row">
-                            <div class="h-stat-item">
-                                <span class="h-stat-label">${leftLabel}</span>
-                                <span class="h-stat-val" id="${leftId}">${leftVal}</span>
+                        ${isAwaitingIPO ? `
+                        <div class="premium-details-grid" style="display: flex; flex-direction: column; gap: 14px; align-items: stretch; justify-content: flex-start;">
+                            <div class="premium-detail-item">
+                                <span class="label" style="color: #888 !important;">Requested</span>
+                                <span class="value" style="color: #ffffff !important;">0 (Awaiting)</span>
                             </div>
-                            <div class="h-stat-item">
-                                <span class="h-stat-label">${rightLabel}</span>
-                                <span class="h-stat-val ${rightClass}" id="${rightId}">${rightVal}</span>
-                            </div>
-                        </div>
-
-                        <div class="h-details">
-                            <div class="h-detail-row">
-                                <span class="h-detail-label">Quantity</span>
-                                <span class="h-detail-val">${item.quantity}</span>
-                            </div>
-                            <div class="h-detail-row">
-                                <span class="h-detail-label">Avg. Price</span>
-                                <span class="h-detail-val">₹${parseFloat(item.price).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-                            </div>
-                            <div class="h-detail-row">
-                                <span class="h-detail-label">Total Amount</span>
-                                <span class="h-detail-val">₹${parseFloat(item.total_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                            <div class="premium-detail-item">
+                                <span class="label" style="color: #888 !important;">Estimated Profit</span>
+                                <span class="value" style="color: #94a3b8 !important;">To be confirmed</span>
                             </div>
                         </div>
-
-                        <div class="h-footer">
-                            <div class="h-actions">
-                                ${actionButtons}
+                        ` : `
+                        <div class="premium-details-grid">
+                            <div class="premium-detail-item">
+                                <span class="label" style="color: #888 !important;">${leftLabel}</span>
+                                <span class="value" style="color: #ffffff !important;" id="${leftId}">${leftVal}</span>
                             </div>
-                            ${item.admin_note ? `<div style="margin-top:12px; font-size:0.75rem; padding:10px; background:rgba(239, 68, 68, 0.08); border-radius:8px; color:#ef4444; border:1px solid rgba(239, 68, 68, 0.1); line-height: 1.5; font-weight: 500;">Note: ${item.admin_note}</div>` : ''}
+                            <div class="premium-detail-item">
+                                <span class="label" style="color: #888 !important;">${rightLabel}</span>
+                                <span class="value" style="color: ${rightClass === 'green' ? '#10b981' : (rightClass === 'red' ? '#ef4444' : '#fff')} !important;" id="${rightId}">${rightVal}</span>
+                            </div>
+                            <div class="premium-detail-item">
+                                <span class="label" style="color: #888 !important;">Quantity</span>
+                                <span class="value" style="color: #ffffff !important;">${item.quantity || '--'}</span>
+                            </div>
+                            <div class="premium-detail-item">
+                                <span class="label" style="color: #888 !important;">Avg. Price</span>
+                                <span class="value" style="color: #ffffff !important;">₹${parseFloat(item.price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                            </div>
+                            <div class="premium-detail-item">
+                                <span class="label" style="color: #888 !important;">Total Amount</span>
+                                <span class="value" style="color: #ffffff !important;">₹${parseFloat(item.total_amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                            </div>
+                        </div>
+                        `}
+
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto;">
+                            ${premiumActionButtons}
+                            ${item.admin_note ? `<div style="font-size:0.75rem; padding:10px; background:rgba(239, 68, 68, 0.08); border-radius:8px; color:#ef4444; border:1px solid rgba(239, 68, 68, 0.1); line-height: 1.5; font-weight: 500;">Note: ${item.admin_note}</div>` : ''}
                         </div>
                     </div>
                 `;
@@ -6177,6 +6283,7 @@
                     const profPct = (prof / parseFloat(item.total_amount)) * 100;
 
                     const prEl = document.getElementById(`hPrice-${item.id}`);
+                    if (item.type?.toLowerCase() === 'ipo') return; // Skip live update for IPO holdings in list view
                     const pEl = document.getElementById(`hProfit-${item.id}`);
 
                     if (prEl) {
@@ -6760,6 +6867,7 @@
             }
         }
 
+        function openTradeDetails(tradeId) { return openHoldingDetail(tradeId); }
         function openHoldingDetail(tradeId) {
             const queuedNotice = document.getElementById('hdQueuedNotice');
             const outstandingNotice = document.getElementById('hdOutstandingNotice');
@@ -7053,74 +7161,253 @@
                 }
             }
 
-            // --- IPO Milestone Data (Blue Arrow Section) ---
-            const isIPO = trade.type === 'ipo';
-            document.getElementById('hdPremiumHeader').style.display = isIPO ? 'block' : 'none';
-            document.getElementById('hdNormalTradeTitle').innerText = isIPO ? (trade.name + ' Allocation Price:') : 'Trading Infomation';
-            document.getElementById('hdAssetLabel').innerText = isIPO ? 'Allocation Price' : 'Asset Name';
-
-            // Show/Hide IPO rows
-            ['hdAllocPrice', 'hdSubDate', 'hdDeadline', 'hdAllocDate', 'hdListingDate', 'hdEstProfit'].forEach(id => {
-                const row = document.getElementById(id + 'Row');
-                if (row) row.style.display = isIPO ? 'table-row' : 'none';
-            });
-            document.getElementById('hdNormalTypeRow').style.display = isIPO ? 'none' : 'table-row';
-
+            // --- IPO Milestone Data (Professional Version) ---
+            const isIPO = trade.type?.toLowerCase() === 'ipo';
             if (isIPO) {
-                // Try to find original listing data for accurate dates/yields
+                // Reset Sections for IPO
+                document.getElementById('hdPremiumHeader').style.display = 'none';
+                document.getElementById('hdIpoProcessNotice').style.display = 'none';
+                ['hdAnnouncementDateRow', 'hdAllotmentDateRow', 'hdAllocationStatusRow', 'hdSubDateRow', 'hdDeadlineRow', 'hdAllocDateRow', 'hdListingDateRow', 'hdEstProfitRow', 'hdNormalTypeRow', 'hdNormalQtyRow', 'hdNormalBuyPriceRow', 'hdNormalOrderValRow', 'hdNormalCurrPriceRow', 'hdNormalProfitRow', 'hdLockupStatusRow', 'hdLockupRow', 'hdLockupRemainingRow', 'hdAllocPriceRow'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+
                 const listing = (window.MarketEngine ? window.MarketEngine.getIPO().find(x => x.symbol === trade.symbol) : null);
-                const parseNote = (key) => note.includes(key + ':') ? note.split(key + ':')[1].split(';')[0] : null;
 
-                document.getElementById('hdPremiumTitle').innerText = trade.name + ' (QIB)';
-                const yieldVal = parseNote('PROFIT') || (listing ? listing.yield : '300%');
-                document.getElementById('hdPremiumYield').innerText = yieldVal;
-                document.getElementById('hdEstProfit').innerText = yieldVal;
+                if (trade.status === 'Awaiting' || trade.status === 'Pending') {
+                    // 1. IF STATUS = 'Awaiting'
+                    document.getElementById('hdNormalTradeTitle').innerText = 'Basic Information';
+                    document.getElementById('hdAssetLabel').innerText = 'IPO Name';
+                    document.getElementById('hdAssetName').innerText = trade.name;
+                    document.getElementById('hdSymbol').innerText = trade.symbol;
 
-                document.getElementById('hdAssetName').innerText = '₹' + parseFloat(trade.price).toLocaleString('en-IN');
-                document.getElementById('hdAllocPrice').innerText = '₹' + parseFloat(trade.price).toLocaleString('en-IN');
-                document.getElementById('hdSubDate').innerText = parseNote('SUB_DATE') || (listing ? listing.subDate : dateStr.split(' ')[0]);
-                document.getElementById('hdDeadline').innerText = parseNote('DEADLINE') || (listing ? listing.deadline : 'TBD');
-                document.getElementById('hdAllocDate').innerText = parseNote('ALLOC_DATE') || (listing ? listing.allocDate : 'Pending');
-                document.getElementById('hdListingDate').innerText = parseNote('LISTING') || (listing ? listing.listingDate : 'TBD');
+                    document.getElementById('hdSubDateRow').style.display = 'table-row';
+                    const subLbl = document.getElementById('hdSubDateLabel');
+                    if (subLbl) subLbl.innerText = 'Subscription Date';
+                    document.getElementById('hdSubDate').innerText = new Date(trade.created_at).toLocaleDateString('en-IN');
 
-                // Redesign labels to match Blue Arrow section
-                document.getElementById('hdAssetName').innerText = '₹' + parseFloat(trade.price).toLocaleString('en-IN');
+                    document.getElementById('hdNormalTypeRow').style.display = 'table-row';
+                    document.getElementById('hdAssetType').innerText = 'Awaiting';
+                    document.getElementById('hdAssetType').style.color = '#f59e0b';
 
-            }
+                    // IPO Timeline (Product-level)
+                    document.getElementById('hdAnnouncementDateRow').style.display = 'table-row';
+                    document.getElementById('hdAnnouncementDate').innerText = listing ? listing.subDate : 'TBD';
+                    document.getElementById('hdAllotmentDateRow').style.display = 'table-row';
+                    document.getElementById('hdAllotmentDate').innerText = listing ? listing.listingDate : 'TBD';
 
-            // --- UNIVERSAL LOCK-UP VISIBILITY ---
-            const hdLockupRow = document.getElementById('hdLockupRow');
-            const hdLockupStatusRow = document.getElementById('hdLockupStatusRow');
-            const hdLockupRemainingRow = document.getElementById('hdLockupRemainingRow');
-            const lockupUntil = trade.lockup_until ? new Date(trade.lockup_until) : null;
-            const now = new Date();
+                    // Allocation Section
+                    document.getElementById('hdAllocationStatusRow').style.display = 'table-row';
+                    document.getElementById('hdAllocationStatus').innerText = 'In Process';
+                    document.getElementById('hdAllocationStatus').style.color = '#3b82f6';
 
-            if (lockupUntil) {
-                const isActive = lockupUntil > now;
-                if (hdLockupRow) hdLockupRow.style.display = 'table-row';
-                if (hdLockupStatusRow) hdLockupStatusRow.style.display = 'table-row';
-                if (hdLockupRemainingRow) hdLockupRemainingRow.style.display = isActive ? 'table-row' : 'none';
+                    document.getElementById('hdNormalQtyRow').style.display = 'table-row';
+                    document.getElementById('hdQty').innerText = 'To be confirmed';
+                    document.getElementById('hdQty').style.color = '#94a3b8';
 
-                document.getElementById('hdLockupUntil').innerText = lockupUntil.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+                    document.getElementById('hdNormalOrderValRow').style.display = 'table-row';
+                    document.getElementById('hdOrderVal').innerText = 'To be determined';
+                    document.getElementById('hdOrderVal').style.color = '#94a3b8';
 
-                const statusEl = document.getElementById('hdLockupStatus');
-                statusEl.innerText = isActive ? 'ACTIVE' : 'EXPIRED';
-                statusEl.style.color = isActive ? '#f59e0b' : '#10b981';
+                    // Informational Notice
+                    document.getElementById('hdIpoProcessNotice').style.display = 'block';
 
-                if (isActive) {
-                    const diffTime = Math.abs(lockupUntil - now);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    document.getElementById('hdLockupRemaining').innerText = diffDays + (diffDays === 1 ? ' day' : ' days');
+                    // Reset financial totals
+                    document.getElementById('hdTotalVal').innerText = '-';
+                    document.getElementById('hdProfit').innerText = '-';
+                    document.getElementById('hdCurrPrice').innerText = '-';
+
+                } else {
+                    // 2. IF STATUS = 'Holding' (or other processed status)
+                    document.getElementById('hdNormalTradeTitle').innerText = 'Allocation Summary';
+                    document.getElementById('hdAssetLabel').innerText = 'IPO Name';
+                    document.getElementById('hdAssetName').innerText = trade.name;
+                    document.getElementById('hdSymbol').innerText = trade.symbol;
+
+                    document.getElementById('hdSubDateRow').style.display = 'table-row';
+                    const subLbl = document.getElementById('hdSubDateLabel');
+                    if (subLbl) subLbl.innerText = 'Subscription Date';
+                    document.getElementById('hdSubDate').innerText = new Date(trade.created_at).toLocaleDateString('en-IN');
+
+                    document.getElementById('hdAllotmentDateRow').style.display = 'table-row';
+                    document.getElementById('hdAllotmentDate').innerText = listing && listing.allocDate ? listing.allocDate : 'TBD';
+
+                    document.getElementById('hdListingDateRow').style.display = 'table-row';
+                    document.getElementById('hdListingDate').innerText = listing && listing.listingDate ? listing.listingDate : 'TBD';
+
+                    document.getElementById('hdNormalTypeRow').style.display = 'table-row';
+                    document.getElementById('hdAssetType').innerText = 'HOLDING';
+                    document.getElementById('hdAssetType').style.color = '#10b981';
+
+                    // Allocation Section
+                    document.getElementById('hdAllocationStatusRow').style.display = 'table-row';
+                    document.getElementById('hdAllocationStatus').innerText = 'Allocated';
+                    document.getElementById('hdAllocationStatus').style.color = '#10b981';
+
+                    const approvedQty = parseFloat(trade.quantity) || 0;
+                    document.getElementById('hdNormalQtyRow').style.display = 'table-row';
+                    document.getElementById('hdQty').innerText = approvedQty;
+                    document.getElementById('hdQty').style.color = '#f8fafc';
+                    const qtyLabel = document.getElementById('hdNormalQtyRow').querySelector('td');
+                    if (qtyLabel) qtyLabel.innerText = 'Approved Quantity';
+
+                    const buyPrice = parseFloat(trade.price) || 0;
+                    document.getElementById('hdAllocPriceRow').style.display = 'table-row';
+                    document.getElementById('hdAllocPrice').innerText = '₹' + buyPrice.toLocaleString('en-IN');
+                    const allocPriceLabel = document.getElementById('hdAllocPriceRow').querySelector('td');
+                    if (allocPriceLabel) allocPriceLabel.innerText = 'Allocation Price (Issue Price)';
+
+                    document.getElementById('hdNormalOrderValRow').style.display = 'table-row';
+                    const allocAmount = buyPrice * approvedQty;
+                    document.getElementById('hdOrderVal').innerText = '₹' + allocAmount.toLocaleString('en-IN');
+                    const orderValLabel = document.getElementById('hdNormalOrderValRow').querySelector('td');
+                    if (orderValLabel) orderValLabel.innerText = 'Total Allocated Amount';
+
+                    // Lock-up Information
+                    if (trade.lockup_until) {
+                        const lockupUntil = new Date(trade.lockup_until);
+                        const isActive = lockupUntil > new Date();
+                        document.getElementById('hdLockupStatusRow').style.display = 'table-row';
+                        document.getElementById('hdLockupStatus').innerText = isActive ? 'ACTIVE' : 'EXPIRED';
+                        document.getElementById('hdLockupStatus').style.color = isActive ? '#f59e0b' : '#10b981';
+
+                        document.getElementById('hdLockupRow').style.display = 'table-row';
+                        document.getElementById('hdLockupUntil').innerText = lockupUntil.toLocaleDateString('en-IN');
+
+                        if (isActive) {
+                            document.getElementById('hdAssetType').innerHTML = `HOLDING <span style="font-size:0.75rem;">🔒</span>`;
+                        } else {
+                            document.getElementById('hdAssetType').innerHTML = `HOLDING`;
+                        }
+                    }
+
+                    // Financial Summary (Top Section)
+                    const totalLabel = document.querySelector('#holdingDetailModal .detail-total-label');
+                    if (totalLabel) totalLabel.innerText = 'Allocation Amount (Deducted)';
+                    document.getElementById('hdTotalVal').innerText = '₹' + allocAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+                    // Estimated Return / Percentages
+                    document.getElementById('hdPremiumHeader').style.display = 'block';
+                    document.getElementById('hdPremiumTitle').innerText = 'Estimated Profit';
+                    document.getElementById('hdPremiumTitle').style.color = '#94a3b8';
+                    document.getElementById('hdPremiumTitle').style.fontSize = '0.9rem';
+
+                    let displayPct = 'TBD';
+                    let displayProfit = '-';
+
+                    let isPreListing = true;
+                    if (listing && listing.listingDate && listing.listingDate !== 'TBD') {
+                        const lDate = new Date(listing.listingDate);
+                        if (!isNaN(lDate.getTime()) && new Date() >= lDate) {
+                            isPreListing = false;
+                        }
+                    }
+
+                    if (isPreListing) {
+                        // PROJECTION MODE (Pre-listing)
+                        let estPct = 0;
+                        if (listing && listing.yield && listing.yield !== 'TBD') {
+                            const match = String(listing.yield).match(/(\d+(\.\d+)?)/);
+                            if (match) estPct = parseFloat(match[1]);
+                            displayPct = String(listing.yield);
+                        } else {
+                            displayPct = '0.00%';
+                        }
+
+                        const projectedProfitPerShare = buyPrice * (estPct / 100);
+                        const estProfitVal = projectedProfitPerShare * approvedQty;
+                        displayProfit = `₹${estProfitVal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+
+                    } else {
+                        // REAL P/L MODE (Post-listing)
+                        if (listing && typeof listing.price !== 'undefined') {
+                            const currentMarketPrice = parseFloat(listing.price) || 0;
+                            const estProfitVal = (currentMarketPrice - buyPrice) * approvedQty;
+
+                            displayProfit = `₹${estProfitVal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+
+                            if (allocAmount > 0) {
+                                const pct = (estProfitVal / allocAmount) * 100;
+                                displayPct = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
+                            } else {
+                                displayPct = '0.00%';
+                            }
+                        }
+                    }
+
+                    document.getElementById('hdPremiumYield').innerText = displayProfit;
+                    document.getElementById('hdPremiumYield').style.color = '#10b981';
+
+                    // Sneak the percentage below the main value if it exists or use estProfitRow
+                    document.getElementById('hdEstProfitRow').style.display = 'table-row';
+                    const epLabel = document.getElementById('hdEstProfitRow').querySelector('td');
+                    if (epLabel) epLabel.innerText = 'Estimated Profit Percentage';
+                    document.getElementById('hdEstProfit').innerText = displayPct;
+                    document.getElementById('hdEstProfit').style.color = '#10b981';
                 }
             } else {
-                if (hdLockupStatusRow) {
-                    hdLockupStatusRow.style.display = 'table-row';
+                // Restore standard logic for non-IPO
+                document.getElementById('hdPremiumHeader').style.display = 'none';
+                document.getElementById('hdIpoProcessNotice').style.display = 'none';
+                document.getElementById('hdNormalTradeTitle').innerText = 'Trading Information';
+                document.getElementById('hdAssetLabel').innerText = 'Asset Name';
+
+                // Reset potentially mutated labels from IPO view
+                const qtyLabel = document.getElementById('hdNormalQtyRow')?.querySelector('td');
+                if (qtyLabel) qtyLabel.innerText = 'Quantity';
+
+                const orderValLabel = document.getElementById('hdNormalOrderValRow')?.querySelector('td');
+                if (orderValLabel) orderValLabel.innerText = 'Total Order Value';
+
+                const totalLabel = document.querySelector('#holdingDetailModal .detail-total-label');
+                if (totalLabel) totalLabel.innerText = 'Total Value';
+
+                ['hdAnnouncementDateRow', 'hdAllotmentDateRow', 'hdAllocationStatusRow', 'hdAllocPriceRow', 'hdSubDateRow', 'hdDeadlineRow', 'hdAllocDateRow', 'hdListingDateRow', 'hdEstProfitRow'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+
+                document.getElementById('hdNormalTypeRow').style.display = 'table-row';
+                document.getElementById('hdNormalQtyRow').style.display = 'table-row';
+                document.getElementById('hdNormalBuyPriceRow').style.display = 'table-row';
+                document.getElementById('hdNormalOrderValRow').style.display = 'table-row';
+                document.getElementById('hdNormalCurrPriceRow').style.display = 'table-row';
+                document.getElementById('hdNormalProfitRow').style.display = 'table-row';
+
+                // --- UNIVERSAL LOCK-UP VISIBILITY (Restored for non-IPO) ---
+                const hdLockupRow = document.getElementById('hdLockupRow');
+                const hdLockupStatusRow = document.getElementById('hdLockupStatusRow');
+                const hdLockupRemainingRow = document.getElementById('hdLockupRemainingRow');
+                const lockupUntil = trade.lockup_until ? new Date(trade.lockup_until) : null;
+                const now = new Date();
+
+                if (lockupUntil) {
+                    const isActive = lockupUntil > now;
+                    if (hdLockupRow) hdLockupRow.style.display = 'table-row';
+                    if (hdLockupStatusRow) hdLockupStatusRow.style.display = 'table-row';
+                    if (hdLockupRemainingRow) hdLockupRemainingRow.style.display = isActive ? 'table-row' : 'none';
+
+                    document.getElementById('hdLockupUntil').innerText = lockupUntil.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
                     const statusEl = document.getElementById('hdLockupStatus');
-                    statusEl.innerText = 'No Lock-up';
-                    statusEl.style.color = '#94a3b8';
+                    statusEl.innerText = isActive ? 'ACTIVE' : 'EXPIRED';
+                    statusEl.style.color = isActive ? '#f59e0b' : '#10b981';
+
+                    if (isActive) {
+                        const diffTime = Math.abs(lockupUntil - now);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        document.getElementById('hdLockupRemaining').innerText = diffDays + (diffDays === 1 ? ' day' : ' days');
+                    }
+                } else {
+                    if (hdLockupStatusRow) {
+                        hdLockupStatusRow.style.display = 'table-row';
+                        const statusEl = document.getElementById('hdLockupStatus');
+                        statusEl.innerText = 'No Lock-up';
+                        statusEl.style.color = '#94a3b8';
+                    }
+                    if (hdLockupRow) hdLockupRow.style.display = 'none';
+                    if (hdLockupRemainingRow) hdLockupRemainingRow.style.display = 'none';
                 }
-                if (hdLockupRow) hdLockupRow.style.display = 'none';
-                if (hdLockupRemainingRow) hdLockupRemainingRow.style.display = 'none';
             }
 
             // Set Market based on symbol if possible, else default BSE
@@ -7745,8 +8032,20 @@
                         <td>Allocation Price</td>
                         <td id="hdAllocPrice">₹0.00</td>
                     </tr>
+                    <tr id="hdAnnouncementDateRow" style="display: none;">
+                        <td>Announcement Date</td>
+                        <td id="hdAnnouncementDate">-</td>
+                    </tr>
+                    <tr id="hdAllotmentDateRow" style="display: none;">
+                        <td>Allotment Date</td>
+                        <td id="hdAllotmentDate">-</td>
+                    </tr>
+                    <tr id="hdAllocationStatusRow" style="display: none;">
+                        <td>Allocation Status</td>
+                        <td id="hdAllocationStatus">-</td>
+                    </tr>
                     <tr id="hdSubDateRow" style="display: none;">
-                        <td>Subscription Date</td>
+                        <td id="hdSubDateLabel">Subscription Date</td>
                         <td id="hdSubDate">-</td>
                     </tr>
                     <tr id="hdDeadlineRow" style="display: none;">
@@ -7818,6 +8117,11 @@
                         <td id="hdLockupRemaining" style="color: #94a3b8 !important;">-</td>
                     </tr>
                 </table>
+                <div id="hdIpoProcessNotice"
+                    style="display: none; background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.1); border-radius: 12px; padding: 1.25rem; margin-top: 1.5rem; color: #94a3b8; font-size: 0.85rem; line-height: 1.5; text-align: center; font-weight: 500;">
+                    This IPO subscription is currently under processing. Final allocation details will be updated once
+                    available.
+                </div>
 
                 <div id="hdOutstandingNotice"
                     style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 1.25rem; margin: 1.5rem 0; color: #ef4444; font-size: 0.9rem; line-height: 1.6;">
