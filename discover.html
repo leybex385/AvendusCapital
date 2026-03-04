@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lightweight-charts@4/dist/lightweight-charts.standalone.production.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="db.js?v=20260212"></script>
@@ -2866,45 +2867,8 @@
                                         <!-- Real-time Price Header -->
                                         <div class="chart-header-stylized" style="margin-bottom: 1.5rem;">
                                             <div id="valSymbol"
-                                                style="font-size: 1rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">
-                                                SENSEX</div>
-                                            <div
-                                                style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 0.5rem;">
-                                                <h1 id="indexPrice"
-                                                    style="font-size: 2.8rem; font-weight: 800; color: #1e293b; margin: 0; line-height: 1;">
-                                                    84,065.75</h1>
-                                                <div id="heroChange" class="index-chg green"
-                                                    style="font-size: 1.2rem; font-weight: 700; background: #eefcf4; padding: 4px 12px; border-radius: 8px;">
-                                                    +485.35 (+0.58%)</div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Day Range Bar -->
-                                        <div class="styled-range-container"
-                                            style="margin-bottom: 2rem; position: relative;">
-                                            <div class="range-labels"
-                                                style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 8px;">
-                                                <span id="dayLow" style="color: #ef4444;">83,580.42</span>
-                                                <span id="dayHigh" style="color: #10b981;">84,314.68</span>
-                                            </div>
-                                            <div class="range-track"
-                                                style="height: 6px; background: #f1f5f9; border-radius: 3px; position: relative;">
-                                                <div id="rangeProgress"
-                                                    style="position: absolute; left: 0; top: 0; height: 100%; width: 50%; background: linear-gradient(to right, #ef4444, #10b981); border-radius: 3px;">
-                                                </div>
-                                                <div id="sliderMarker" class="range-dot"
-                                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; background: white; border: 3px solid #10b981; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 2;">
-                                                </div>
-                                            </div>
-                                            <div class="range-stats"
-                                                style="display: flex; gap: 25px; margin-top: 10px; font-size: 11px; color: #94a3b8; font-weight: 600;">
-                                                <span>Symbol: <b id="valSymbolText"
-                                                        style="color: #475569;">SENSEX</b></span>
-                                                <span>Market: <b style="color: #475569;">ININ</b></span>
-                                                <span>Prev Close: <b id="gridClose"
-                                                        style="color: #475569;">83,580.4</b></span>
-                                                <span>Volume: <b id="valVol"
-                                                        style="color: #475569;">14,913,178</b></span>
+                                                style="font-size: 2.2rem; font-weight: 800; color: inherit; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;">
+                                                SENSEX
                                             </div>
                                         </div>
 
@@ -3177,67 +3141,42 @@
                 if (!container) return;
                 container.innerHTML = '';
 
-                // Handle Restricted Symbols with Investing.com Iframe
-                const investingPairs = {
-                    'NSE:NIFTY': '17940',
-                    'NIFTY1!': '17940',
-                    'BSE:SENSEX': '39929',
-                    'NSE:BANKNIFTY': '17923',
-                    'NSE:NIFTYBANK': '17923',
-                    'NIFTYBANK': '17923',
-                    'NSE:INDIAVIX': '17942',
-                    'NSE:MIDCPNIFTY': '18012',
-                    'NSE:NIFTYMIDCAP100': '18012',
-                    'NSE:NIFTYMIDCAP': '18012',
-                    'NSE:SMLCAP100': '17946',
-                    'NSE:NIFTYSMALLCAP100': '17946',
-                    'NSE:NIFTYSMLCAP': '17946'
-                };
+                // No more Investing.com Fallback - use TradingView for everything
 
-                if (investingPairs[symbol]) {
-                    let pairId = investingPairs[symbol];
-                    const wrapper = document.createElement('div');
-                    wrapper.style.position = 'relative';
-                    wrapper.style.width = '100%';
-                    wrapper.style.height = '100%';
-                    wrapper.style.overflow = 'hidden';
-
-                    const iframe = document.createElement('iframe');
-                    let w = container.offsetWidth || 800;
-                    let h = container.offsetHeight || 600;
-                    iframe.src = `https://ssltvc.investing.com/?pair_ID=${pairId}&height=${h}&width=${w}&interval=300&plotStyle=candles&domain_ID=56&lang_ID=56&timezone_ID=20`;
-                    iframe.style.width = '100%';
-                    iframe.style.height = '100%';
-                    iframe.style.border = 'none';
-                    iframe.style.filter = 'invert(1) hue-rotate(180deg) brightness(0.9)'; // Dark Mode Filter
-                    iframe.id = 'investing_chart';
-
-                    // Mask for the logo (now black to match dark theme)
-                    const mask = document.createElement('div');
-                    mask.style.position = 'absolute';
-                    mask.style.bottom = '42px';
-                    mask.style.left = '45px';
-                    mask.style.width = '100px';
-                    mask.style.height = '25px';
-                    mask.style.background = '#000000';
-                    mask.style.pointerEvents = 'none';
-                    mask.style.zIndex = '10';
-
-                    wrapper.appendChild(iframe);
-                    wrapper.appendChild(mask);
-                    container.appendChild(wrapper);
-                    return;
-                }
 
                 let targetSymbol = symbol;
+
+                // Handle Index Symbol Mapping for TradingView
+                const indexMap = {
+                    'NIFTY1!': 'BSE:SNSX50',
+                    'NSE:NIFTY': 'BSE:SNSX50',
+                    'NIFTYBANK': 'BSE:BANK',
+                    'NSE:NIFTYBANK': 'BSE:BANK',
+                    'NSE:BANKNIFTY': 'BSE:BANK',
+                    'BSE:SENSEX': 'BSE:SENSEX',
+                    'SENSEX': 'BSE:SENSEX',
+                    'NSE:INDIAVIX': 'TVC:VIX',
+                    'INDIAVIX': 'TVC:VIX',
+                    'NSE:MIDCPNIFTY': 'BSE:MID150',
+                    'NIFMDCP100': 'BSE:MID150',
+                    'NSE:NIFMDCP100': 'BSE:MID150',
+                    'NSE:SMLCAP100': 'BSE:SML250',
+                    'NIFSMCP100': 'BSE:SML250',
+                    'NSE:NIFSMCP100': 'BSE:SML250'
+                };
+
+                if (indexMap[symbol]) {
+                    targetSymbol = indexMap[symbol];
+                }
+
                 currentWidget = new TradingView.widget({
                     "autosize": true,
                     "symbol": targetSymbol,
                     "interval": currentInterval,
-                    "timezone": "Asia/Kolkata",
+                    "timezone": "Etc/UTC",
                     "theme": "dark",
-                    "style": "1",
-                    "locale": "in",
+                    "style": "3",
+                    "locale": "en",
                     "toolbar_bg": "#111111",
                     "enable_publishing": false,
                     "allow_symbol_change": true,
@@ -3248,20 +3187,14 @@
                     "details": true,
                     "hotlist": true,
                     "calendar": true,
-                    "studies": ["Volume@tv-basicstudies"],
                     "overrides": {
-                        "paneProperties.background": "#0b0b0b",
+                        "paneProperties.background": "#111111",
                         "paneProperties.vertGridProperties.color": "#1f1f1f",
                         "paneProperties.horzGridProperties.color": "#1f1f1f",
                         "scalesProperties.textColor": "#94a3b8",
-                        "mainSeriesProperties.candleStyle.upColor": "#10b981",
-                        "mainSeriesProperties.candleStyle.downColor": "#ef4444",
-                        "mainSeriesProperties.candleStyle.wickUpColor": "#10b981",
-                        "mainSeriesProperties.candleStyle.wickDownColor": "#ef4444",
-                        "mainSeriesProperties.candleStyle.borderUpColor": "#10b981",
-                        "mainSeriesProperties.candleStyle.borderDownColor": "#ef4444",
-                        "volume.volume.color.1": "#d4af37",
-                        "volume.volume.color.0": "#ef4444"
+                        "mainSeriesProperties.areaStyle.linecolor": "#d4af37",
+                        "mainSeriesProperties.areaStyle.color1": "rgba(212, 175, 55, 0.2)",
+                        "mainSeriesProperties.areaStyle.color2": "rgba(212, 175, 55, 0.05)"
                     }
                 });
             }
@@ -3551,13 +3484,16 @@
                         <i data-lucide="heart" class="heart-icon" size="24"></i>
                     </div>
 
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
-                        <h2 id="detPrice" style="font-size: 2.5rem; margin: 0;">₹14.34</h2>
-                        <div id="detChange" class="index-chg green" style="font-size: 1.1rem;">+2.39 (+20.00%)</div>
+                    <div style="display: none;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
+                            <h2 id="detPrice" style="font-size: 2.5rem; margin: 0;">₹14.34</h2>
+                            <div id="detChange" class="index-chg green" style="font-size: 1.1rem;">+2.39 (+20.00%)</div>
+                        </div>
                     </div>
 
-                    <div class="day-range-container">
+
+                    <div class="day-range-container" style="display: none;">
                         <div class="range-bar-wrapper">
                             <div class="slider-marker" id="detSliderMarker" style="left: 100%;"></div>
                         </div>
@@ -3597,6 +3533,7 @@
                             </div>
                         </div>
                     </div>
+
 
                     <div class="timeframe-btns">
                         <button class="tf-btn active">1D</button>
@@ -4699,7 +4636,44 @@
         let detailLiveTimer = null;
         let currentProductId = null;
         let currentMinInvest = 0;
-        function openStockDetail(symbol, name, exchange, price, change, color, type = 'stock', push = true, id = null, minInvest = 0) {
+
+        async function fetchLivePrice(symbol) {
+            console.log("🔥 fetchLivePrice CALLED:", symbol);
+
+            try {
+                const price = await window.DB.getCachedMarketPrice(symbol);
+
+                if (!price) return;
+
+                const formatted = `₹${Number(price).toLocaleString('en-IN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                })}`;
+
+                const el = document.getElementById("detPrice");
+
+                if (el) {
+                    el.innerText = formatted;
+
+                    // 🔥 HARD LOCK — prevent other scripts from overwriting
+                    Object.defineProperty(el, "innerText", {
+                        writable: false
+                    });
+                }
+
+                const detBuyPriceEl = document.getElementById("detBuyPrice");
+                if (detBuyPriceEl) {
+                    detBuyPriceEl.innerText = formatted;
+                }
+
+                console.log("✅ detPrice locked at:", formatted);
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function openStockDetail(symbol, name, exchange, price, change, color, type = 'stock', push = true, id = null, minInvest = 0) {
             document.getElementById('mainDashboard').style.display = 'none';
             document.getElementById('discoverView').style.display = 'none';
             document.querySelector('.header').style.display = 'none';
@@ -4709,11 +4683,18 @@
             // Start Live Updates
             if (detailLiveTimer) clearInterval(detailLiveTimer);
             detailLiveTimer = setInterval(() => {
-                const updatedPrice = MarketEngine.getProduct(symbol)?.price || MarketEngine.getIndices()[symbol]?.price;
+                const prod = window.MarketEngine ? window.MarketEngine.getProduct(symbol) : null;
+                const idx = window.MarketEngine ? window.MarketEngine.getIndices()[symbol] : null;
+                const updatedPrice = prod?.price || idx?.price;
+
+                if (prod && prod.exchange) {
+                    const exEl = document.getElementById('detExchange');
+                    if (exEl && !exEl.innerText.includes(prod.exchange)) {
+                        exEl.innerText = `${prod.exchange} • IN`;
+                    }
+                }
+
                 if (updatedPrice) {
-                    const formatted = '₹' + updatedPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-                    document.getElementById('detPrice').innerText = formatted;
-                    document.getElementById('detBuyPrice').innerText = formatted;
                     updateBuyCalculations();
                 }
             }, 1000);
@@ -4721,11 +4702,16 @@
             // Populate Data
             document.getElementById('detailStockTitle').innerText = name;
             document.getElementById('detName').innerText = name;
-            document.getElementById('detExchange').innerText = `${exchange} • IN`;
-            document.getElementById('detPrice').innerText = price;
+
+            // Fetch actual exchange from MarketEngine if available
+            const initProd = window.MarketEngine ? window.MarketEngine.getProduct(symbol) : null;
+            const actualExchange = (initProd && initProd.exchange) ? initProd.exchange : exchange;
+
+            document.getElementById('detExchange').innerText = `${actualExchange} • IN`;
+            document.getElementById('detPrice').innerText = "Loading...";
             document.getElementById('detChange').innerText = change;
             document.getElementById('detChange').className = `index-chg ${change.startsWith('+') ? 'green' : 'red'}`;
-            document.getElementById('detBuyPrice').innerText = price;
+            document.getElementById('detBuyPrice').innerText = "Loading...";
             document.getElementById('detSymbol').innerText = symbol;
 
             const buyBtn = document.getElementById('buyBtn');
@@ -4765,6 +4751,8 @@
 
             // Hide Your Holdings for OTC/IPO
             const holdingsSection = document.getElementById('detailHoldingsSection');
+            const tvContainer = document.getElementById('tradingview_det');
+
             if (holdingsSection) {
                 if (type === 'OTC' || type === 'IPO') {
                     holdingsSection.style.display = 'none';
@@ -4773,12 +4761,12 @@
                 }
             }
 
-            const detLogoWrap = document.getElementById('detLogoWrap');
-            if (detLogoWrap) detLogoWrap.innerHTML = '';
+            const tvEx = exchange || 'BSE';
+            const tvSym = symbol;
 
             new TradingView.widget({
                 "autosize": true,
-                "symbol": exchange + ":" + symbol,
+                "symbol": tvEx + ":" + tvSym,
                 "interval": "D",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
@@ -4808,7 +4796,166 @@
             window.scrollTo(0, 0);
             renderDetailHoldings();
             lucide.createIcons();
+
+            await fetchLivePrice(symbol);
         }
+
+        let currentYahooChart = null;
+        let yahooUpdateTimer = null;
+
+        async function loadYahooChart(symbol, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (yahooUpdateTimer) clearInterval(yahooUpdateTimer);
+            container.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center; color:#94a3b8; font-family: Outfit, sans-serif;">Loading realtime chart...</div>';
+
+            if (!window.LightweightCharts) {
+                container.innerHTML = '<div style="color:#ef4444; text-align:center;">Library Error: Lightweight Charts not loaded.</div>';
+                return;
+            }
+
+            // Function to try fetching with fallbacks
+            const fetchWithFallbacks = async (sym) => {
+                const proxyUrls = [
+                    'https://api.allorigins.win/raw?url=',
+                    'https://corsproxy.io/?'
+                ];
+                // Try different ranges and intervals
+                const configs = [
+                    { range: '1d', interval: '5m' },
+                    { range: '5d', interval: '15m' },
+                    { range: '1mo', interval: '1d' }
+                ];
+
+                for (const config of configs) {
+                    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=${config.interval}&range=${config.range}&.ts=${Date.now()}`;
+                    for (const proxy of proxyUrls) {
+                        try {
+                            const response = await fetch(proxy + encodeURIComponent(yahooUrl));
+                            if (!response.ok) continue;
+                            const data = await response.json();
+
+                            if (data.chart && data.chart.result && data.chart.result[0].timestamp) {
+                                return data.chart.result[0];
+                            }
+                        } catch (e) {
+                            console.warn(`Fetch failed for ${sym} using proxy ${proxy}:`, e);
+                        }
+                    }
+                }
+                return null;
+            };
+
+            try {
+                let result = await fetchWithFallbacks(symbol);
+                let usedSymbol = symbol;
+
+                // If original symbol fails, try with .NS suffix if it looks like an Indian stock (no dot)
+                if (!result && !symbol.includes('.')) {
+                    console.log("Trying with .NS suffix...");
+                    result = await fetchWithFallbacks(symbol + ".NS");
+                    if (result) usedSymbol = symbol + ".NS";
+                    else {
+                        console.log("Trying with .BO suffix...");
+                        result = await fetchWithFallbacks(symbol + ".BO");
+                        if (result) usedSymbol = symbol + ".BO";
+                    }
+                }
+
+                if (!result) throw new Error("No data found even with suffixes");
+
+                const timestamps = result.timestamp;
+                const quote = result.indicators.quote[0];
+
+                const chartData = timestamps.map((t, i) => ({
+                    time: t,
+                    open: quote.open[i],
+                    high: quote.high[i],
+                    low: quote.low[i],
+                    close: quote.close[i],
+                })).filter(d => d.open !== null);
+
+                if (chartData.length === 0) throw new Error("Data empty after filtering");
+
+                container.innerHTML = '';
+                const chart = LightweightCharts.createChart(container, {
+                    layout: {
+                        background: { color: '#111111' },
+                        textColor: '#94a3b8',
+                        fontFamily: 'Outfit, sans-serif',
+                    },
+                    grid: {
+                        vertLines: { color: '#1f1f1f' },
+                        horzLines: { color: '#1f1f1f' },
+                    },
+                    crosshair: {
+                        mode: LightweightCharts.CrosshairMode.Normal,
+                    },
+                    rightPriceScale: {
+                        borderColor: '#1f1f1f',
+                        visible: true,
+                    },
+                    timeScale: {
+                        borderColor: '#1f1f1f',
+                        timeVisible: true,
+                        secondsVisible: false,
+                    },
+                });
+
+                const candleSeries = chart.addCandlestickSeries({
+                    upColor: '#10b981',
+                    downColor: '#ef4444',
+                    borderVisible: false,
+                    wickUpColor: '#10b981',
+                    wickDownColor: '#ef4444',
+                });
+
+                candleSeries.setData(chartData);
+                chart.timeScale().fitContent();
+
+                currentYahooChart = chart;
+
+                // Start realtime update simulation/fetch
+                yahooUpdateTimer = setInterval(async () => {
+                    try {
+                        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                        const priceUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${usedSymbol}?interval=1m&range=1d&.ts=${Date.now()}`;
+                        const priceRes = await fetch(proxyUrl + encodeURIComponent(priceUrl));
+                        const pData = await priceRes.json();
+                        if (pData && pData.chart && pData.chart.result) {
+                            const meta = pData.chart.result[0].meta;
+                            const lastTime = pData.chart.result[0].timestamp.slice(-1)[0];
+
+                            candleSeries.update({
+                                time: lastTime,
+                                open: meta.regularMarketPrice,
+                                high: meta.regularMarketPrice,
+                                low: meta.regularMarketPrice,
+                                close: meta.regularMarketPrice,
+                            });
+                        }
+                    } catch (e) {
+                        console.error("Yahoo realtime update failed", e);
+                    }
+                }, 20000);
+
+                const resizeObserver = new ResizeObserver(entries => {
+                    if (entries.length === 0 || !entries[0].contentRect) return;
+                    const { width, height } = entries[0].contentRect;
+                    chart.applyOptions({ width, height });
+                });
+                resizeObserver.observe(container);
+
+            } catch (error) {
+                console.error("loadYahooChart Error:", error);
+                container.innerHTML = `<div style="display:flex; height:100%; align-items:center; justify-content:center; color:#94a3b8; font-size:1.1rem; text-align:center; flex-direction:column; gap:10px; font-family: Outfit, sans-serif;"><i data-lucide="bar-chart-2" style="width:48px;height:48px;opacity:0.5;"></i>Chart data not available for ${symbol}</div>`;
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+
+
+
         window.openStockDetail = openStockDetail;
 
         async function handleSellFromDetail() {
@@ -5119,7 +5266,7 @@
                             <div class="premium-details-grid">
                                 <div class="premium-detail-item">
                                     <span class="label">Subscription Price</span>
-                                    <span class="value">₹${s.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                    <span class="value">₹${(s.subscription_price || s.price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                                 </div>
                                 <div class="premium-detail-item">
                                     <span class="label">Level Limit</span>
@@ -5635,7 +5782,15 @@
                                     <div style="text-align: left;">
                                         <div style="font-weight: 700; font-size: 0.9rem; color: #f8fafc;">${t.symbol}</div>
                                         <div style="font-size: 0.75rem; color: #94a3b8;">${date} • Buy Price ₹${parseFloat(t.price).toLocaleString('en-IN')}</div>
-                                        <button class="h-btn close close-order-btn" style="margin-top: 0.5rem; padding: 4px 12px; height: auto; font-size: 0.75rem;" data-id="${t.id}">Close Order</button>
+                                        ${(() => {
+                                    const pListingDate = t.products ? t.products.listing_date : null;
+                                    const isPreListing = pListingDate && new Date(pListingDate) > new Date();
+                                    if (isPreListing) {
+                                        const lDateStr = new Date(pListingDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                                        return `<button class="h-btn close" style="margin-top: 0.5rem; padding: 4px 12px; height: auto; font-size: 0.70rem; background:#475569 !important; border-color:#475569 !important; cursor:not-allowed; opacity:0.8;" disabled>🔒 Sell Available After Listing – ${lDateStr}</button>`;
+                                    }
+                                    return `<button class="h-btn close close-order-btn" style="margin-top: 0.5rem; padding: 4px 12px; height: auto; font-size: 0.75rem;" data-id="${t.id}">Close Order</button>`;
+                                })()}
                                     </div>
                                     <div style="text-align: right;">
                                         <div style="font-weight: 700; color: #d4af37;">₹${parseFloat(t.total_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
@@ -5754,7 +5909,18 @@
                             </div>
                             <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto;">
                                 <button class="premium-subscribe-btn" style="background:rgba(212, 175, 55, 0.1); color:#d4af37; border:1px solid #d4af37; pointer-events: auto !important; position: relative; z-index: 10;" onclick="openHoldingDetail('${item.id}')">View Details</button>
-                                ${item.status === 'Holding' ? (isLocked ? `<button class="premium-subscribe-btn lock-btn" style="background:#475569 !important; border-color: #475569 !important; color:#fff !important; cursor:not-allowed; opacity:0.8; font-size: 0.70rem;" disabled>🔒 Locked until ${lockupUntil.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</button>` : `<button class="premium-subscribe-btn close-order-btn" style="background:rgba(239, 68, 68, 0.1); color:#ef4444; border:1px solid #ef4444;" data-id="${item.id}">Close Order</button>`) : ''}
+                                ${(() => {
+                            const pListingDate = item.products ? item.products.listing_date : null;
+                            const isPreListing = pListingDate && new Date(pListingDate) > new Date();
+                            if (isLocked) {
+                                return `<button class="premium-subscribe-btn lock-btn" style="background:#475569 !important; border-color: #475569 !important; color:#fff !important; cursor:not-allowed; opacity:0.8; font-size: 0.70rem;" disabled>🔒 Locked until ${lockupUntil.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}</button>`;
+                            } else if (isPreListing) {
+                                const lDateStr = new Date(pListingDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                                return `<button class="premium-subscribe-btn lock-btn" style="background:#475569 !important; border-color: #475569 !important; color:#fff !important; cursor:not-allowed; opacity:0.8; font-size: 0.70rem;" disabled>🔒 Sell Available After Listing – ${lDateStr}</button>`;
+                            } else {
+                                return `<button class="premium-subscribe-btn close-order-btn" style="background:rgba(239, 68, 68, 0.1); color:#ef4444; border:1px solid #ef4444;" data-id="${item.id}">Close Order</button>`;
+                            }
+                        })()}
                             </div>
                         </div>
                     `;
@@ -5916,36 +6082,18 @@
 
             try {
                 // Fetch all data in parallel
-                const [tradesRes, depositsRes, withdrawalsRes] = await Promise.all([
-                    window.DB.getTradesByUserId(user.id),
+                const [depositsRes, withdrawalsRes] = await Promise.all([
                     client.from('deposits').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
                     client.from('withdrawals').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
                 ]);
 
-                const trades = tradesRes || [];
                 const deposits = (depositsRes && depositsRes.data) || [];
                 const withdrawals = (withdrawalsRes && withdrawalsRes.data) || [];
 
                 // Debug log
-                console.log(`[FundRecords] Found ${trades.length} trades, ${deposits.length} deposits, ${withdrawals.length} withdrawals`);
+                console.log(`[FundRecords] Found ${deposits.length} deposits, ${withdrawals.length} withdrawals`);
 
                 let allRecords = [];
-
-                // Normalize Trades
-                trades.forEach(t => {
-                    const isBuy = t.type !== 'sell'; // Assuming 'sell' type for selling
-                    // Buy = Negative (outflow), Sell = Positive (inflow)
-                    // If trade is approved/pending, we show it.
-                    allRecords.push({
-                        rawDate: new Date(t.created_at),
-                        type: isBuy ? `Buy ${t.symbol}` : `Sell ${t.symbol}`,
-                        ex: 'Wallet',
-                        id: t.id ? String(t.id).substring(0, 8).toUpperCase() : 'N/A',
-                        amount: parseFloat(t.total_amount) || 0,
-                        isNegative: isBuy, // Buy is expense
-                        rawStatus: t.status
-                    });
-                });
 
                 // Normalize Deposits
                 deposits.forEach(d => {
@@ -6511,7 +6659,7 @@
                 document.getElementById('hdEstProfit').innerText = listing.yield || 'TBD';
 
                 document.getElementById('hdNormalTradeTitle').innerText = (listing.name || symbol) + ' Listing Info';
-                document.getElementById('hdAssetLabel').innerText = 'Subscription Price';
+                document.getElementById('hdAssetLabel').innerText = 'QIB';
                 document.getElementById('hdAssetName').innerText = '₹' + parseFloat(listing.price || 0).toLocaleString('en-IN');
 
                 document.getElementById('hdAllocPriceRow').style.display = 'table-row';
@@ -6524,10 +6672,10 @@
                 document.getElementById('hdDeadline').innerText = listing.deadline || 'Final Call';
 
                 document.getElementById('hdAllocDateRow').style.display = 'table-row';
-                document.getElementById('hdAllocDate').innerText = listing.allocDate || 'Pending';
+                document.getElementById('hdAllocDate').innerText = listing.deadline && listing.deadline !== 'TBD' ? listing.deadline : 'TBD';
 
                 document.getElementById('hdListingDateRow').style.display = 'table-row';
-                document.getElementById('hdListingDate').innerText = listing.listingDate || 'TBD';
+                document.getElementById('hdListingDate').innerText = listing.listingDate && listing.listingDate !== 'TBD' ? listing.listingDate : 'TBD';
 
                 document.getElementById('hdEstProfitRow').style.display = 'table-row';
 
@@ -6690,7 +6838,7 @@
             const isIPO = trade.type === 'ipo';
             document.getElementById('hdPremiumHeader').style.display = isIPO ? 'block' : 'none';
             document.getElementById('hdNormalTradeTitle').innerText = isIPO ? (trade.name + ' Allocation Price:') : 'Trading Infomation';
-            document.getElementById('hdAssetLabel').innerText = isIPO ? 'Allocation Price' : 'Asset Name';
+            document.getElementById('hdAssetLabel').innerText = isIPO ? 'QIB' : 'Asset Name';
 
             // Show/Hide IPO rows
             ['hdAllocPrice', 'hdSubDate', 'hdDeadline', 'hdAllocDate', 'hdListingDate', 'hdEstProfit'].forEach(id => {
@@ -6701,7 +6849,7 @@
 
             if (isIPO) {
                 // Try to find original listing data for accurate dates/yields
-                const listing = (window.MarketEngine ? window.MarketEngine.getIPO().find(x => x.symbol === trade.symbol) : null);
+                let listing = (window.MarketEngine ? window.MarketEngine.getIPO().find(x => x.symbol === trade.symbol) : null);
                 const parseNote = (key) => note.includes(key + ':') ? note.split(key + ':')[1].split(';')[0] : null;
 
                 document.getElementById('hdPremiumTitle').innerText = trade.name + ' (QIB)';
@@ -6710,6 +6858,33 @@
                 document.getElementById('hdEstProfit').innerText = yieldVal;
 
                 document.getElementById('hdAssetName').innerText = '₹' + parseFloat(trade.price).toLocaleString('en-IN');
+
+                const formattedAllocDate = trade.allotment_date ? new Date(trade.allotment_date).toLocaleDateString('en-IN') : 'TBD';
+
+                const hdAllocInit = document.getElementById('hdAllocDate');
+                if (hdAllocInit) hdAllocInit.innerText = formattedAllocDate;
+
+                // --- BEGIN ASYNC FALLBACK FOR IPO DATES ---
+                if (window.DB) {
+                    window.DB.getClient()
+                        .from('products')
+                        .select('listing_date, end_date')
+                        .eq('name', trade.name)
+                        .limit(1)
+                        .single()
+                        .then(({ data }) => {
+                            if (data && document.getElementById('hdTradeId').innerText == trade.id) {
+                                const hdList = document.getElementById('hdListingDate');
+                                if (hdList) hdList.innerText = data.listing_date || 'TBD';
+
+                                const hdAlloc = document.getElementById('hdAllocDate');
+                                if (hdAlloc && (!trade.allotment_date || trade.allotment_date === '')) {
+                                    hdAlloc.innerText = data.end_date || 'TBD';
+                                }
+                            }
+                        }).catch(e => console.error("Async IPO fetch error:", e));
+                }
+                // --- END ASYNC FALLBACK ---
             }
 
             // --- UNIVERSAL LOCK-UP VISIBILITY ---
@@ -7196,7 +7371,7 @@
                         <td id="hdAssetName">-</td>
                     </tr>
                     <tr id="hdAllocPriceRow" style="display: none;">
-                        <td>Allocation Price</td>
+                        <td>QIB</td>
                         <td id="hdAllocPrice">₹0.00</td>
                     </tr>
                     <tr id="hdSubDateRow" style="display: none;">
@@ -7965,19 +8140,11 @@
                         };
 
                         div.innerHTML = `
-                            <div class="index-card-left">
-                                <div class="index-head">
-                                    <img src="https://flagcdn.com/w20/in.png" class="index-flag">
-                                    <span class="index-name">${idx.symbol}</span>
+                            <div class="index-card-left" style="width: 100%; display: flex; justify-content: center; align-items: center;">
+                                <div class="index-head" style="display: flex; justify-content: center; gap: 8px; align-items: center;">
+                                    <img src="https://flagcdn.com/w20/in.png" class="index-flag" style="width: 20px; height: 14px;">
+                                    <span class="index-name" style="font-size: 1.4rem; font-weight: 700;">${idx.symbol}</span>
                                 </div>
-                                <div class="index-val" id="idx-val-${i}" style="font-weight:700; font-size:1.1rem; margin:0.25rem 0;">--</div>
-                                <div class="index-chg" id="idx-chg-${i}" style="font-weight:600; font-size:0.85rem;">--</div>
-                            </div>
-                            <div class="sparkline-container">
-                                <svg class="sparkline-svg" viewBox="0 0 100 40" style="width:100px; height:40px;">
-                                    <path class="sparkline-path" id="idx-spark-${i}"
-                                        d="M0 20 C 20 10, 40 30, 60 15 S 100 25, 100 20" fill="none" stroke-width="2"></path>
-                                </svg>
                             </div>
                         `;
                         container.appendChild(div);
@@ -7988,25 +8155,9 @@
                     if (initialActive) initialActive.classList.add('active');
                 }
 
-                // Update Values Loop
+                // Update Values Loop (Prices removed as per request)
                 indices.forEach((idx, i) => {
-                    const valParams = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
-                    const priceEl = document.getElementById(`idx-val-${i}`);
-                    const chgEl = document.getElementById(`idx-chg-${i}`);
-                    const sparkEl = document.getElementById(`idx-spark-${i}`);
-
-                    if (priceEl) priceEl.innerText = idx.price.toLocaleString('en-IN', valParams);
-
-                    if (chgEl) {
-                        const isUp = idx.change >= 0;
-                        const colorClass = isUp ? '#10b981' : '#ef4444';
-                        const colorClassName = isUp ? 'green' : 'red';
-
-                        chgEl.className = `index-chg ${colorClassName}`;
-                        chgEl.innerText = `${isUp ? '+' : ''}${idx.change.toFixed(2)} (${isUp ? '+' : ''}${idx.changePercent.toFixed(2)}%)`;
-
-                        if (sparkEl) sparkEl.setAttribute('stroke', colorClass);
-                    }
+                    // No price or sparkline updates needed anymore
                 });
 
                 // Trigger Hero Update via syncUI (which we overrode)
