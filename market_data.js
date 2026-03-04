@@ -69,8 +69,8 @@
         { symbol: 'SENSEX', name: 'BSE SENSEX', price: 83710.26, change: 396.33, changePercent: 0.48, type: 'index' },
         { symbol: 'NIFTY 50', name: 'NSE NIFTY 50', price: 25619.54, change: -156.46, changePercent: -0.61, type: 'index' },
         { symbol: 'NIFTY BANK', name: 'NSE NIFTY BANK', price: 60120.55, change: -563.00, changePercent: -0.09, type: 'index' },
-        { symbol: 'NIFTY SMLCAP', name: 'NIFTY SMALLCAP 100', price: 16938.65, change: -45.53, changePercent: -0.27, type: 'index' },
-        { symbol: 'NIFTY MIDCAP', name: 'NIFTY MIDCAP 100', price: 59502.70, change: -144.00, changePercent: -0.02, type: 'index' },
+        { symbol: 'NIFSMCP100', name: 'NIFTY SMALLCAP 100', price: 16938.65, change: -45.53, changePercent: -0.27, type: 'index' },
+        { symbol: 'NIFMDCP100', name: 'NIFTY MIDCAP 100', price: 59502.70, change: -144.00, changePercent: -0.02, type: 'index' },
         { symbol: 'VIX', name: 'INDIA VIX', price: 15.1, change: 1.46, changePercent: 10.73, type: 'index' }
     ];
 
@@ -82,9 +82,55 @@
             this.indices = INDICES_DATA;
             this.dbProducts = []; // Cache for database products (IPO)
             this.dbOtcProducts = []; // Cache for database products (OTC)
+            this.dbInsStocks = []; // Cache for database products (Ins.stocks)
+            this.cachedPrices = {}; // Store raw cached data { symbol: { price, updated_at } }
             this.listeners = [];
             this.startSimulation();
             this.syncFromDB();
+            this.syncMarketCache(); // Initial cache sync
+
+            // Auto-refresh market cache every 30 seconds
+            setInterval(() => this.syncMarketCache(), 30 * 1000);
+        }
+
+        async syncMarketCache() {
+            if (window.supabase) {
+                try {
+                    const { data, error } = await window.supabase
+                        .from('market_cache')
+                        .select('symbol, price, updated_at');
+
+                    if (error) throw error;
+
+                    if (data && data.length > 0) {
+                        data.forEach(item => {
+                            this.cachedPrices[item.symbol] = {
+                                price: parseFloat(item.price),
+                                updated_at: item.updated_at
+                            };
+
+                            // Update local arrays immediately
+                            const stock = this.stocks.find(s => s.symbol === item.symbol) ||
+                                this.otc.find(s => s.symbol === item.symbol) ||
+                                this.ipo.find(s => s.symbol === item.symbol) ||
+                                this.indices.find(s => s.symbol === item.symbol);
+
+                            if (stock) {
+                                // Calculate accurate change if possible, otherwise keep existing change logic
+                                if (stock.price !== item.price && stock.price > 0) {
+                                    stock.change = ((item.price - stock.price) / stock.price) * 100;
+                                }
+                                stock.price = item.price;
+                                stock.isCached = true; // Flag to disable fake simulation
+                                stock.updated_at = item.updated_at;
+                            }
+                        });
+                        this.notifyListeners();
+                    }
+                } catch (e) {
+                    console.error("Failed to sync market cache: ", e);
+                }
+            }
         }
 
         async syncFromDB() {
@@ -94,11 +140,11 @@
                     const ipoData = await window.DB.getActiveProductsByType('IPO');
                     this.dbProducts = ipoData.map(p => ({
                         id: p.id,
-                        symbol: p.name.split(' ')[0].toUpperCase() + '-IPO',
+                        symbol: p.market_symbol || p.name.split(' ')[0].toUpperCase(),
+                        market_symbol: p.market_symbol,
                         name: p.name,
                         price: parseFloat(p.price) || 0,
-                        minInvest: parseFloat(p.min_invest) || 0,
-                        yield: p.profit || 'TBD',
+                        yield: p.est_profit_percent || 'TBD',
                         subDate: p.start_date || 'TBD',
                         deadline: p.end_date || 'TBD',
                         listingDate: p.listing_date || 'TBD',
@@ -113,11 +159,11 @@
                     const otcData = await window.DB.getActiveProductsByType('OTC');
                     this.dbOtcProducts = otcData.map(p => ({
                         id: p.id,
-                        symbol: p.name.split(' ')[0].toUpperCase() + '-OTC',
+                        symbol: p.market_symbol || p.name.split(' ')[0].toUpperCase(),
+                        market_symbol: p.market_symbol,
                         name: p.name,
                         price: parseFloat(p.price) || 0,
-                        minInvest: parseFloat(p.min_invest) || 0,
-                        yield: p.profit || 'TBD',
+                        yield: p.est_profit_percent || 'TBD',
                         subDate: p.start_date || 'TBD',
                         deadline: p.end_date || 'TBD',
                         listingDate: p.listing_date || 'TBD',
@@ -126,6 +172,18 @@
                         totalShares: p.total_shares || 0,
                         availableShares: p.available_shares || 0,
                         change: 0
+                    }));
+
+                    // Fetch Ins.stocks
+                    const insData = await window.DB.getActiveProductsByType('Ins.stocks');
+                    this.dbInsStocks = insData.map(p => ({
+                        id: p.id,
+                        symbol: p.market_symbol || p.name.split(' ')[0].toUpperCase(),
+                        market_symbol: p.market_symbol,
+                        name: p.name,
+                        price: parseFloat(p.price) || 0,
+                        change: 0,
+                        type: 'stock'
                     }));
 
                     this.notifyListeners();
@@ -139,6 +197,8 @@
             setInterval(() => {
                 // Fluctuate Stocks
                 this.stocks.forEach(stock => {
+                    if (stock.isCached) return; // Skip simulation if we have real cached data
+
                     const volatility = 0.005;
                     const changePercent = (Math.random() * volatility * 2) - volatility;
                     const changeAmount = stock.price * changePercent;
@@ -150,6 +210,8 @@
 
                 // Fluctuate OTC (New: Real-time fluctuation)
                 this.otc.forEach(stock => {
+                    if (stock.isCached) return; // Skip simulation if we have real cached data
+
                     const volatility = 0.003;
                     const changePercent = (Math.random() * volatility * 2) - volatility;
                     stock.price += (stock.price * changePercent);
@@ -157,6 +219,8 @@
 
                 // Fluctuate IPO (New: Real-time fluctuation)
                 this.ipo.forEach(stock => {
+                    if (stock.isCached) return; // Skip simulation if we have real cached data
+
                     const volatility = 0.002;
                     const changePercent = (Math.random() * volatility * 2) - volatility;
                     stock.price += (stock.price * changePercent);
@@ -204,7 +268,7 @@
 
         getIndices() { return this.indices; }
 
-        getAllStocks() { return this.stocks; }
+        getAllStocks() { return [...this.stocks, ...(this.dbInsStocks || [])]; }
         getOTC() { return [...this.otc, ...(this.dbOtcProducts || [])]; }
         getIPO() {
             return [...this.ipo, ...this.dbProducts];

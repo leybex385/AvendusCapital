@@ -222,16 +222,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const colorClass = isUp ? 'up' : 'down';
 
             html += `
-                <div class="index-card ${bgClass}">
-                    <div class="index-card-header">
-                        <img src="https://flagcdn.com/w20/in.png" class="index-flag" alt="IN">
-                        <span class="index-name">${idx.symbol}</span>
-                        <span class="index-region">ININ</span>
-                    </div>
-                    <div class="index-price">${idx.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
-                    <div class="index-change ${colorClass}">
-                        <span>${isUp ? '+' : ''}${idx.change.toFixed(2)}</span>
-                        <span>(${isUp ? '+' : ''}${idx.changePercent.toFixed(2)}%)</span>
+                <div class="index-card ${bgClass}" style="display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1.5rem;">
+                    <div class="index-card-header" style="justify-content: center; gap: 10px;">
+                        <img src="https://flagcdn.com/w20/in.png" class="index-flag" alt="IN" style="width: 24px; height: 16px;">
+                        <span class="index-name" style="font-size: 1.8rem; font-weight: 700;">${idx.symbol}</span>
                     </div>
                 </div>
             `;
@@ -1149,6 +1143,32 @@ window.loadUserAssets = async function (userId) {
             el.setAttribute('data-val', text);
             el.title = text;
 
+            // --- Automatic Negative Styling ---
+            // If the element is a balance display and text contains '-', apply red class
+            const isBalanceEl = el.id.toLowerCase().includes('balance') ||
+                el.id.toLowerCase().includes('available') ||
+                el.classList.contains('asset-amount') ||
+                el.classList.contains('p-asset-val') ||
+                el.classList.contains('me-as-val') ||
+                el.classList.contains('stat-value') ||
+                el.classList.contains('portfolio-balance');
+
+            if (isBalanceEl) {
+                const isNegative = text.includes('-');
+                if (isNegative) {
+                    el.classList.add('negative-balance');
+                } else {
+                    el.classList.remove('negative-balance');
+                }
+
+                // Also apply to inner span if it exists (Portfolio/Me views)
+                const innerSpan = el.querySelector('.asset-value');
+                if (innerSpan) {
+                    if (isNegative) innerSpan.classList.add('negative-balance');
+                    else innerSpan.classList.remove('negative-balance');
+                }
+            }
+
             // Check hidden state (using global vars if defined, else default false)
             let isHidden = false;
             // Market/Global asset-amount
@@ -1182,7 +1202,9 @@ window.loadUserAssets = async function (userId) {
 
         const updateVal = (id, val) => {
             const el = document.getElementById(id);
-            if (el) fitText(el, formatCurrency(val));
+            if (el) {
+                fitText(el, formatCurrency(val));
+            }
         };
 
         // --- Update Market Page (Sidebar Assets) ---
@@ -1191,7 +1213,9 @@ window.loadUserAssets = async function (userId) {
         if (assetAmounts.length >= 6) {
             const vals = [rawBalance, inv, bonus, frozen, loan, outstanding];
             assetAmounts.forEach((el, idx) => {
-                if (vals[idx] !== undefined) fitText(el, formatCurrency(vals[idx]));
+                if (vals[idx] !== undefined) {
+                    fitText(el, formatCurrency(vals[idx]));
+                }
             });
         }
 
@@ -1223,7 +1247,9 @@ window.loadUserAssets = async function (userId) {
 
         // --- Update Generic Indicators (Header/Script.js elements) ---
         const balanceEls = document.querySelectorAll('.stat-value.green, .portfolio-balance, #mainBalance, #valAvailable');
-        balanceEls.forEach(el => fitText(el, formatCurrency(rawBalance)));
+        balanceEls.forEach(el => {
+            fitText(el, formatCurrency(rawBalance));
+        });
 
         const investedEls = document.querySelectorAll('.stat-value.blue, #valInvested');
         investedEls.forEach(el => fitText(el, formatCurrency(inv)));

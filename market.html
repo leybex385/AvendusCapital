@@ -5,19 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <title>Market - Avendus Capital</title>
+    <title>Avendus Capital - Market</title>
+
+    <!-- Core Database Layer (MOVED TO HEAD FOR RELIABILITY) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js?v=1.0.4"></script>
+    <script src="js/db.js?v=1.0.4"></script>
+    <script src="js/user.js?v=1.0.4"></script>
+    <script src="js/market_data.js?v=1.0.4"></script>
+    <script src="js/trading.js?v=1.0.4"></script>
+    <script src="script.js?v=1.0.4"></script>
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="portfolio-theme.css">
     <link rel="stylesheet" href="settings-panel-fix.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lightweight-charts@4/dist/lightweight-charts.standalone.production.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="db.js?v=20260212"></script>
-    <script src="db_patch.js"></script>
-    <script src="market_data.js"></script>
-    <script src="script.js"></script>
     <style>
         /* Using global styles from styles.css */
 
@@ -3000,45 +3007,8 @@
                                         <!-- Real-time Price Header -->
                                         <div class="chart-header-stylized" style="margin-bottom: 1.5rem;">
                                             <div id="valSymbol"
-                                                style="font-size: 1rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">
-                                                NIFTY 50</div>
-                                            <div
-                                                style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 0.5rem;">
-                                                <h1 id="indexPrice"
-                                                    style="font-size: 2.8rem; font-weight: 800; color: #1e293b; margin: 0; line-height: 1;">
-                                                    25,641.65</h1>
-                                                <div id="heroChange" class="index-chg green"
-                                                    style="font-size: 1.2rem; font-weight: 700; background: #eefcf4; padding: 4px 12px; border-radius: 8px;">
-                                                    +485.35 (+0.58%)</div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Day Range Bar -->
-                                        <div class="styled-range-container"
-                                            style="margin-bottom: 2rem; position: relative;">
-                                            <div class="range-labels"
-                                                style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 8px;">
-                                                <span id="dayLow" style="color: #ef4444;">25,600.00</span>
-                                                <span id="dayHigh" style="color: #10b981;">25,800.00</span>
-                                            </div>
-                                            <div class="range-track"
-                                                style="height: 6px; background: #f1f5f9; border-radius: 3px; position: relative;">
-                                                <div id="rangeProgress"
-                                                    style="position: absolute; left: 0; top: 0; height: 100%; width: 20%; background: linear-gradient(to right, #ef4444, #10b981); border-radius: 3px;">
-                                                </div>
-                                                <div id="sliderMarker" class="range-dot"
-                                                    style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; background: white; border: 3px solid #10b981; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 2;">
-                                                </div>
-                                            </div>
-                                            <div class="range-stats"
-                                                style="display: flex; gap: 25px; margin-top: 10px; font-size: 11px; color: #94a3b8; font-weight: 600;">
-                                                <span>Symbol: <b id="valSymbolText" style="color: #475569;">NIFTY
-                                                        50</b></span>
-                                                <span>Market: <b style="color: #475569;">ININ</b></span>
-                                                <span>Prev Close: <b id="gridClose"
-                                                        style="color: #475569;">25,776.00</b></span>
-                                                <span>Volume: <b id="valVol"
-                                                        style="color: #475569;">22,450,112</b></span>
+                                                style="font-size: 2.2rem; font-weight: 800; color: inherit; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 10px;">
+                                                NIFTY 50
                                             </div>
                                         </div>
 
@@ -3248,282 +3218,8 @@
 
 
 
-        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+
         <script type="text/javascript">
-            let currentWidget = null;
-            let currentActiveSymbol = 'NIFTY1!';
-            let currentInterval = 'D';
-
-            function loadWidgetWithInterval(interval, btn) {
-                currentInterval = interval;
-                document.querySelectorAll('.mini-tf-btn').forEach(b => b.classList.remove('active'));
-                if (btn) btn.classList.add('active');
-                loadWidget(currentActiveSymbol);
-            }
-
-            const indexData = {
-                'BSE:SENSEX': {
-                    price: 83580.40,
-                    basePrice: 83313.93,
-                    low: 83250.27,
-                    high: 83784.17,
-                    open: 83757.54,
-                    close: 83817.69,
-                    vol: "14,913,178",
-                    sym: "SENSEX",
-                    cardValId: 'valSensexCard',
-                    cardChgId: 'chgSensexCard',
-                    sparkId: 'sparkSensex',
-                    history: [35, 38, 30, 32, 25, 28, 20, 22, 15, 18, 20]
-                },
-                'NIFTY1!': {
-                    price: 25660.25,
-                    basePrice: 25776.00,
-                    low: 25600.00,
-                    high: 25800.00,
-                    open: 25750.00,
-                    close: 25776.00,
-                    vol: "22,450,112",
-                    sym: "NIFTY 50",
-                    cardValId: 'valNiftyCard',
-                    cardChgId: 'chgNiftyCard',
-                    sparkId: 'sparkNifty',
-                    history: [30, 32, 35, 38, 36, 40, 38, 42, 40, 45, 42]
-                },
-                'NSE:BANKNIFTY': {
-                    price: 60045.35,
-                    basePrice: 60238.15,
-                    low: 59500.00,
-                    high: 60500.00,
-                    open: 60200.00,
-                    close: 60238.15,
-                    vol: "8,124,556",
-                    sym: "NIFTY BANK",
-                    cardValId: 'valBankNiftyCard',
-                    cardChgId: 'chgBankNiftyCard',
-                    sparkId: 'sparkBankNifty',
-                    history: [20, 22, 25, 22, 28, 25, 30, 28, 35, 32, 38]
-                }
-            };
-
-            let chartResizeObserver = null;
-
-            function loadWidget(symbol) {
-                const container = document.getElementById('tradingview_widget');
-                if (!container) return;
-
-                const width = container.offsetWidth;
-                const height = container.offsetHeight;
-                console.log(`[MarketChart] Initializing ${symbol}. Container: ${width}x${height}`);
-
-                if (width === 0 || height === 0) {
-                    console.warn(`[MarketChart] Container size is 0px. Layout not ready. Starting ResizeObserver.`);
-                    if (chartResizeObserver) chartResizeObserver.disconnect();
-                    chartResizeObserver = new ResizeObserver(entries => {
-                        for (let entry of entries) {
-                            if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
-                                console.log(`[MarketChart] Container now ready (${entry.contentRect.width}x${entry.contentRect.height}). Rendering chart.`);
-                                loadWidget(symbol);
-                                chartResizeObserver.disconnect();
-                                chartResizeObserver = null;
-                            }
-                        }
-                    });
-                    chartResizeObserver.observe(container);
-                    return;
-                }
-
-                // Clear container for fresh render (Destroy existing chart logic)
-                container.innerHTML = '';
-                if (currentWidget && typeof currentWidget.remove === 'function') {
-                    try { currentWidget.remove(); } catch (e) { }
-                }
-
-                // Handle Restricted Symbols with Investing.com Iframe
-                const investingPairs = {
-                    'NSE:NIFTY': '17940',
-                    'NIFTY1!': '17940',
-                    'BSE:SENSEX': '39929',
-                    'NSE:BANKNIFTY': '17923',
-                    'NSE:NIFTYBANK': '17923',
-                    'NIFTYBANK': '17923',
-                    'NSE:INDIAVIX': '17942',
-                    'NSE:MIDCPNIFTY': '18012',
-                    'NSE:NIFTYMIDCAP100': '18012',
-                    'NSE:NIFTYMIDCAP': '18012',
-                    'NSE:SMLCAP100': '17946',
-                    'NSE:NIFTYSMALLCAP100': '17946',
-                    'NSE:NIFTYSMLCAP': '17946'
-                };
-
-                if (investingPairs[symbol]) {
-                    let pairId = investingPairs[symbol];
-                    const wrapper = document.createElement('div');
-                    wrapper.style.position = 'relative';
-                    wrapper.style.width = '100%';
-                    wrapper.style.height = '100%';
-                    wrapper.style.overflow = 'hidden';
-
-                    const iframe = document.createElement('iframe');
-                    let w = container.offsetWidth || 800;
-                    let h = container.offsetHeight || 600;
-                    iframe.src = `https://ssltvc.investing.com/?pair_ID=${pairId}&height=${h}&width=${w}&interval=300&plotStyle=candles&domain_ID=56&lang_ID=56&timezone_ID=20`;
-                    iframe.style.width = '100%';
-                    iframe.style.height = '100%';
-                    iframe.style.border = 'none';
-                    iframe.style.filter = 'invert(1) hue-rotate(180deg) brightness(0.9)'; // Dark Mode Filter
-                    iframe.id = 'investing_chart';
-
-                    // Mask for the logo (now black to match dark theme)
-                    const mask = document.createElement('div');
-                    mask.style.position = 'absolute';
-                    mask.style.bottom = '42px';
-                    mask.style.left = '45px';
-                    mask.style.width = '100px';
-                    mask.style.height = '25px';
-                    mask.style.background = '#000000';
-                    mask.style.pointerEvents = 'none';
-                    mask.style.zIndex = '10';
-
-                    wrapper.appendChild(iframe);
-                    wrapper.appendChild(mask);
-                    container.appendChild(wrapper);
-                    return;
-                }
-
-                let targetSymbol = symbol;
-                currentWidget = new TradingView.widget({
-                    "autosize": true,
-                    "symbol": targetSymbol,
-                    "interval": currentInterval,
-                    "timezone": "Asia/Kolkata",
-                    "theme": "dark",
-                    "style": "1",
-                    "locale": "in",
-                    "toolbar_bg": "#111111",
-                    "enable_publishing": false,
-                    "allow_symbol_change": true,
-                    "container_id": "tradingview_widget",
-                    "hide_side_toolbar": false,
-                    "withdateranges": true,
-                    "save_image": true,
-                    "details": true,
-                    "hotlist": true,
-                    "calendar": true,
-                    "studies": ["Volume@tv-basicstudies"],
-                    "overrides": {
-                        "paneProperties.background": "#0b0b0b",
-                        "paneProperties.vertGridProperties.color": "#1f1f1f",
-                        "paneProperties.horzGridProperties.color": "#1f1f1f",
-                        "scalesProperties.textColor": "#94a3b8",
-                        "mainSeriesProperties.candleStyle.upColor": "#10b981",
-                        "mainSeriesProperties.candleStyle.downColor": "#ef4444",
-                        "mainSeriesProperties.candleStyle.wickUpColor": "#10b981",
-                        "mainSeriesProperties.candleStyle.wickDownColor": "#ef4444",
-                        "mainSeriesProperties.candleStyle.borderUpColor": "#10b981",
-                        "mainSeriesProperties.candleStyle.borderDownColor": "#ef4444",
-                        "volume.volume.color.1": "#d4af37",
-                        "volume.volume.color.0": "#ef4444"
-                    }
-                });
-            }
-
-            function updateChartInterval(interval, btn) {
-                currentInterval = interval;
-                document.querySelectorAll('.mini-tf-btn').forEach(b => b.classList.remove('active'));
-                if (btn) btn.classList.add('active');
-                loadWidget(currentActiveSymbol);
-            }
-
-            function updateChart(symbol, title) {
-                currentActiveSymbol = symbol;
-                // Removed chartTitle update as it's now internal to the widget
-                document.querySelectorAll('.index-card').forEach(c => c.classList.remove('active'));
-
-                if (symbol === 'BSE:SENSEX') document.getElementById('cardSensex').classList.add('active');
-                else if (symbol === 'NSE:NIFTY' || symbol === 'NIFTY1!') document.getElementById('cardNifty').classList.add('active');
-                else if (symbol === 'NSE:BANKNIFTY') document.getElementById('cardNiftyBank').classList.add('active');
-
-                syncUI();
-                loadWidget(symbol);
-            }
-
-
-            function syncUI() {
-                // Rehydrate existing static data
-                for (const sym in indexData) {
-                    const d = indexData[sym];
-                    const diff = d.price - d.basePrice;
-                    const pct = (diff / d.basePrice) * 100;
-                    const isUp = diff >= 0;
-                    const colorClass = isUp ? 'green' : 'red';
-                    const sign = isUp ? '+' : '';
-                    const changeText = `${sign}${diff.toFixed(2)} (${sign}${pct.toFixed(2)}%)`;
-                    const formattedPrice = d.price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-                    // Cards
-                    const cardVal = document.getElementById(d.cardValId);
-                    if (cardVal) {
-                        cardVal.innerText = formattedPrice;
-                        const cardChg = document.getElementById(d.cardChgId);
-                        if (cardChg) {
-                            cardChg.innerText = changeText;
-                            cardChg.className = `index-chg ${colorClass}`;
-                        }
-
-                        // Sparkline
-                        const sparkPath = document.querySelector(`#${d.sparkId} .sparkline-path`);
-                        if (sparkPath) {
-                            const points = d.history.map((val, i) => `${i * 10} ${val}`).join(' L');
-                            sparkPath.setAttribute('d', `M${points}`);
-                            sparkPath.className.baseVal = `sparkline-path ${colorClass}`;
-                        }
-                    }
-                }
-
-                // If it's one of the known indices, update Hero with static data
-                if (indexData[currentActiveSymbol]) {
-                    const d = indexData[currentActiveSymbol];
-                    const diff = d.price - d.basePrice;
-                    const pct = (diff / d.basePrice) * 100;
-                    const isUp = diff >= 0;
-                    const colorClass = isUp ? 'green' : 'red';
-                    const sign = isUp ? '+' : '';
-                    const changeText = `${sign}${(diff || 0).toFixed(2)} (${sign}${(pct || 0).toFixed(2)}%)`;
-
-                    // Update Stylish Header
-                    if (document.getElementById('indexPrice')) document.getElementById('indexPrice').innerText = (d.price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 });
-                    if (document.getElementById('valSymbol')) document.getElementById('valSymbol').innerText = d.sym;
-                    if (document.getElementById('valSymbolText')) document.getElementById('valSymbolText').innerText = d.sym;
-
-                    const hChg = document.getElementById('heroChange');
-                    if (hChg) {
-                        hChg.innerText = changeText;
-                        hChg.className = `index-chg ${colorClass}`;
-                        hChg.style.background = isUp ? '#eefcf4' : '#fff1f1';
-                        hChg.style.color = isUp ? '#10b981' : '#ef4444';
-                    }
-
-                    // Update Range Bar
-                    if (document.getElementById('dayLow')) {
-                        document.getElementById('dayLow').innerText = d.low.toLocaleString('en-IN');
-                        document.getElementById('dayHigh').innerText = d.high.toLocaleString('en-IN');
-                        if (document.getElementById('gridClose')) document.getElementById('gridClose').innerText = d.close.toLocaleString('en-IN');
-                        if (document.getElementById('valVol')) document.getElementById('valVol').innerText = d.vol;
-
-                        const range = d.high - d.low;
-                        const pos = d.price - d.low;
-                        const pctPos = (pos / range) * 100;
-                        const safePct = Math.max(0, Math.min(100, pctPos));
-
-                        document.getElementById('sliderMarker').style.left = `${safePct}%`;
-                        document.getElementById('rangeProgress').style.width = `${safePct}%`;
-                    }
-                } else {
-                    // Custom Stock Selected
-                }
-            }
-
             // --- SEARCH FUNCTIONALITY WITH ALPHA VANTAGE ---
             const INDIAN_STOCKS = [
                 { s: 'BSE:SENSEX', n: 'SENSEX Index', p: 83580.40 },
@@ -3639,67 +3335,7 @@
                 }
             }
 
-            window.onload = function () {
-                // Determine starting symbol
-                const startSym = window.currentActiveSymbol || 'NIFTY1!';
-                updateChart(startSym, "Major Index Live");
-
-                // Backup loadWidget call if updateChart didn't trigger it
-                if (window.loadWidget) loadWidget(startSym);
-
-                syncUI();
-                // Optional: Mock live update for hero prices of default data
-                setInterval(() => {
-                    for (let k in indexData) {
-                        let v = indexData[k];
-                        let change = (Math.random() - 0.5) * (v.price * 0.0005); // 0.05% fluctuation
-                        v.price += change;
-                        if (v.price < v.low) v.low = v.price;
-                        if (v.price > v.high) v.high = v.price;
-                    }
-                    syncUI();
-                }, 3000);
-            };
-
-            function startSimulation() {
-                setInterval(() => {
-                    for (const sym in indexData) {
-                        const d = indexData[sym];
-                        const oldPrice = d.price;
-                        const change = (Math.random() - 0.5) * (d.price * 0.0006);
-                        d.price += change;
-
-                        // Keep within day range
-                        if (d.price < d.low) d.price = d.low + Math.abs(change);
-                        if (d.price > d.high) d.price = d.high - Math.abs(change);
-
-                        // Update Sparkline History (Simulated)
-                        // Every 3 seconds, shift history
-                        if (Date.now() % 3000 < 1000) {
-                            const lastVal = d.history[d.history.length - 1];
-                            const nextVal = Math.max(5, Math.min(35, lastVal + (Math.random() - 0.5) * 5));
-                            d.history.shift();
-                            d.history.push(nextVal);
-                        }
-                    }
-
-                    // Fluatuate Sectors too
-                    for (let i = 1; i <= 9; i++) {
-                        const sectEl = document.getElementById(`sect-${i}`);
-                        if (sectEl) {
-                            let curVal = parseFloat(sectEl.innerText);
-                            let newVal = curVal + (Math.random() - 0.5) * 0.05;
-                            sectEl.innerText = (newVal > 0 ? '+' : '') + newVal.toFixed(2) + '%';
-                            sectEl.className = `sector-pct ${newVal >= 0 ? 'up' : 'down'}`;
-                        }
-                    }
-
-                    syncUI();
-                }, 1000);
-            }
-
             // Moved initialization to window.onload to ensure layout is ready
-            startSimulation();
         </script>
 
         <!-- Stock Detail View (Hidden by default) -->
@@ -3719,13 +3355,20 @@
                         <i data-lucide="heart" class="heart-icon" size="24"></i>
                     </div>
 
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
-                        <h2 id="detPrice" style="font-size: 2.5rem; margin: 0;">₹14.34</h2>
-                        <div id="detChange" class="index-chg green" style="font-size: 1.1rem;">+2.39 (+20.00%)</div>
+                    <div style="display: none;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 0.5rem;">
+                            <h2 id="detPrice" style="font-size: 2.5rem; margin: 0;">₹14.34</h2>
+                            <div id="detChange" class="index-chg green" style="font-size: 1.1rem;">+2.39 (+20.00%)</div>
+                        </div>
+                        <div id="detTimestamp"
+                            style="font-size: 0.75rem; color: #64748b; margin-bottom: 1.5rem; text-align: left;">
+                            Checking
+                            price...</div>
                     </div>
 
-                    <div class="day-range-container">
+
+                    <div class="day-range-container" style="display: none;">
                         <div class="range-bar-wrapper">
                             <div class="slider-marker" id="detSliderMarker" style="left: 100%;"></div>
                         </div>
@@ -3753,11 +3396,11 @@
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Prev Open:</span>
-                                <span class="info-val-text">₹12.12</span>
+                                <span class="info-val-text" id="detGridOpen">Loading...</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Prev Close:</span>
-                                <span class="info-val-text">₹11.95</span>
+                                <span class="info-val-text" id="detGridClose">Loading...</span>
                             </div>
                             <div class="info-item" style="grid-column: span 3;">
                                 <span class="info-label">Volume:</span>
@@ -3765,6 +3408,7 @@
                             </div>
                         </div>
                     </div>
+
 
                     <div class="timeframe-btns">
                         <button class="tf-btn active">1D</button>
@@ -4835,7 +4479,91 @@
         let detailLiveTimer = null;
         let currentProductId = null;
         let currentMinInvest = 0;
-        function openStockDetail(symbol, name, exchange, price, change, color, type = 'stock', push = true, id = null, minInvest = 0) {
+
+        window.livePriceIntervals = window.livePriceIntervals || {};
+
+        async function fetchCachedPrice(symbol) {
+            try {
+                if (!window.supabaseClient) return null;
+                const { data, error } = await window.supabaseClient
+                    .from('market_cache')
+                    .select('price, updated_at')
+                    .eq('symbol', symbol)
+                    .single();
+
+                if (error || !data) return null;
+                return data;
+            } catch (err) {
+                console.error("fetchCachedPrice error:", err);
+                return null;
+            }
+        }
+
+        async function fetchLivePrice(symbol) {
+            console.log("🔥 fetchLivePrice CALLED:", symbol);
+
+            const updatePriceUI = async () => {
+                const cacheData = await fetchCachedPrice(symbol);
+                const el = document.getElementById("detPrice");
+                const timestampEl = document.getElementById("detTimestamp");
+
+                if (!cacheData && el) {
+                    // Fallback to random if no cache available or if empty
+                    const val = document.getElementById("detPrice").innerText;
+                    if (val === "Loading...") {
+                        const fallbackPrice = (MarketEngine.getProduct(symbol) && MarketEngine.getProduct(symbol).price) ? MarketEngine.getProduct(symbol).price : 0;
+                        el.innerText = `₹${fallbackPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    }
+                    if (timestampEl) timestampEl.innerHTML = `<span style="color:#ef4444;">⚠ Price unavailable</span>`;
+                    return;
+                }
+
+                if (cacheData) {
+                    const price = cacheData.price;
+                    const updatedAt = new Date(cacheData.updated_at);
+                    const now = new Date();
+                    const ageMs = now - updatedAt;
+                    const ageMins = ageMs / (1000 * 60);
+
+                    const formatted = `₹${Number(price).toLocaleString('en-IN', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    })}`;
+
+                    if (el) el.innerText = formatted;
+
+                    const detBuyPriceEl = document.getElementById("detBuyPrice");
+                    if (detBuyPriceEl) detBuyPriceEl.innerText = formatted;
+
+                    // Update high/low/close with calculated bounds since market_cache only has price
+                    const detGridHigh = document.getElementById("detGridHigh");
+                    const detGridLow = document.getElementById("detGridLow");
+                    const detGridOpen = document.getElementById("detGridOpen");
+                    const detGridClose = document.getElementById("detGridClose");
+                    if (detGridHigh) detGridHigh.innerText = `₹${(price * 1.05).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+                    if (detGridLow) detGridLow.innerText = `₹${(price * 0.95).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+                    if (detGridOpen) detGridOpen.innerText = `₹${(price * 0.98).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+                    if (detGridClose) detGridClose.innerText = `₹${(price * 0.99).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+
+                    if (timestampEl) {
+                        if (ageMins > 5) {
+                            timestampEl.innerHTML = `<span style="color:#ef4444;">⚠ Price unavailable</span>`;
+                        } else {
+                            const timeStr = updatedAt.toLocaleTimeString('en-IN');
+                            timestampEl.innerHTML = `Last updated: ${timeStr}`;
+                        }
+                    }
+                }
+            };
+
+            await updatePriceUI();
+
+            // Clear any existing interval for this symbol context to prevent overlap
+            if (window.livePriceIntervals['detPrice']) clearInterval(window.livePriceIntervals['detPrice']);
+            window.livePriceIntervals['detPrice'] = setInterval(updatePriceUI, 30000); // 30s auto-refresh
+        }
+
+        async function openStockDetail(symbol, name, exchange, price, change, color, type = 'stock', push = true, id = null, minInvest = 0) {
             if (push) {
                 const params = new URLSearchParams(window.location.search);
                 let view = params.get("view");
@@ -4878,11 +4606,18 @@
             // Start Live Updates
             if (detailLiveTimer) clearInterval(detailLiveTimer);
             detailLiveTimer = setInterval(() => {
-                const updatedPrice = MarketEngine.getProduct(symbol)?.price || MarketEngine.getIndices()[symbol]?.price;
+                const prod = window.MarketEngine ? window.MarketEngine.getProduct(symbol) : null;
+                const idx = window.MarketEngine ? window.MarketEngine.getIndices()[symbol] : null;
+                const updatedPrice = prod?.price || idx?.price;
+
+                if (prod && prod.exchange) {
+                    const exEl = document.getElementById('detExchange');
+                    if (exEl && !exEl.innerText.includes(prod.exchange)) {
+                        exEl.innerText = `${prod.exchange} • IN`;
+                    }
+                }
+
                 if (updatedPrice) {
-                    const formatted = '₹' + updatedPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-                    document.getElementById('detPrice').innerText = formatted;
-                    document.getElementById('detBuyPrice').innerText = formatted;
                     updateBuyCalculations();
                 }
             }, 1000);
@@ -4890,11 +4625,16 @@
             // Populate Data
             document.getElementById('detailStockTitle').innerText = name;
             document.getElementById('detName').innerText = name;
-            document.getElementById('detExchange').innerText = `${exchange} • IN`;
-            document.getElementById('detPrice').innerText = price;
+
+            // Fetch actual exchange from MarketEngine if available
+            const initProd = window.MarketEngine ? window.MarketEngine.getProduct(symbol) : null;
+            const actualExchange = (initProd && initProd.exchange) ? initProd.exchange : exchange;
+
+            document.getElementById('detExchange').innerText = `${actualExchange} • IN`;
+            document.getElementById('detPrice').innerText = "Loading...";
             document.getElementById('detChange').innerText = change;
             document.getElementById('detChange').className = `index-chg ${change.startsWith('+') ? 'green' : 'red'}`;
-            document.getElementById('detBuyPrice').innerText = price;
+            document.getElementById('detBuyPrice').innerText = "Loading...";
             document.getElementById('detSymbol').innerText = symbol;
 
             const buyBtn = document.getElementById('buyBtn');
@@ -4947,9 +4687,40 @@
             const detLogoWrap = document.getElementById('detLogoWrap');
             if (detLogoWrap) detLogoWrap.innerHTML = '';
 
+            let tvSymbol = symbol;
+            let tvExchange = exchange;
+
+            if (symbol) {
+                const upperSymbol = symbol.toUpperCase();
+                let cleanSymbol = symbol;
+                // Strip existing exchange prefixes (BSE:, NSE:)
+                if (cleanSymbol.includes(':')) {
+                    const parts = cleanSymbol.split(':');
+                    cleanSymbol = parts[parts.length - 1]; // Take the part after the colon
+                }
+
+                if (upperSymbol.endsWith('.NS')) {
+                    tvSymbol = cleanSymbol.slice(0, -3);
+                    tvExchange = 'NSE';
+                } else if (upperSymbol.endsWith('.BO')) {
+                    tvSymbol = cleanSymbol.slice(0, -3);
+                    tvExchange = 'BSE';
+                } else if (upperSymbol.endsWith('.KS')) {
+                    tvSymbol = cleanSymbol.slice(0, -3);
+                    tvExchange = 'KRX';
+                } else {
+                    tvSymbol = cleanSymbol;
+                }
+            }
+
+            const tvContainer = document.getElementById('tradingview_det');
+
+            tvExchange = exchange || 'BSE';
+            const tvSym = tvSymbol || symbol;
+
             new TradingView.widget({
                 "autosize": true,
-                "symbol": exchange + ":" + symbol,
+                "symbol": tvExchange + ":" + tvSym,
                 "interval": "D",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
@@ -4979,7 +4750,167 @@
             window.scrollTo(0, 0);
             renderDetailHoldings();
             lucide.createIcons();
+
+            await fetchLivePrice(symbol);
         }
+
+        let currentYahooChart = null;
+        let yahooUpdateTimer = null;
+
+        async function loadYahooChart(symbol, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (yahooUpdateTimer) clearInterval(yahooUpdateTimer);
+            container.innerHTML = '<div style="display:flex; height:100%; align-items:center; justify-content:center; color:#94a3b8; font-family: Outfit, sans-serif;">Loading realtime chart...</div>';
+
+            if (!window.LightweightCharts) {
+                container.innerHTML = '<div style="color:#ef4444; text-align:center;">Library Error: Lightweight Charts not loaded.</div>';
+                return;
+            }
+
+            // Function to try fetching with fallbacks
+            const fetchWithFallbacks = async (sym) => {
+                const proxyUrls = [
+                    'https://api.allorigins.win/raw?url=',
+                    'https://corsproxy.io/?'
+                ];
+                // Try different ranges and intervals
+                const configs = [
+                    { range: '1d', interval: '5m' },
+                    { range: '5d', interval: '15m' },
+                    { range: '1mo', interval: '1d' }
+                ];
+
+                for (const config of configs) {
+                    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=${config.interval}&range=${config.range}&.ts=${Date.now()}`;
+                    for (const proxy of proxyUrls) {
+                        try {
+                            const response = await fetch(proxy + encodeURIComponent(yahooUrl));
+                            if (!response.ok) continue;
+                            const data = await response.json();
+
+                            if (data.chart && data.chart.result && data.chart.result[0].timestamp) {
+                                return data.chart.result[0];
+                            }
+                        } catch (e) {
+                            console.warn(`Fetch failed for ${sym} using proxy ${proxy}:`, e);
+                        }
+                    }
+                }
+                return null;
+            };
+
+            try {
+                let result = await fetchWithFallbacks(symbol);
+                let usedSymbol = symbol;
+
+                // If original symbol fails, try with .NS suffix if it looks like an Indian stock (no dot)
+                if (!result && !symbol.includes('.')) {
+                    console.log("Trying with .NS suffix...");
+                    result = await fetchWithFallbacks(symbol + ".NS");
+                    if (result) usedSymbol = symbol + ".NS";
+                    else {
+                        console.log("Trying with .BO suffix...");
+                        result = await fetchWithFallbacks(symbol + ".BO");
+                        if (result) usedSymbol = symbol + ".BO";
+                    }
+                }
+
+                if (!result) throw new Error("No data found even with suffixes");
+
+                const timestamps = result.timestamp;
+                const quote = result.indicators.quote[0];
+
+                const chartData = timestamps.map((t, i) => ({
+                    time: t,
+                    open: quote.open[i],
+                    high: quote.high[i],
+                    low: quote.low[i],
+                    close: quote.close[i],
+                })).filter(d => d.open !== null);
+
+                if (chartData.length === 0) throw new Error("Data empty after filtering");
+
+                container.innerHTML = '';
+                const chart = LightweightCharts.createChart(container, {
+                    layout: {
+                        background: { color: '#111111' },
+                        textColor: '#94a3b8',
+                        fontFamily: 'Outfit, sans-serif',
+                    },
+                    grid: {
+                        vertLines: { color: '#1f1f1f' },
+                        horzLines: { color: '#1f1f1f' },
+                    },
+                    crosshair: {
+                        mode: LightweightCharts.CrosshairMode.Normal,
+                    },
+                    rightPriceScale: {
+                        borderColor: '#1f1f1f',
+                        visible: true,
+                    },
+                    timeScale: {
+                        borderColor: '#1f1f1f',
+                        timeVisible: true,
+                        secondsVisible: false,
+                    },
+                });
+
+                const candleSeries = chart.addCandlestickSeries({
+                    upColor: '#10b981',
+                    downColor: '#ef4444',
+                    borderVisible: false,
+                    wickUpColor: '#10b981',
+                    wickDownColor: '#ef4444',
+                });
+
+                candleSeries.setData(chartData);
+                chart.timeScale().fitContent();
+
+                currentYahooChart = chart;
+
+                // Start realtime update simulation/fetch
+                yahooUpdateTimer = setInterval(async () => {
+                    try {
+                        const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                        const priceUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${usedSymbol}?interval=1m&range=1d&.ts=${Date.now()}`;
+                        const priceRes = await fetch(proxyUrl + encodeURIComponent(priceUrl));
+                        const pData = await priceRes.json();
+                        if (pData && pData.chart && pData.chart.result) {
+                            const meta = pData.chart.result[0].meta;
+                            const lastTime = pData.chart.result[0].timestamp.slice(-1)[0];
+
+                            candleSeries.update({
+                                time: lastTime,
+                                open: meta.regularMarketPrice,
+                                high: meta.regularMarketPrice,
+                                low: meta.regularMarketPrice,
+                                close: meta.regularMarketPrice,
+                            });
+                        }
+                    } catch (e) {
+                        console.error("Yahoo realtime update failed", e);
+                    }
+                }, 20000);
+
+                const resizeObserver = new ResizeObserver(entries => {
+                    if (entries.length === 0 || !entries[0].contentRect) return;
+                    const { width, height } = entries[0].contentRect;
+                    chart.applyOptions({ width, height });
+                });
+                resizeObserver.observe(container);
+
+            } catch (error) {
+                console.error("loadYahooChart Error:", error);
+                container.innerHTML = `<div style="display:flex; height:100%; align-items:center; justify-content:center; color:#94a3b8; font-size:1.1rem; text-align:center; flex-direction:column; gap:10px; font-family: Outfit, sans-serif;"><i data-lucide="bar-chart-2" style="width:48px;height:48px;opacity:0.5;"></i>Chart data not available for ${symbol}</div>`;
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+
+
+
+
         window.openStockDetail = openStockDetail;
 
         async function handleSellFromDetail() {
@@ -4987,6 +4918,11 @@
             const symbol = document.getElementById('detSymbol')?.innerText;
             const user = window.DB ? window.DB.getCurrentUser() : null;
             if (!user || !symbol) return;
+
+            if (user && parseFloat(user.balance) < 0) {
+                alert("Selling is disabled because your account has a negative balance. Please repay the outstanding amount to resume selling.");
+                return;
+            }
 
             const originalText = btn.innerText;
             btn.innerText = "Checking...";
@@ -5110,7 +5046,7 @@
             lucide.createIcons();
 
             // Refresh user data (Assets, Balance, Invested)
-            DB.refreshCurrentUser().then(fullUser => {
+            window.DB.refreshCurrentUser().then(fullUser => {
                 if (fullUser) syncUserData();
             });
 
@@ -5134,7 +5070,7 @@
             if (typeof window.syncVipCredit === 'function') window.syncVipCredit();
 
             // Refresh user data (KYC status, balance, etc.) from backend
-            DB.refreshCurrentUser().then(fullUser => {
+            window.DB.refreshCurrentUser().then(fullUser => {
                 if (fullUser) syncUserData();
             });
 
@@ -5321,7 +5257,7 @@
 
             // MAINTENANCE CHECK for Institutional Stocks
             if (type === 'stocks' || type === 'all') {
-                const config = await window.DB.getPlatformSettings('institutional_config');
+                const config = (window.DB && typeof window.DB.getPlatformSettings === 'function') ? await window.DB.getPlatformSettings('institutional_config') : null;
                 if (config && config.status === 'Maintenance' && type === 'stocks') {
                     listContainer.innerHTML = `
                         <div style="background: #fff7ed; border: 1px solid #ffedd5; padding: 2rem; border-radius: 12px; text-align: center; margin-top: 1rem;">
@@ -5347,6 +5283,8 @@
                 data = MarketEngine.getIPO().map(s => ({ ...s, type: 'IPO' }));
             }
 
+            console.log(`DEBUG: switchTradesTab type: ${type} data count: ${data.length}`);
+
             if (data.length === 0) {
                 listContainer.innerHTML = `<div style="color: #94a3b8; font-size: 0.9rem; margin-top: 1rem;">No data.</div>`;
                 return;
@@ -5369,16 +5307,30 @@
                     const profitRange = (isIPO && s.yield) ? s.yield : (isIPO ? "100% - 300%" : "20% - 60%");
                     const vipLv = (isIPO && s.level) ? s.level : (isIPO ? "Lv ≥ 2" : "Lv ≥ 1");
                     const isLocked = false; // Allow all IPOs to be viewable for now as requested
-                    const exchange = s.symbol.includes('NSE') ? 'NSE' : 'BSE';
+                    const exchange = s.exchange || 'BSE';
 
                     if (s.type === 'stock' && (type === 'all' || type === 'stocks')) {
                         // Regular stocks in "All" view still look premium but slightly different if mixed
+
+                        let lastUpdatedHtml = '';
+                        if (s.updated_at) {
+                            const msDiff = new Date() - new Date(s.updated_at + "Z"); // ensure UTC parsing
+                            const minsDiff = msDiff / 1000 / 60;
+                            if (minsDiff > 5) {
+                                lastUpdatedHtml = `<div style="font-size: 0.7rem; color: #ef4444; margin-top: 4px; font-weight: 500;">⚠ Price unavailable</div>`;
+                            } else {
+                                const timeStr = new Date(s.updated_at + "Z").toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                                lastUpdatedHtml = `<div style="font-size: 0.7rem; color: #10b981; margin-top: 4px; font-weight: 500;">Last updated: ${timeStr}</div>`;
+                            }
+                        }
+
                         return `
                             <div class="premium-trade-card">
                                 <div class="premium-card-head">
                                     <div class="premium-asset-info">
                                         <div class="premium-asset-name">${s.name}</div>
                                         <div class="premium-asset-meta">${exchange} • Standard Stock</div>
+                                        ${lastUpdatedHtml}
                                     </div>
                                     <div class="premium-return-rate">
                                         <span class="premium-return-label">Volatility</span>
@@ -5420,7 +5372,7 @@
                             <div class="premium-details-grid">
                                 <div class="premium-detail-item">
                                     <span class="label">Subscription Price</span>
-                                    <span class="value">₹${s.price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                    <span class="value">₹${(s.subscription_price || s.price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                                 </div>
                                 <div class="premium-detail-item">
                                     <span class="label">Level Limit</span>
@@ -5441,7 +5393,22 @@
                 listContainer.style.gap = '1rem';
                 listContainer.style.padding = '1rem 0';
 
-                listContainer.innerHTML = data.map(s => `
+                listContainer.innerHTML = data.map(s => {
+                    let lastUpdatedHtml = '';
+                    if (s.updated_at) {
+                        const msDiff = new Date() - new Date(s.updated_at + "Z"); // ensure UTC parsing
+                        const minsDiff = msDiff / 1000 / 60;
+                        if (minsDiff > 5) {
+                            lastUpdatedHtml = `<div style="font-size: 0.7rem; color: #ef4444; margin-top: 4px; font-weight: 500; margin-bottom: 1.5rem;">⚠ Price unavailable</div>`;
+                        } else {
+                            const timeStr = new Date(s.updated_at + "Z").toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                            lastUpdatedHtml = `<div style="font-size: 0.7rem; color: #10b981; margin-top: 4px; font-weight: 500; margin-bottom: 1.5rem;">Last updated: ${timeStr}</div>`;
+                        }
+                    } else {
+                        lastUpdatedHtml = `<div style="margin-bottom: 1.5rem;"></div>`;
+                    }
+
+                    return `
                     <div class="sector-card" style="width: 100%; height: auto; padding: 1.5rem; text-align: left; align-items: flex-start; cursor: default;">
                         <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-bottom: 0.5rem;">
                             <div style="text-align: right; width: 100%;">
@@ -5450,16 +5417,18 @@
                             </div>
                         </div>
                         <div class="stock-ticker" style="font-size: 1.1rem; margin-top: 0.5rem;">${s.symbol}</div>
-                        <div class="stock-full-name" style="margin-bottom: 1.5rem;">
+                        <div class="stock-full-name" style="margin-bottom: 0;">
                             ${s.name} ${s.type !== 'stock' ? `<span style="font-size:0.65rem; background:#eff6ff; color:#3b82f6; padding:2px 6px; border-radius:4px; font-weight:700; margin-left:6px;">${s.type}</span>` : ''}
                         </div>
+                        ${lastUpdatedHtml}
                         
                         <button class="h-btn view subscribe-btn" style="width: 100%; border-radius: 12px; height: 44px; background: #1e56a0; font-weight: 700;"
                             data-id="${s.symbol}">
                             Trade Now
                         </button>
                     </div>
-                `).join('');
+                `;
+                }).join('');
             }
 
             lucide.createIcons();
@@ -5647,7 +5616,7 @@
             const ocBtn = document.getElementById('ocConfirmBtn');
 
             if (ocName) ocName.innerText = stockName;
-            if (ocSym) ocSym.innerText = `${symbol} • ${exchangeText}`;
+            if (ocSym) ocSym.innerText = `${symbol} • ${exchangeText} `;
             if (ocQty) ocQty.innerText = calc.qty.toLocaleString();
             if (ocPr) ocPr.innerText = '₹' + calc.price.toLocaleString('en-IN', { minimumFractionDigits: 2 });
             if (ocBase) ocBase.innerText = '₹' + calc.baseTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 });
@@ -5817,14 +5786,14 @@
                             });
                         });
                     } else if (isInsufficient) {
-                        showModal('warning', 'Order Queued', `Your balance of ₹${currentBalance.toLocaleString('en-IN')} has been applied. Please settle the remaining ₹${(calc.total - currentBalance).toLocaleString('en-IN')} to finalize your subscription.`, () => {
+                        showModal('warning', 'Order Queued', `Your balance of ₹${currentBalance.toLocaleString('en-IN')} has been applied.Please settle the remaining ₹${(calc.total - currentBalance).toLocaleString('en-IN')} to finalize your subscription.`, () => {
                             window.DB.refreshCurrentUser().then(() => {
                                 if (typeof syncUserData === 'function') syncUserData();
                                 // Switch to transactions tab to show pending payment
                                 showDiscoverView('transactions');
                                 // Ensure tab switch happens after view is shown
                                 setTimeout(() => {
-                                    const pendingTab = document.querySelector(`[onclick="switchTransactionTab(this, 'pendingPayment')"]`);
+                                    const pendingTab = document.querySelector(`[onclick = "switchTransactionTab(this, 'pendingPayment')"]`);
                                     if (pendingTab) switchTransactionTab(pendingTab, 'pendingPayment');
                                 }, 100);
                             });
@@ -5854,7 +5823,7 @@
             document.getElementById('cpName').innerText = name;
             document.getElementById('cpSymbol').innerText = symbol;
             document.getElementById('cpQty').innerText = qty;
-            document.getElementById('cpTotal').innerText = `₹${total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+            document.getElementById('cpTotal').innerText = `₹${total.toLocaleString('en-IN', { minimumFractionDigits: 2 })} `;
 
             document.getElementById('purchaseConfirmModal').style.display = 'flex';
             lucide.createIcons();
@@ -5897,37 +5866,66 @@
 
         // Initialize Discover Trades and View Routing
         document.addEventListener('DOMContentLoaded', async () => {
+            // Helper to wait for DB to be initialized and session to be restored
+            const waitForDB = () => {
+                return new Promise(resolve => {
+                    const check = () => {
+                        if (window.DB && window.DB_READY) resolve();
+                        else setTimeout(check, 100);
+                    };
+                    check();
+                });
+            };
+
+            await waitForDB();
+            console.log("🔥 DB Ready, initializing UI...");
+
+            (async () => {
+                console.log("=== RAW TRADES TEST START ===");
+                const { data, error } = await window.supabaseClient
+                    .from("trades")
+                    .select("*");
+                console.log("RAW TRADES RESULT:", data);
+                console.log("RAW TRADES ERROR:", error);
+                console.log("=== RAW TRADES TEST END ===");
+            })();
+
             // Force refresh user data on load
-            if (DB.getCurrentUser()) {
-                await DB.refreshCurrentUser(); // Use refreshCurrentUser instead of refreshUserData for consistency if needed, but DB.refreshUserData was used before. Let's stick to refreshUserData if it exists or refreshCurrentUser. 
-                // Checking DB.js: refreshUserData doesn't exist? refreshCurrentUser does.
-                // Wait, previous code used refreshUserData? Let's check. 
+            console.log("CHECK: window.DB state:", typeof window.DB, (window.DB ? Object.keys(window.DB) : "undefined"));
+            const currentUser = (window.DB && typeof window.DB.getCurrentUser === 'function') ? window.DB.getCurrentUser() : null;
+
+            if (currentUser) {
+                await window.DB.refreshCurrentUser();
                 syncUserData();
+                // Ensure trades are fetched with debug logging
+                if (typeof window.loadTrades === 'function') {
+                    await window.loadTrades();
+                }
             }
 
             const allTab = document.querySelector('.discover-tabs .d-tab.active');
             if (allTab) switchTradesTab(allTab, 'all');
 
             // --- REALTIME LISTENER FOR BALANCE UPDATES ---
-            const user = DB.getCurrentUser();
-            const client = DB.getClient();
+            const user = (window.DB && typeof window.DB.getCurrentUser === 'function') ? window.DB.getCurrentUser() : null;
+            const client = (window.DB && typeof window.DB.getClient === 'function') ? window.DB.getClient() : null;
             if (user && client) {
                 client.channel('public:users:' + user.id)
                     .on('postgres_changes', {
                         event: 'UPDATE',
                         schema: 'public',
                         table: 'users',
-                        filter: `id=eq.${user.id}`
+                        filter: `id = eq.${user.id}`
                     }, async (payload) => {
                         console.log('Realtime Update:', payload);
-                        await DB.refreshCurrentUser();
+                        await window.DB.refreshCurrentUser();
                         syncUserData();
                     })
                     .subscribe();
 
                 // --- ROBUST POLLING AS FALLBACK ---
                 setInterval(async () => {
-                    const fresh = await DB.refreshCurrentUser();
+                    const fresh = await window.DB.refreshCurrentUser();
                     if (fresh) syncUserData();
                 }, 3000); // Check every 3 seconds
             }
@@ -5984,21 +5982,29 @@
                             const prof = (cp * t.quantity) - parseFloat(t.total_amount);
 
                             return `
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid #f1f5f9;">
+                        < div style = "display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid #f1f5f9;" >
                                     <div style="text-align: left;">
                                         <div style="font-weight: 700; font-size: 0.9rem; color: #f8fafc;">${t.symbol}</div>
                                         <div style="font-size: 0.75rem; color: #94a3b8;">${date} • Buy Price ₹${parseFloat(t.price).toLocaleString('en-IN')}</div>
-                                        <button class="h-btn close close-order-btn" style="margin-top: 0.5rem; padding: 4px 12px; height: auto; font-size: 0.75rem;" data-id="${t.id}">Close Order</button>
+                                        ${(() => {
+                                    const pListingDate = t.products ? t.products.listing_date : null;
+                                    const isPreListing = pListingDate && new Date(pListingDate) > new Date();
+                                    if (isPreListing) {
+                                        const lDateStr = new Date(pListingDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                                        return `<button class="h-btn close" style="margin-top: 0.5rem; padding: 4px 12px; height: auto; font-size: 0.70rem; background:#475569 !important; border-color:#475569 !important; cursor:not-allowed; opacity:0.8;" disabled>🔒 Sell Available After Listing – ${lDateStr}</button>`;
+                                    }
+                                    return `<button class="h-btn close close-order-btn" style="margin-top: 0.5rem; padding: 4px 12px; height: auto; font-size: 0.75rem;" data-id="${t.id}">Close Order</button>`;
+                                })()}
                                     </div>
                                     <div style="text-align: right;">
                                         <div style="font-weight: 700; color: #d4af37;">₹${parseFloat(t.total_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
                                         <div style="font-size: 0.75rem; color: ${prof >= 0 ? '#10b981' : '#ef4444'}; font-weight: 600;">${prof >= 0 ? '+' : ''}${prof.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
                                     </div>
-                                </div>
-                            `;
+                                </div >
+                        `;
                         }).join('');
                     } else {
-                        list.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 2rem; font-size: 0.85rem;">No active holdings for this stock.</div>`;
+                        list.innerHTML = `< div style = "text-align: center; color: #94a3b8; padding: 2rem; font-size: 0.85rem;" > No active holdings for this stock.</div > `;
                     }
                 } catch (e) {
                     console.error("Error rendering detail holdings:", e);
@@ -6056,7 +6062,7 @@
             let html = `<div class="premium-trade-grid">`;
             data.forEach(item => {
                 const dateStr = new Date(item.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-                const exchange = item.symbol.includes('NSE') ? 'NSE' : 'BSE';
+                const exchange = item.exchange || 'BSE';
                 const country = 'IN';
 
                 // 1. Status & Badge Logic
@@ -6079,7 +6085,7 @@
 
                 // IPO Refactor: Check type (Point 4 & 6)
                 const isIPOItem = item.type?.toLowerCase() === 'ipo';
-                const isAwaitingIPO = isIPOItem && item.status === 'Awaiting';
+                const isAwaitingIPO = isIPOItem && (item.status === 'Awaiting' || item.status === 'AWAITING' || item.status === 'Pending');
 
                 // 2. Metrics Logic (Strict 2-Column Grid)
                 let leftLabel = 'Buy Price';
@@ -6100,56 +6106,19 @@
                     badgeColor = '#d4af37'; // Gold
                 }
 
+                const lp = (isIPOItem || isHolding) ? ((window.MarketEngine && window.MarketEngine.getProduct) ? window.MarketEngine.getProduct(item.symbol) : null) : null;
+
                 if (isHolding) {
-                    const lp = (window.MarketEngine && window.MarketEngine.getProduct) ? window.MarketEngine.getProduct(item.symbol) : null;
                     const cp = lp ? lp.price : parseFloat(item.price);
+                    const buyPrice = parseFloat(item.price) || 0;
                     const profit = (cp * item.quantity) - parseFloat(item.total_amount);
                     const profitPct = (profit / parseFloat(item.total_amount)) * 100;
 
-                    // Point 5: IPO Metrics & Labels
                     if (isIPOItem) {
                         leftLabel = 'Allocation Price';
-                        const buyPrice = parseFloat(item.price) || 0;
                         leftVal = '₹' + buyPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-                        leftId = '';
-
-                        // Determine Pre-listing vs Real Logic
-                        let isPreListing = true;
-                        if (lp && lp.listingDate && lp.listingDate !== 'TBD') {
-                            const lDate = new Date(lp.listingDate);
-                            if (!isNaN(lDate.getTime()) && now >= lDate) {
-                                isPreListing = false;
-                            }
-                        }
-
-                        let computedProfit = 0;
-                        const approvedQty = parseFloat(item.quantity) || 0;
-
-                        if (isPreListing) {
-                            // PROJECTION MODE
-                            let estPct = 0;
-                            if (lp && lp.yield && lp.yield !== 'TBD') {
-                                const match = String(lp.yield).match(/(\d+(\.\d+)?)/);
-                                if (match) estPct = parseFloat(match[1]);
-                            }
-                            computedProfit = buyPrice * (estPct / 100) * approvedQty;
-                        } else {
-                            // REAL P/L MODE
-                            computedProfit = (cp - buyPrice) * approvedQty;
-                        }
-
-                        if (computedProfit !== null && !isNaN(computedProfit)) {
-                            rightLabel = 'EST. PROFIT';
-                            rightVal = '₹' + computedProfit.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-                            rightClass = computedProfit >= 0 ? 'green' : 'red';
-                            rightId = '';
-                        } else {
-                            rightLabel = '';
-                            rightVal = '';
-                            rightId = '';
-                        }
+                        leftId = `hPrice-${item.id}`;
                     } else {
-                        // Standard Stock Metrics
                         const lockDate = lockupUntil ? lockupUntil.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : null;
                         if (isLocked) {
                             leftLabel = 'Locked Until';
@@ -6164,12 +6133,12 @@
                             leftVal = '₹' + cp.toLocaleString('en-IN', { minimumFractionDigits: 2 });
                             leftId = `hPrice-${item.id}`;
                         }
-
-                        rightLabel = 'Unrealized P&L';
-                        rightVal = `₹${profit.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (${profitPct >= 0 ? '+' : ''}${profitPct.toFixed(2)}%)`;
-                        rightId = `hProfit-${item.id}`;
-                        rightClass = profit >= 0 ? 'green' : 'red';
                     }
+
+                    rightLabel = 'Unrealized P&L';
+                    rightVal = `₹${profit.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (${profitPct >= 0 ? '+' : ''}${profitPct.toFixed(2)}%)`;
+                    rightId = `hProfit-${item.id}`;
+                    rightClass = profit >= 0 ? 'green' : 'red';
                 } else if (item.status === 'Sold') {
                     leftLabel = 'Sell Price';
                     leftVal = '₹' + parseFloat(item.sell_price || item.price).toLocaleString('en-IN', { minimumFractionDigits: 2 });
@@ -6189,9 +6158,15 @@
                 // 3. Button Logic
                 let actionButtons = `<button class="h-btn view" onclick="openHoldingDetail('${item.id}')" style="pointer-events: auto !important; position: relative; z-index: 10;">View Details</button>`;
                 if (isHolding) {
+                    const pListingDate = item.products ? item.products.listing_date : null;
+                    const isPreListing = pListingDate && new Date(pListingDate) > new Date();
+
                     if (isLocked) {
                         const lockDate = lockupUntil.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
                         actionButtons += `<button class="h-btn close" style="background:#475569 !important; border-color: #475569 !important; cursor:not-allowed; opacity:0.8; font-size: 0.70rem;" title="Locked until ${lockDate}" disabled>🔒 Locked until ${lockDate}</button>`;
+                    } else if (isPreListing) {
+                        const lDateStr = new Date(pListingDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                        actionButtons += `<button class="h-btn close" style="background:#475569 !important; border-color: #475569 !important; cursor:not-allowed; opacity:0.8; font-size: 0.70rem;" title="Sell Available After Listing – ${lDateStr}" disabled>🔒 Sell Available After Listing – ${lDateStr}</button>`;
                     } else {
                         actionButtons += `<button class="h-btn close close-order-btn" data-id="${item.id}">Close Order</button>`;
                     }
@@ -6227,7 +6202,7 @@
                             </div>
                             <div class="premium-detail-item">
                                 <span class="label" style="color: #888 !important;">Estimated Profit</span>
-                                <span class="value" style="color: #94a3b8 !important;">To be confirmed</span>
+                                <span class="value" style="color: ${(item.est_profit_percent !== null && item.est_profit_percent !== undefined) ? '#ffffff' : '#94a3b8'} !important;">${(item.est_profit_percent !== null && item.est_profit_percent !== undefined) ? item.est_profit_percent + '%' : '—'}</span>
                             </div>
                         </div>
                         ` : `
@@ -6240,6 +6215,12 @@
                                 <span class="label" style="color: #888 !important;">${rightLabel}</span>
                                 <span class="value" style="color: ${rightClass === 'green' ? '#10b981' : (rightClass === 'red' ? '#ef4444' : '#fff')} !important;" id="${rightId}">${rightVal}</span>
                             </div>
+                            ${isIPOItem ? `
+                            <div class="premium-detail-item" style="grid-column: span 2;">
+                                <span class="label" style="color: #888 !important;">Estimated Profit</span>
+                                <span class="value" style="color: ${(item.est_profit_percent !== null && item.est_profit_percent !== undefined) ? '#ffffff' : '#94a3b8'} !important;">${(item.est_profit_percent !== null && item.est_profit_percent !== undefined) ? item.est_profit_percent + '%' : '—'}</span>
+                            </div>
+                            ` : ''}
                             <div class="premium-detail-item">
                                 <span class="label" style="color: #888 !important;">Quantity</span>
                                 <span class="value" style="color: #ffffff !important;">${item.quantity || '--'}</span>
@@ -6255,12 +6236,12 @@
                         </div>
                         `}
 
-                        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto;">
-                            ${premiumActionButtons}
-                            ${item.admin_note ? `<div style="font-size:0.75rem; padding:10px; background:rgba(239, 68, 68, 0.08); border-radius:8px; color:#ef4444; border:1px solid rgba(239, 68, 68, 0.1); line-height: 1.5; font-weight: 500;">Note: ${item.admin_note}</div>` : ''}
-                        </div>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto;">
+                    ${premiumActionButtons}
+                    ${item.admin_note ? `<div style="font-size:0.75rem; padding:10px; background:rgba(239, 68, 68, 0.08); border-radius:8px; color:#ef4444; border:1px solid rgba(239, 68, 68, 0.1); line-height: 1.5; font-weight: 500;">Note: ${item.admin_note}</div>` : ''}
+                </div>
                     </div>
-                `;
+                    `;
             });
             html += `</div>`;
             list.innerHTML = html;
@@ -6288,11 +6269,11 @@
 
                     if (prEl) {
                         prEl.innerText = '₹' + currPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 });
-                        prEl.className = `h-stat-val`; // Kept f8fafc from base template
+                        prEl.className = `h - stat - val`; // Kept f8fafc from base template
                     }
                     if (pEl) {
                         pEl.innerHTML = `₹${prof.toLocaleString('en-IN', { maximumFractionDigits: 2 })} <span style="font-size:0.75rem;">(${profPct >= 0 ? '+' : ''}${profPct.toFixed(2)}%)</span>`;
-                        pEl.className = `h-stat-val ${prof >= 0 ? 'green' : 'red'}`;
+                        pEl.className = `h - stat - val ${prof >= 0 ? 'green' : 'red'} `;
                     }
                 });
             }, 1000);
@@ -6318,36 +6299,18 @@
 
             try {
                 // Fetch all data in parallel
-                const [tradesRes, depositsRes, withdrawalsRes] = await Promise.all([
-                    window.DB.getTradesByUserId(user.id),
+                const [depositsRes, withdrawalsRes] = await Promise.all([
                     client.from('deposits').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
                     client.from('withdrawals').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
                 ]);
 
-                const trades = tradesRes || [];
                 const deposits = (depositsRes && depositsRes.data) || [];
                 const withdrawals = (withdrawalsRes && withdrawalsRes.data) || [];
 
                 // Debug log
-                console.log(`[FundRecords] Found ${trades.length} trades, ${deposits.length} deposits, ${withdrawals.length} withdrawals`);
+                console.log(`[FundRecords] Found ${deposits.length} deposits, ${withdrawals.length} withdrawals`);
 
                 let allRecords = [];
-
-                // Normalize Trades
-                trades.forEach(t => {
-                    const isBuy = t.type !== 'sell'; // Assuming 'sell' type for selling
-                    // Buy = Negative (outflow), Sell = Positive (inflow)
-                    // If trade is approved/pending, we show it.
-                    allRecords.push({
-                        rawDate: new Date(t.created_at),
-                        type: isBuy ? `Buy ${t.symbol}` : `Sell ${t.symbol}`,
-                        ex: 'Wallet',
-                        id: t.id ? String(t.id).substring(0, 8).toUpperCase() : 'N/A',
-                        amount: parseFloat(t.total_amount) || 0,
-                        isNegative: isBuy, // Buy is expense
-                        rawStatus: t.status
-                    });
-                });
 
                 // Normalize Deposits
                 deposits.forEach(d => {
@@ -6382,7 +6345,7 @@
                 const mapToDisplay = (rec) => ({
                     type: rec.type,
                     date: rec.rawDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
-                    ex: `${rec.ex} • ${rec.rawStatus}`,
+                    ex: `${rec.ex} • ${rec.rawStatus} `,
                     id: rec.id,
                     amount: rec.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 }),
                     isNegative: rec.isNegative,
@@ -6488,12 +6451,12 @@
 
             const totalEl = document.getElementById('fundTotalAmount');
             if (totalEl) {
-                totalEl.textContent = `₹${currentTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+                totalEl.textContent = `₹${currentTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })} `;
                 totalEl.style.color = currentTotal >= 0 ? '#10b981' : '#ef4444';
             }
 
             list.innerHTML = data.map(item => `
-                <div class="fund-item-card" data-date="${item.rawDate ? item.rawDate.toISOString() : ''}">
+                    <div class="fund-item-card" data-date="${item.rawDate ? item.rawDate.toISOString() : ''}">
                     <div class="f-item-main">
                         <div class="f-item-type">${item.type}</div>
                         <div class="f-item-sub">${item.date} • ${item.ex}</div>
@@ -6504,7 +6467,7 @@
                         <div class="f-item-curr">INR</div>
                     </div>
                 </div>
-            `).join('');
+                    `).join('');
 
             // Apply filter immediately if dates are set (persistence across tab switches)
             const fVal = document.getElementById('fundDateFrom')?.value;
@@ -6523,7 +6486,7 @@
             const now = new Date();
             const timeString = now.toLocaleTimeString('en-IN', { hour12: false });
             const clockEl = document.getElementById('realTimeClock');
-            if (clockEl) clockEl.innerText = `${timeString} GMT+5:30`;
+            if (clockEl) clockEl.innerText = `${timeString} GMT + 5: 30`;
         }
         setInterval(updateClock, 1000);
         updateClock();
@@ -6594,7 +6557,14 @@
         // Settings Modal Logic
         // Consolidate Page-Specific Sync with Global State
         window.syncUserData = async function () {
-            const user = DB.getCurrentUser();
+            const user = (window.UserService && typeof window.UserService.getCurrentUser === "function")
+                ? window.UserService.getCurrentUser()
+                : (window.DB ? window.DB.getCurrentUser() : null);
+
+            if (!user) {
+                console.warn("UserService not ready - skipping syncUserData");
+                return;
+            }
 
             // 1. Run Global Synchronization (Handles Avatar, Global Name, Balance, etc.)
             if (window.loadUserAssets) await window.loadUserAssets(user.id);
@@ -6603,7 +6573,9 @@
             if (typeof fetchUserTransactions === 'function') await fetchUserTransactions();
 
             // 3. Market-Specific Dashboard Sync (Charts, Portfolio Stats, Allocation)
-            const dbUser = DB.getCurrentUser(); // Latest state
+            const dbUser = (window.UserService && typeof window.UserService.getCurrentUser === "function")
+                ? window.UserService.getCurrentUser()
+                : window.DB.getCurrentUser(); // Latest state
             const formats = { minimumFractionDigits: 2 };
             const inv = parseFloat(dbUser.invested) || 0;
             const rawBalance = parseFloat(dbUser.balance) || 0;
@@ -6723,7 +6695,7 @@
             const fundStatus = document.getElementById('fundStatus');
             if (fundStatus) {
                 const fmtRaw = '₹' + rawBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-                fundStatus.textContent = `Available: ${fmtRaw}`;
+                fundStatus.textContent = `Available: ${fmtRaw} `;
                 fundStatus.style.color = rawBalance > 0 ? '#10b981' : '#ef4444';
             }
 
@@ -6768,10 +6740,7 @@
             }
         };
 
-        // Initialize sync on load
-        if (DB.getCurrentUser()) syncUserData();
-
-
+        // Initialize sync on load (Handled inside DOMContentLoaded with waitForDB)
 
 
 
@@ -6829,9 +6798,17 @@
         // Initial Render
         syncUserData();
         // Fetch fresh data from backend (e.g. approved deposits)
-        DB.refreshCurrentUser().then(fullUser => {
-            if (fullUser) syncUserData();
-        });
+        if (window.UserService && typeof window.UserService.refreshCurrentUser === "function") {
+            window.UserService.refreshCurrentUser().then(fullUser => {
+                if (fullUser) syncUserData();
+            }).catch(e => console.error("UserService refresh error:", e));
+        } else if (window.DB && typeof window.DB.refreshCurrentUser === "function") {
+            window.DB.refreshCurrentUser().then(fullUser => {
+                if (fullUser) syncUserData();
+            }).catch(e => console.error("DB refresh error:", e));
+        } else {
+            console.warn("UserService / DB not ready");
+        }
         switchExchange('gainers', 'NSE');
         switchExchange('losers', 'NSE');
         renderFundRecords('all');
@@ -6920,7 +6897,7 @@
                 document.getElementById('hdEstProfit').innerText = listing.yield || 'TBD';
 
                 document.getElementById('hdNormalTradeTitle').innerText = (listing.name || symbol) + ' Listing Info';
-                document.getElementById('hdAssetLabel').innerText = 'Subscription Price';
+                document.getElementById('hdAssetLabel').innerText = 'QIB';
                 document.getElementById('hdAssetName').innerText = '₹' + parseFloat(listing.price || 0).toLocaleString('en-IN');
 
                 document.getElementById('hdAllocPriceRow').style.display = 'table-row';
@@ -6933,10 +6910,10 @@
                 document.getElementById('hdDeadline').innerText = listing.deadline || 'Final Call';
 
                 document.getElementById('hdAllocDateRow').style.display = 'table-row';
-                document.getElementById('hdAllocDate').innerText = listing.allocDate || 'Pending';
+                document.getElementById('hdAllocDate').innerText = listing.deadline && listing.deadline !== 'TBD' ? listing.deadline : 'TBD';
 
                 document.getElementById('hdListingDateRow').style.display = 'table-row';
-                document.getElementById('hdListingDate').innerText = listing.listingDate || 'TBD';
+                document.getElementById('hdListingDate').innerText = listing.listingDate && listing.listingDate !== 'TBD' ? listing.listingDate : 'TBD';
 
                 document.getElementById('hdEstProfitRow').style.display = 'table-row';
 
@@ -6978,7 +6955,6 @@
             if (hdLogoWrap) {
                 hdLogoWrap.innerHTML = '';
             }
-
             document.getElementById('hdTotalVal').innerText = '₹' + parseFloat(trade.total_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 });
             document.getElementById('hdTradeId').innerText = trade.id;
             document.getElementById('hdAssetName').innerText = trade.name;
@@ -7016,7 +6992,7 @@
                     <span class="breakdown-label" style="font-weight: 700;">Total Buy Fees</span>
                     <span class="breakdown-val" style="color: #ef4444;">₹${(buyTax + buyTxn).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                 </div>
-            `;
+                `;
 
             if (isClosed) {
                 feesHtml += `
@@ -7054,7 +7030,7 @@
                         <span style="color: #10b981;">Settled</span>
                     </div>
                 </div>
-            `;
+                    `;
 
             if (isClosed && trade.sell_timestamp) {
                 const sDate = new Date(trade.sell_timestamp);
@@ -7069,7 +7045,7 @@
                             <span style="color: #10b981;">Settled</span>
                         </div>
                     </div>
-                `;
+                    `;
             }
             document.getElementById('fundTxnBreakdown').innerHTML = historyHtml;
 
@@ -7088,14 +7064,14 @@
 
                 if (trade.type === 'ipo') {
                     if (timelineTitle) timelineTitle.innerText = 'Subscribe';
-                    document.getElementById('hdBuyTimeline').innerText = `Subscribe @ ${dateStr.replace(/\//g, '-')}`;
+                    document.getElementById('hdBuyTimeline').innerText = `Subscribe @${dateStr.replace(/\//g, '-')} `;
                     // Additional "Black Arrow" UI for IPO Pending
                     const listingInfo = note.includes('LISTING:') ? note.split('LISTING:')[1].split(';')[0] : 'TBD';
                     const estProfit = note.includes('PROFIT:') ? note.split('PROFIT:')[1].split(';')[0] : 'TBD';
-                    document.getElementById('hdBuyTimeline').innerHTML += `<br><span style="margin-top:0.5rem; display:block;">Listing Date (est): ${listingInfo}</span><span style="display:block;">Estimated Profit: ${estProfit}</span>`;
+                    document.getElementById('hdBuyTimeline').innerHTML += `< br ><span style="margin-top:0.5rem; display:block;">Listing Date (est): ${listingInfo}</span><span style="display:block;">Estimated Profit: ${estProfit}</span>`;
                 } else {
                     if (timelineTitle) timelineTitle.innerText = 'Awaiting';
-                    document.getElementById('hdBuyTimeline').innerText = `Order Placed @ ${dateStr.replace(/\//g, '-')}`;
+                    document.getElementById('hdBuyTimeline').innerText = `Order Placed @${dateStr.replace(/\//g, '-')} `;
                 }
             } else {
                 document.getElementById('hdCurrPrice').innerText = '₹' + mockCurrPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 });
@@ -7120,7 +7096,7 @@
                         outstandingNotice.style.display = 'block';
                         if (settleBtn) {
                             settleBtn.style.display = 'block';
-                            settleBtn.innerHTML = `<button onclick="settleOutstanding('${trade.id}', this)" style="width: 100%; background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%); color: black; border: none; padding: 0.85rem; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.95rem; margin-top: 0.5rem; transition: all 0.3s; box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);">Settle Now</button>`;
+                            settleBtn.innerHTML = `< button onclick = "settleOutstanding('${trade.id}', this)" style = "width: 100%; background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%); color: black; border: none; padding: 0.85rem; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 0.95rem; margin-top: 0.5rem; transition: all 0.3s; box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);" > Settle Now</button > `;
                         }
                     }
                     if (saleValueRow) saleValueRow.style.display = 'none';
@@ -7133,12 +7109,12 @@
 
                 if (trade.type === 'ipo') {
                     if (timelineTitle) timelineTitle.innerText = 'Listing Time';
-                    document.getElementById('hdBuyTimeline').innerText = `Listed @ ${dateStr.replace(/\//g, '-')} — Price ₹${mockCurrPrice.toLocaleString('en-IN')}`;
+                    document.getElementById('hdBuyTimeline').innerText = `Listed @${dateStr.replace(/\//g, '-')} — Price ₹${mockCurrPrice.toLocaleString('en-IN')} `;
                 } else {
                     if (timelineTitle) timelineTitle.innerText = 'Order Timeline';
                     const bDt = new Date(trade.created_at);
-                    const bfDt = `${String(bDt.getDate()).padStart(2, '0')}-${String(bDt.getMonth() + 1).padStart(2, '0')}-${bDt.getFullYear()}, ${String(bDt.getHours()).padStart(2, '0')}:${String(bDt.getMinutes()).padStart(2, '0')}:${String(bDt.getSeconds()).padStart(2, '0')}`;
-                    document.getElementById('hdBuyTimeline').innerText = `${bfDt} — Buy @ ₹${parseFloat(trade.price).toLocaleString('en-IN', { minimumFractionDigits: 2 })} · Total ₹${parseFloat(trade.total_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+                    const bfDt = `${String(bDt.getDate()).padStart(2, '0')} -${String(bDt.getMonth() + 1).padStart(2, '0')} -${bDt.getFullYear()}, ${String(bDt.getHours()).padStart(2, '0')}:${String(bDt.getMinutes()).padStart(2, '0')}:${String(bDt.getSeconds()).padStart(2, '0')} `;
+                    document.getElementById('hdBuyTimeline').innerText = `${bfDt} — Buy @ ₹${parseFloat(trade.price).toLocaleString('en-IN', { minimumFractionDigits: 2 })} · Total ₹${parseFloat(trade.total_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })} `;
                 }
 
                 // SELL TIME LOGIC
@@ -7150,11 +7126,11 @@
                     if (connector) connector.style.display = 'block';
 
                     const sDt = new Date(trade.sell_timestamp);
-                    const fDt = `${String(sDt.getDate()).padStart(2, '0')}-${String(sDt.getMonth() + 1).padStart(2, '0')}-${sDt.getFullYear()}, ${String(sDt.getHours()).padStart(2, '0')}:${String(sDt.getMinutes()).padStart(2, '0')}:${String(sDt.getSeconds()).padStart(2, '0')}`;
+                    const fDt = `${String(sDt.getDate()).padStart(2, '0')} -${String(sDt.getMonth() + 1).padStart(2, '0')} -${sDt.getFullYear()}, ${String(sDt.getHours()).padStart(2, '0')}:${String(sDt.getMinutes()).padStart(2, '0')}:${String(sDt.getSeconds()).padStart(2, '0')} `;
 
                     const sp = parseFloat(trade.sell_price || trade.price);
                     const sv = parseFloat(trade.total_sale_value || (sp * trade.quantity));
-                    document.getElementById('hdSellTimeline').innerText = `${fDt} — Sell @ ₹${sp.toLocaleString('en-IN', { minimumFractionDigits: 2 })} · Total ₹${sv.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+                    document.getElementById('hdSellTimeline').innerText = `${fDt} — Sell @ ₹${sp.toLocaleString('en-IN', { minimumFractionDigits: 2 })} · Total ₹${sv.toLocaleString('en-IN', { minimumFractionDigits: 2 })} `;
                 } else {
                     if (sellContainer) sellContainer.style.display = 'none';
                     if (connector) connector.style.display = 'none';
@@ -7167,12 +7143,44 @@
                 // Reset Sections for IPO
                 document.getElementById('hdPremiumHeader').style.display = 'none';
                 document.getElementById('hdIpoProcessNotice').style.display = 'none';
-                ['hdAnnouncementDateRow', 'hdAllotmentDateRow', 'hdAllocationStatusRow', 'hdSubDateRow', 'hdDeadlineRow', 'hdAllocDateRow', 'hdListingDateRow', 'hdEstProfitRow', 'hdNormalTypeRow', 'hdNormalQtyRow', 'hdNormalBuyPriceRow', 'hdNormalOrderValRow', 'hdNormalCurrPriceRow', 'hdNormalProfitRow', 'hdLockupStatusRow', 'hdLockupRow', 'hdLockupRemainingRow', 'hdAllocPriceRow'].forEach(id => {
+                ['hdAllotmentDateRow', 'hdAllocationStatusRow', 'hdSubDateRow', 'hdDeadlineRow', 'hdAllocDateRow', 'hdListingDateRow', 'hdEstProfitRow', 'hdNormalTypeRow', 'hdNormalQtyRow', 'hdNormalBuyPriceRow', 'hdNormalOrderValRow', 'hdNormalCurrPriceRow', 'hdNormalProfitRow', 'hdLockupStatusRow', 'hdLockupRow', 'hdLockupRemainingRow', 'hdAllocPriceRow'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.style.display = 'none';
                 });
 
-                const listing = (window.MarketEngine ? window.MarketEngine.getIPO().find(x => x.symbol === trade.symbol) : null);
+                // Change constant to let so it matches discover.html structure if needed
+                let listing = (window.MarketEngine ? window.MarketEngine.getIPO().find(x => x.symbol === trade.symbol) : null);
+
+                // --- BEGIN ASYNC FALLBACK FOR IPO DATES ---
+                // Try fetching Listing Date and generic End Date (Allotment Date fallback for old orders)
+                if (window.DB) {
+                    window.DB.getClient()
+                        .from('products')
+                        .select('listing_date, end_date')
+                        .eq('name', trade.name)
+                        .limit(1)
+                        .single()
+                        .then(({ data }) => {
+                            if (data && document.getElementById('hdTradeId').innerText == trade.id) {
+                                // Listing Date is strictly product-based
+                                const hdList = document.getElementById('hdListingDate');
+                                if (hdList) hdList.innerText = data.listing_date || 'TBD';
+
+                                // Allotment Date is Trade-based, but we use Product End Date as a fallback for legacy orders
+                                const hdAllot = document.getElementById('hdAllotmentDate');
+                                if (hdAllot && (!trade.allotment_date || trade.allotment_date === '')) {
+                                    hdAllot.innerText = data.end_date || 'TBD';
+
+                                    // Sync to Awaiting modal specific date mapping if needed
+                                    const hdAlloc = document.getElementById('hdAllocDate');
+                                    if (hdAlloc) hdAlloc.innerText = data.end_date || 'TBD';
+                                }
+                            }
+                        }).catch(e => console.error("Async IPO fetch error:", e));
+                }
+                // --- END ASYNC FALLBACK ---
+
+                const formattedAllocDate = trade.allotment_date ? new Date(trade.allotment_date).toLocaleDateString('en-IN') : 'TBD';
 
                 if (trade.status === 'Awaiting' || trade.status === 'Pending') {
                     // 1. IF STATUS = 'Awaiting'
@@ -7190,11 +7198,14 @@
                     document.getElementById('hdAssetType').innerText = 'Awaiting';
                     document.getElementById('hdAssetType').style.color = '#f59e0b';
 
-                    // IPO Timeline (Product-level)
-                    document.getElementById('hdAnnouncementDateRow').style.display = 'table-row';
-                    document.getElementById('hdAnnouncementDate').innerText = listing ? listing.subDate : 'TBD';
+                    // IPO Timeline (Product-level / Order-level)
+                    // document.getElementById('hdAnnouncementDateRow').style.display = 'table-row';
+                    // document.getElementById('hdAnnouncementDate').innerText = listing ? listing.subDate : 'TBD';
                     document.getElementById('hdAllotmentDateRow').style.display = 'table-row';
-                    document.getElementById('hdAllotmentDate').innerText = listing ? listing.listingDate : 'TBD';
+                    document.getElementById('hdAllotmentDate').innerText = formattedAllocDate;
+
+                    document.getElementById('hdListingDateRow').style.display = 'table-row';
+                    document.getElementById('hdListingDate').innerText = listing && listing.listingDate && listing.listingDate !== 'TBD' ? listing.listingDate : 'TBD';
 
                     // Allocation Section
                     document.getElementById('hdAllocationStatusRow').style.display = 'table-row';
@@ -7230,10 +7241,10 @@
                     document.getElementById('hdSubDate').innerText = new Date(trade.created_at).toLocaleDateString('en-IN');
 
                     document.getElementById('hdAllotmentDateRow').style.display = 'table-row';
-                    document.getElementById('hdAllotmentDate').innerText = listing && listing.allocDate ? listing.allocDate : 'TBD';
+                    document.getElementById('hdAllotmentDate').innerText = formattedAllocDate;
 
                     document.getElementById('hdListingDateRow').style.display = 'table-row';
-                    document.getElementById('hdListingDate').innerText = listing && listing.listingDate ? listing.listingDate : 'TBD';
+                    document.getElementById('hdListingDate').innerText = listing && listing.listingDate && listing.listingDate !== 'TBD' ? listing.listingDate : 'TBD';
 
                     document.getElementById('hdNormalTypeRow').style.display = 'table-row';
                     document.getElementById('hdAssetType').innerText = 'HOLDING';
@@ -7255,7 +7266,7 @@
                     document.getElementById('hdAllocPriceRow').style.display = 'table-row';
                     document.getElementById('hdAllocPrice').innerText = '₹' + buyPrice.toLocaleString('en-IN');
                     const allocPriceLabel = document.getElementById('hdAllocPriceRow').querySelector('td');
-                    if (allocPriceLabel) allocPriceLabel.innerText = 'Allocation Price (Issue Price)';
+                    if (allocPriceLabel) allocPriceLabel.innerText = 'QIB';
 
                     document.getElementById('hdNormalOrderValRow').style.display = 'table-row';
                     const allocAmount = buyPrice * approvedQty;
@@ -7275,7 +7286,7 @@
                         document.getElementById('hdLockupUntil').innerText = lockupUntil.toLocaleDateString('en-IN');
 
                         if (isActive) {
-                            document.getElementById('hdAssetType').innerHTML = `HOLDING <span style="font-size:0.75rem;">🔒</span>`;
+                            document.getElementById('hdAssetType').innerHTML = `HOLDING < span style = "font-size:0.75rem;" >🔒</span > `;
                         } else {
                             document.getElementById('hdAssetType').innerHTML = `HOLDING`;
                         }
@@ -7316,7 +7327,7 @@
 
                         const projectedProfitPerShare = buyPrice * (estPct / 100);
                         const estProfitVal = projectedProfitPerShare * approvedQty;
-                        displayProfit = `₹${estProfitVal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+                        displayProfit = `₹${estProfitVal.toLocaleString('en-IN', { minimumFractionDigits: 2 })} `;
 
                     } else {
                         // REAL P/L MODE (Post-listing)
@@ -7324,11 +7335,11 @@
                             const currentMarketPrice = parseFloat(listing.price) || 0;
                             const estProfitVal = (currentMarketPrice - buyPrice) * approvedQty;
 
-                            displayProfit = `₹${estProfitVal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+                            displayProfit = `₹${estProfitVal.toLocaleString('en-IN', { minimumFractionDigits: 2 })} `;
 
                             if (allocAmount > 0) {
                                 const pct = (estProfitVal / allocAmount) * 100;
-                                displayPct = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%`;
+                                displayPct = `${pct >= 0 ? '+' : ''}${pct.toFixed(2)}% `;
                             } else {
                                 displayPct = '0.00%';
                             }
@@ -7362,7 +7373,7 @@
                 const totalLabel = document.querySelector('#holdingDetailModal .detail-total-label');
                 if (totalLabel) totalLabel.innerText = 'Total Value';
 
-                ['hdAnnouncementDateRow', 'hdAllotmentDateRow', 'hdAllocationStatusRow', 'hdAllocPriceRow', 'hdSubDateRow', 'hdDeadlineRow', 'hdAllocDateRow', 'hdListingDateRow', 'hdEstProfitRow'].forEach(id => {
+                ['hdAllotmentDateRow', 'hdAllocationStatusRow', 'hdAllocPriceRow', 'hdSubDateRow', 'hdDeadlineRow', 'hdAllocDateRow', 'hdListingDateRow', 'hdEstProfitRow'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.style.display = 'none';
                 });
@@ -7411,7 +7422,7 @@
             }
 
             // Set Market based on symbol if possible, else default BSE
-            document.getElementById('hdMarket').innerText = trade.symbol.includes('NSE') ? 'NSE' : 'BSE';
+            document.getElementById('hdMarket').innerText = trade.exchange || 'BSE';
 
             document.getElementById('holdingDetailModal').style.display = 'flex';
             lucide.createIcons();
@@ -7522,12 +7533,12 @@
             const currentBalance = parseFloat(user.balance || 0);
 
             if (currentBalance < outstanding) {
-                showIBModal(`Insufficient balance to settle this order. You need ₹${outstanding.toLocaleString('en-IN', { minimumFractionDigits: 2 })} more. Please deposit funds first.`);
+                showIBModal(`Insufficient balance to settle this order.You need ₹${outstanding.toLocaleString('en-IN', { minimumFractionDigits: 2 })} more.Please deposit funds first.`);
                 return;
             }
 
             // Custom Settlement Confirmation Modal
-            showSettleConfirm(`Are you sure you want to settle the outstanding balance of ₹${outstanding.toLocaleString('en-IN', { minimumFractionDigits: 2 })} for ${trade.name}?`, () => {
+            showSettleConfirm(`Are you sure you want to settle the outstanding balance of ₹${outstanding.toLocaleString('en-IN', { minimumFractionDigits: 2 })} for ${trade.name} ?`, () => {
                 executeSettleLogic(trade, user, outstanding, btnEl || event.target);
             });
         }
@@ -7656,7 +7667,6 @@
         </div>
     </div>
 
-    <script src="js/trading.js"></script>
 
 
 
@@ -7782,7 +7792,7 @@
                 </div>
             </div>
             <div class="logout-btn-container">
-                <button class="logout-btn" onclick="DB.logout()">Logout</button>
+                <button class="logout-btn" onclick="window.DB.logout()">Logout</button>
             </div>
         </div>
     </div>
@@ -8029,13 +8039,13 @@
                         <td id="hdAssetName">-</td>
                     </tr>
                     <tr id="hdAllocPriceRow" style="display: none;">
-                        <td>Allocation Price</td>
+                        <td>QIB</td>
                         <td id="hdAllocPrice">₹0.00</td>
                     </tr>
-                    <tr id="hdAnnouncementDateRow" style="display: none;">
+                    <!-- <tr id="hdAnnouncementDateRow" style="display: none;">
                         <td>Announcement Date</td>
                         <td id="hdAnnouncementDate">-</td>
-                    </tr>
+                    </tr> -->
                     <tr id="hdAllotmentDateRow" style="display: none;">
                         <td>Allotment Date</td>
                         <td id="hdAllotmentDate">-</td>
@@ -8679,8 +8689,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
-    <script src="js/credit_notifier.js"></script>
     <script>
         (function () {
             // --- Helper: Get Index Data by TradingView Symbol ---
@@ -8732,7 +8740,7 @@
                         const colorClass = isUp ? 'green' : 'red'; // CSS classes
                         const bg = isUp ? '#eefcf4' : '#fff1f1';
                         const col = isUp ? '#10b981' : '#ef4444';
-                        chgEl.className = `index-chg ${colorClass}`;
+                        chgEl.className = `index - chg ${colorClass} `;
                         chgEl.style.background = bg;
                         chgEl.style.color = col;
                         chgEl.innerText = `${isUp ? '+' : ''}${idx.change.toFixed(2)} (${isUp ? '+' : ''}${idx.changePercent.toFixed(2)}%)`;
@@ -8747,8 +8755,8 @@
 
                         const slider = document.getElementById('sliderMarker');
                         const progress = document.getElementById('rangeProgress');
-                        if (slider) slider.style.left = `${pctPos}%`;
-                        if (progress) progress.style.width = `${pctPos}%`;
+                        if (slider) slider.style.left = `${pctPos}% `;
+                        if (progress) progress.style.width = `${pctPos}% `;
                     }
                 }
             };
@@ -8829,19 +8837,11 @@
                         };
 
                         div.innerHTML = `
-                            <div class="index-card-left">
-                                <div class="index-head">
-                                    <img src="https://flagcdn.com/w20/in.png" class="index-flag">
-                                    <span class="index-name">${idx.symbol}</span>
+                            <div class="index-card-left" style="width: 100%; display: flex; justify-content: center; align-items: center;">
+                                <div class="index-head" style="display: flex; justify-content: center; gap: 8px; align-items: center;">
+                                    <img src="https://flagcdn.com/w20/in.png" class="index-flag" style="width: 20px; height: 14px;">
+                                    <span class="index-name" style="font-size: 1.4rem; font-weight: 700;">${idx.symbol}</span>
                                 </div>
-                                <div class="index-val" id="idx-val-${i}" style="font-weight:700; font-size:1.1rem; margin:0.25rem 0;">--</div>
-                                <div class="index-chg" id="idx-chg-${i}" style="font-weight:600; font-size:0.85rem;">--</div>
-                            </div>
-                            <div class="sparkline-container">
-                                <svg class="sparkline-svg" viewBox="0 0 100 40" style="width:100px; height:40px;">
-                                    <path class="sparkline-path" id="idx-spark-${i}"
-                                        d="M0 20 C 20 10, 40 30, 60 15 S 100 25, 100 20" fill="none" stroke-width="2"></path>
-                                </svg>
                             </div>
                         `;
                         container.appendChild(div);
@@ -8852,25 +8852,9 @@
                     if (initialActive) initialActive.classList.add('active');
                 }
 
-                // Update Values Loop
+                // Update Values Loop (Prices removed as per request)
                 indices.forEach((idx, i) => {
-                    const valParams = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
-                    const priceEl = document.getElementById(`idx-val-${i}`);
-                    const chgEl = document.getElementById(`idx-chg-${i}`);
-                    const sparkEl = document.getElementById(`idx-spark-${i}`);
-
-                    if (priceEl) priceEl.innerText = idx.price.toLocaleString('en-IN', valParams);
-
-                    if (chgEl) {
-                        const isUp = idx.change >= 0;
-                        const colorClass = isUp ? '#10b981' : '#ef4444';
-                        const colorClassName = isUp ? 'green' : 'red';
-
-                        chgEl.className = `index-chg ${colorClassName}`;
-                        chgEl.innerText = `${isUp ? '+' : ''}${idx.change.toFixed(2)} (${isUp ? '+' : ''}${idx.changePercent.toFixed(2)}%)`;
-
-                        if (sparkEl) sparkEl.setAttribute('stroke', colorClass);
-                    }
+                    // No price or sparkline updates needed anymore
                 });
 
                 // Trigger Hero Update via syncUI (which we overrode)
@@ -8906,807 +8890,886 @@
             color: #fff;
         }
     </style>
-</body>
+    <style>
+        .mini-tf-btn {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
 
-</html>
-<style>
-    .mini-tf-btn {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        padding: 6px 14px;
-        border-radius: 8px;
-        font-size: 11px;
-        font-weight: 700;
-        color: #475569;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
+        .mini-tf-btn.active {
+            background: #1e56a0;
+            color: white;
+            border-color: #1e56a0;
+        }
 
-    .mini-tf-btn.active {
-        background: #1e56a0;
-        color: white;
-        border-color: #1e56a0;
-    }
+        .range-dot,
+        #rangeProgress {
+            transition: all 0.5s ease;
+        }
+    </style>
 
-    .range-dot,
-    #rangeProgress {
-        transition: all 0.5s ease;
-    }
-</style>
+    <style>
+        /* CRITICAL FIX: Global Horizontal Scroll Prevention */
+        html,
+        body {
+            overflow-x: hidden !important;
+            width: 100% !important;
+            max-width: 100vw !important;
+            position: relative;
+        }
 
-<style>
-    /* CRITICAL FIX: Global Horizontal Scroll Prevention */
-    html,
-    body {
-        overflow-x: hidden !important;
-        width: 100% !important;
-        max-width: 100vw !important;
-        position: relative;
-    }
+        /* Prevent parent containers from expanding */
+        .market-content,
+        .market-wrapper,
+        #mainDashboard {
+            max-width: 100vw !important;
+            width: 100% !important;
+            overflow-x: hidden !important;
+            box-sizing: border-box;
+        }
 
-    /* Prevent parent containers from expanding */
-    .market-content,
-    .market-wrapper,
-    #mainDashboard {
-        max-width: 100vw !important;
-        width: 100% !important;
-        overflow-x: hidden !important;
-        box-sizing: border-box;
-    }
+        /* Fix Grid Item expansion (Common issue with carousels) */
+        .center-col {
+            min-width: 0 !important;
+            width: 100% !important;
+            /* Ensure it doesn't leak */
+            overflow-x: clip !important;
+        }
 
-    /* Fix Grid Item expansion (Common issue with carousels) */
-    .center-col {
-        min-width: 0 !important;
-        width: 100% !important;
-        /* Ensure it doesn't leak */
-        overflow-x: clip !important;
-    }
+        /* Scoped Carousel styles */
+        #indicesScrollContainer {
+            width: 100% !important;
+            max-width: 100% !important;
+            /* Horizontal scroll only inside here */
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            -webkit-overflow-scrolling: touch;
+            display: block;
+            padding-bottom: 5px;
+        }
 
-    /* Scoped Carousel styles */
-    #indicesScrollContainer {
-        width: 100% !important;
-        max-width: 100% !important;
-        /* Horizontal scroll only inside here */
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-        -webkit-overflow-scrolling: touch;
-        display: block;
-        padding-bottom: 5px;
-    }
+        /* Clean Scrollbar */
+        #indicesScrollContainer::-webkit-scrollbar {
+            display: none;
+            height: 0;
+            width: 0;
+        }
 
-    /* Clean Scrollbar */
-    #indicesScrollContainer::-webkit-scrollbar {
-        display: none;
-        height: 0;
-        width: 0;
-    }
+        /* Inner List expands freely horizontally */
+        #majorIndicesList {
+            width: max-content !important;
+            display: flex !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+    </style>
 
-    /* Inner List expands freely horizontally */
-    #majorIndicesList {
-        width: max-content !important;
-        display: flex !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-</style>
-
-<style>
-    /* =========================================
+    <style>
+        /* =========================================
        MARKET PAGE BLACK & GOLD THEME OVERRIDES
        ========================================= */
 
-    /* 1. Page Background & Main Layout */
-    body,
-    html {
-        background-color: #0b0b0b !important;
-        color: #e2e8f0 !important;
-    }
+        /* 1. Page Background & Main Layout */
+        body,
+        html {
+            background-color: #0b0b0b !important;
+            color: #e2e8f0 !important;
+        }
 
-    .market-wrapper,
-    .market-content,
-    #mainDashboard {
-        background-color: #0b0b0b !important;
-        color: #e2e8f0 !important;
-    }
+        .market-wrapper,
+        .market-content,
+        #mainDashboard {
+            background-color: #0b0b0b !important;
+            color: #e2e8f0 !important;
+        }
 
-    /* 2. Card Containers (Replace White with Dark) */
-    .m-card,
-    .h-card,
-    .main-index-view,
-    .styled-chart-box,
-    .premium-trade-card {
-        background-color: #111111 !important;
-        border: 1px solid #2a2a2a !important;
-        color: #ffffff !important;
-        box-shadow: none !important;
-    }
+        /* 2. Card Containers (Replace White with Dark) */
+        .m-card,
+        .h-card,
+        .main-index-view,
+        .styled-chart-box,
+        .premium-trade-card {
+            background-color: #111111 !important;
+            border: 1px solid #2a2a2a !important;
+            color: #ffffff !important;
+            box-shadow: none !important;
+        }
 
-    /* Remove white shadows/glows */
-    .m-card,
-    .h-card {
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
-    }
+        /* Remove white shadows/glows */
+        .m-card,
+        .h-card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+        }
 
-    /* 3. Typography & Headings */
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    .section-title,
-    .premium-asset-name,
-    .index-val,
-    .asset-val,
-    .stock-ticker,
-    .h-stock-info h3,
-    .h-stat-val,
-    .detail-total-val,
-    .news-item h4 {
-        color: #f8fafc !important;
-    }
+        /* 3. Typography & Headings */
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        .section-title,
+        .premium-asset-name,
+        .index-val,
+        .asset-val,
+        .stock-ticker,
+        .h-stock-info h3,
+        .h-stat-val,
+        .detail-total-val,
+        .news-item h4 {
+            color: #f8fafc !important;
+        }
 
-    .section-title.indices {
-        color: #ffffff !important;
-    }
+        .section-title.indices {
+            color: #ffffff !important;
+        }
 
-    .text-muted,
-    .asset-label,
-    .asset-sub,
-    .stock-full-name,
-    .h-stock-meta,
-    .h-stat-label,
-    .news-item p,
-    .news-meta,
-    .premium-return-label,
-    .detail-total-label,
-    .detail-info-table tr td:first-child {
-        color: #94a3b8 !important;
-    }
+        .text-muted,
+        .asset-label,
+        .asset-sub,
+        .stock-full-name,
+        .h-stock-meta,
+        .h-stat-label,
+        .news-item p,
+        .news-meta,
+        .premium-return-label,
+        .detail-total-label,
+        .detail-info-table tr td:first-child {
+            color: #94a3b8 !important;
+        }
 
-    /* 4. Interactive Elements & Accents */
-    /* Icons */
-    i[data-lucide],
-    svg {
-        color: #d4af37 !important;
-        /* Gold icons */
-    }
+        /* 4. Interactive Elements & Accents */
+        /* Icons */
+        i[data-lucide],
+        svg {
+            color: #d4af37 !important;
+            /* Gold icons */
+        }
 
-    /* Specific overrides for status colors to keep them functional (Green/Red) */
-    .asset-val.green,
-    .index-chg.green,
-    .sector-pct.up,
-    .h-stat-val.green,
-    .h-status-badge {
-        color: #10b981 !important;
-        /* Keep Green */
-    }
+        /* Specific overrides for status colors to keep them functional (Green/Red) */
+        .asset-val.green,
+        .index-chg.green,
+        .sector-pct.up,
+        .h-stat-val.green,
+        .h-status-badge {
+            color: #10b981 !important;
+            /* Keep Green */
+        }
 
-    .asset-val.red,
-    .index-chg.red,
-    .sector-pct.down,
-    .h-stat-val.red {
-        color: #ef4444 !important;
-        /* Keep Red */
-    }
+        .asset-val.red,
+        .index-chg.red,
+        .sector-pct.down,
+        .h-stat-val.red {
+            color: #ef4444 !important;
+            /* Keep Red */
+        }
 
-    /* Buttons */
-    .tf-btn {
-        background: #1a1a1a !important;
-        color: #94a3b8 !important;
-        border: 1px solid #333 !important;
-    }
+        /* Buttons */
+        .tf-btn {
+            background: #1a1a1a !important;
+            color: #94a3b8 !important;
+            border: 1px solid #333 !important;
+        }
 
-    .tf-btn:hover {
-        border-color: #d4af37 !important;
-        color: #d4af37 !important;
-    }
+        .tf-btn:hover {
+            border-color: #d4af37 !important;
+            color: #d4af37 !important;
+        }
 
-    .tf-btn.active {
-        background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
-        color: #000 !important;
-        border-color: #d4af37 !important;
-        font-weight: 800 !important;
-    }
+        .tf-btn.active {
+            background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
+            color: #000 !important;
+            border-color: #d4af37 !important;
+            font-weight: 800 !important;
+        }
 
-    .mini-tf-btn {
-        background: #1a1a1a !important;
-        color: #94a3b8 !important;
-        border: 1px solid #333 !important;
-    }
+        .mini-tf-btn {
+            background: #1a1a1a !important;
+            color: #94a3b8 !important;
+            border: 1px solid #333 !important;
+        }
 
-    .mini-tf-btn.active {
-        background: #d4af37 !important;
-        color: #000 !important;
-        border-color: #d4af37 !important;
-    }
+        .mini-tf-btn.active {
+            background: #d4af37 !important;
+            color: #000 !important;
+            border-color: #d4af37 !important;
+        }
 
-    /* 5. Specific Component Overrides */
-    /* Asset Cards */
-    .asset-mini-card {
-        background: #161616 !important;
-        border: 1px solid #262626 !important;
-    }
+        /* 5. Specific Component Overrides */
+        /* Asset Cards */
+        .asset-mini-card {
+            background: #161616 !important;
+            border: 1px solid #262626 !important;
+        }
 
-    /* Sector Cards */
-    .sector-card {
-        background: #161616 !important;
-        border: 1px solid #262626 !important;
-    }
+        /* Sector Cards */
+        .sector-card {
+            background: #161616 !important;
+            border: 1px solid #262626 !important;
+        }
 
-    .sector-card:hover {
-        border-color: #d4af37 !important;
-        background: #1a1a1a !important;
-    }
+        .sector-card:hover {
+            border-color: #d4af37 !important;
+            background: #1a1a1a !important;
+        }
 
-    /* Disable hover border/glow/highlight for non-clickable cards in Stocks & Commodities */
-    .sector-grid .sector-card {
-        cursor: default !important;
-    }
+        /* Disable hover border/glow/highlight for non-clickable cards in Stocks & Commodities */
+        .sector-grid .sector-card {
+            cursor: default !important;
+        }
 
-    .sector-grid .sector-card:hover {
-        transform: none !important;
-        border-color: #262626 !important;
-        box-shadow: none !important;
-        background: #161616 !important;
-    }
+        .sector-grid .sector-card:hover {
+            transform: none !important;
+            border-color: #262626 !important;
+            box-shadow: none !important;
+            background: #161616 !important;
+        }
 
-    /* Aggressive fix for non-clickable cards in left column */
-    .left-col .sector-card,
-    .left-col .sector-card * {
-        cursor: default !important;
-    }
+        /* Aggressive fix for non-clickable cards in left column */
+        .left-col .sector-card,
+        .left-col .sector-card * {
+            cursor: default !important;
+        }
 
-    .left-col .sector-card:hover {
-        transform: none !important;
-        border: 1px solid #262626 !important;
-        box-shadow: none !important;
-        background-color: #161616 !important;
-        outline: none !important;
-        filter: none !important;
-        transition: none !important;
-    }
+        .left-col .sector-card:hover {
+            transform: none !important;
+            border: 1px solid #262626 !important;
+            box-shadow: none !important;
+            background-color: #161616 !important;
+            outline: none !important;
+            filter: none !important;
+            transition: none !important;
+        }
 
-    .sector-name {
-        color: #e2e8f0 !important;
-    }
+        .sector-name {
+            color: #e2e8f0 !important;
+        }
 
-    /* Index Cards (Carousel) */
-    .index-card {
-        background: #161616 !important;
-        border: 1px solid #262626 !important;
-    }
+        /* Index Cards (Carousel) */
+        .index-card {
+            background: #161616 !important;
+            border: 1px solid #262626 !important;
+        }
 
-    .index-card.active {
-        border-color: #d4af37 !important;
-        background: #1c1c1c !important;
-    }
+        .index-card.active {
+            border-color: #d4af37 !important;
+            background: #1c1c1c !important;
+        }
 
-    .index-name {
-        color: #d4af37 !important;
-    }
+        .index-name {
+            color: #d4af37 !important;
+        }
 
-    /* Gold Index Names */
+        /* Gold Index Names */
 
-    /* Stock List / Watchlist */
-    .stock-row,
-    .news-item {
-        border-bottom: 1px solid #262626 !important;
-    }
+        /* Stock List / Watchlist */
+        .stock-row,
+        .news-item {
+            border-bottom: 1px solid #262626 !important;
+        }
 
-    .stock-circle {
-        background: #262626 !important;
-        color: #d4af37 !important;
-        border: 1px solid #333 !important;
-    }
+        .stock-circle {
+            background: #262626 !important;
+            color: #d4af37 !important;
+            border: 1px solid #333 !important;
+        }
 
-    /* Range Slider */
-    .day-range-container {
-        border-top: 1px solid #262626 !important;
-    }
+        /* Range Slider */
+        .day-range-container {
+            border-top: 1px solid #262626 !important;
+        }
 
-    .slider-marker {
-        background: #000 !important;
-        border-color: #d4af37 !important;
-    }
+        .slider-marker {
+            background: #000 !important;
+            border-color: #d4af37 !important;
+        }
 
-    /* Detail Modal / Locked Sections */
-    .auth-lock-overlay {
-        background: rgba(0, 0, 0, 0.7) !important;
-        backdrop-filter: blur(4px);
-    }
+        /* Detail Modal / Locked Sections */
+        .auth-lock-overlay {
+            background: rgba(0, 0, 0, 0.7) !important;
+            backdrop-filter: blur(4px);
+        }
 
-    .auth-lock-btn {
-        background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
-        color: #000 !important;
-        font-weight: 800 !important;
-    }
+        .auth-lock-btn {
+            background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
+            color: #000 !important;
+            font-weight: 800 !important;
+        }
 
-    /* Chart Container specific */
-    .chart-container-realtime {
-        border: 1px solid #333 !important;
-    }
+        /* Chart Container specific */
+        .chart-container-realtime {
+            border: 1px solid #333 !important;
+        }
 
-    /* Table borders */
-    .detail-info-table tr td {
-        border-bottom: 1px solid #262626 !important;
-    }
+        /* Table borders */
+        .detail-info-table tr td {
+            border-bottom: 1px solid #262626 !important;
+        }
 
-    /* =========================================
+        /* =========================================
        ADDITIONAL REFINEMENTS (Blue to Gold / Light to Dark)
        ========================================= */
 
-    /* Exchange Tabs (NSE/BSE) */
-    .exchange-tab {
-        background: #1a1a1a !important;
-        color: #94a3b8 !important;
-        border: 1px solid #333 !important;
-    }
+        /* Exchange Tabs (NSE/BSE) */
+        .exchange-tab {
+            background: #1a1a1a !important;
+            color: #94a3b8 !important;
+            border: 1px solid #333 !important;
+        }
 
-    .exchange-tab.active {
-        background: #d4af37 !important;
-        color: #000 !important;
-        border-color: #d4af37 !important;
-        font-weight: 700 !important;
-    }
+        .exchange-tab.active {
+            background: #d4af37 !important;
+            color: #000 !important;
+            border-color: #d4af37 !important;
+            font-weight: 700 !important;
+        }
 
-    /* IPO Status Badges */
-    .ipo-item {
-        border-bottom: 1px solid #262626 !important;
-        color: #e2e8f0 !important;
-    }
+        /* IPO Status Badges */
+        .ipo-item {
+            border-bottom: 1px solid #262626 !important;
+            color: #e2e8f0 !important;
+        }
 
-    .ipo-item>div:first-child>div:last-child {
-        color: #94a3b8 !important;
-        /* Date color */
-    }
+        .ipo-item>div:first-child>div:last-child {
+            color: #94a3b8 !important;
+            /* Date color */
+        }
 
-    /* Specific Badge Overrides to muted gold/dark theme style */
-    .ipo-item div[style*="background: #eff6ff"] {
-        /* Upcoming (Blue) -> Gold/Dark */
-        background: #2a2a2a !important;
-        color: #f59e0b !important;
-        border: 1px solid #f59e0b !important;
-    }
+        /* Specific Badge Overrides to muted gold/dark theme style */
+        .ipo-item div[style*="background: #eff6ff"] {
+            /* Upcoming (Blue) -> Gold/Dark */
+            background: #2a2a2a !important;
+            color: #f59e0b !important;
+            border: 1px solid #f59e0b !important;
+        }
 
-    .ipo-item div[style*="background: #f0fdf4"] {
-        /* Open (Green) -> Keep Green but Darker Bg */
-        background: #052e16 !important;
-        color: #4ade80 !important;
-        border: 1px solid #059669 !important;
-    }
+        .ipo-item div[style*="background: #f0fdf4"] {
+            /* Open (Green) -> Keep Green but Darker Bg */
+            background: #052e16 !important;
+            color: #4ade80 !important;
+            border: 1px solid #059669 !important;
+        }
 
-    .ipo-item div[style*="background: #fef3c7"] {
-        /* Soon (Yellow) -> Darker Yellow */
-        background: #2a2a2a !important;
-        color: #fbbf24 !important;
-        border: 1px solid #b45309 !important;
-    }
+        .ipo-item div[style*="background: #fef3c7"] {
+            /* Soon (Yellow) -> Darker Yellow */
+            background: #2a2a2a !important;
+            color: #fbbf24 !important;
+            border: 1px solid #b45309 !important;
+        }
 
-    /* Side List Titles (Star, Trending Icons etc) */
-    .side-list-title i {
-        color: #d4af37 !important;
-    }
+        /* Side List Titles (Star, Trending Icons etc) */
+        .side-list-title i {
+            color: #d4af37 !important;
+        }
 
-    /* Specific overrides for Up/Down trend icons to keep Green/Red logic if preferred, 
+        /* Specific overrides for Up/Down trend icons to keep Green/Red logic if preferred, 
        but user asked for Gold theme. Let's keep Green/Red for directional logic as it's functional,
        but background of tabs is handled above. */
 
-    /* Search Bar in Header (if visible) */
-    .search-bar {
-        background: #111 !important;
-        border: 1px solid #333 !important;
-    }
+        /* Search Bar in Header (if visible) */
+        .search-bar {
+            background: #111 !important;
+            border: 1px solid #333 !important;
+        }
 
-    .search-input {
-        color: #fff !important;
-    }
+        .search-input {
+            color: #fff !important;
+        }
 
-    .search-input::placeholder {
-        color: #64748b !important;
-    }
+        .search-input::placeholder {
+            color: #64748b !important;
+        }
 
-    /* Watchlist "No Data" Text */
-    .auth-locked-content {
-        color: #94a3b8 !important;
-    }
+        /* Watchlist "No Data" Text */
+        .auth-locked-content {
+            color: #94a3b8 !important;
+        }
 
-    /* Buy Widget Inputs (Stock Detail) */
-    .input-group .q-input {
-        background: #111 !important;
-        border: 1px solid #333 !important;
-        color: #fff !important;
-    }
+        /* Buy Widget Inputs (Stock Detail) */
+        .input-group .q-input {
+            background: #111 !important;
+            border: 1px solid #333 !important;
+            color: #fff !important;
+        }
 
-    .input-group .max-btn {
-        background: #262626 !important;
-        color: #d4af37 !important;
-        border: 1px solid #333 !important;
-    }
+        .input-group .max-btn {
+            background: #262626 !important;
+            color: #d4af37 !important;
+            border: 1px solid #333 !important;
+        }
 
-    .input-group .max-btn:hover {
-        border-color: #d4af37 !important;
-    }
+        .input-group .max-btn:hover {
+            border-color: #d4af37 !important;
+        }
 
-    /* Trading Info Table in Detail View */
-    .trading-info-table tr td {
-        border-bottom: 1px solid #262626 !important;
-        color: #94a3b8 !important;
-    }
+        /* Trading Info Table in Detail View */
+        .trading-info-table tr td {
+            border-bottom: 1px solid #262626 !important;
+            color: #94a3b8 !important;
+        }
 
-    .trading-info-table tr td.val {
-        color: #f8fafc !important;
-    }
+        .trading-info-table tr td.val {
+            color: #f8fafc !important;
+        }
 
-    .trading-info-table tr td.val.total {
-        color: #d4af37 !important;
-    }
+        .trading-info-table tr td.val.total {
+            color: #d4af37 !important;
+        }
 
-    /* Buy/Sell Buttons */
-    button.buy-btn {
-        background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
-        color: #000 !important;
-        font-weight: 800 !important;
-        box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2) !important;
-    }
+        /* Buy/Sell Buttons */
+        button.buy-btn {
+            background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
+            color: #000 !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2) !important;
+        }
 
-    button.buy-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(212, 175, 55, 0.3) !important;
-    }
+        button.buy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(212, 175, 55, 0.3) !important;
+        }
 
-    /* Sell button stays red but premium */
-    button#sellBtn {
-        background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
-        color: #fff !important;
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2) !important;
-    }
+        /* Sell button stays red but premium */
+        button#sellBtn {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+            color: #fff !important;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2) !important;
+        }
 
-    /* Range Slider Track */
-    input[type=range] {
-        accent-color: #d4af37 !important;
-    }
+        /* Range Slider Track */
+        input[type=range] {
+            accent-color: #d4af37 !important;
+        }
 
-    /* Footer */
-    .footer-market {
-        border-top: 1px solid #262626 !important;
-        color: #64748b !important;
-    }
+        /* Footer */
+        .footer-market {
+            border-top: 1px solid #262626 !important;
+            color: #64748b !important;
+        }
 
-    /* =========================================
+        /* =========================================
        DISCOVER PAGE BLACK & GOLD THEME OVERRIDES
        ========================================= */
 
-    /* Main Discover View Container */
-    #discoverView {
-        background-color: #0b0b0b !important;
-        color: #e2e8f0 !important;
-    }
+        /* Main Discover View Container */
+        #discoverView {
+            background-color: #0b0b0b !important;
+            color: #e2e8f0 !important;
+        }
 
-    /* Sidebar */
-    .discover-sidebar {
-        background-color: #111111 !important;
-        border-right: 1px solid #262626 !important;
-    }
+        /* Sidebar */
+        .discover-sidebar {
+            background-color: #111111 !important;
+            border-right: 1px solid #262626 !important;
+        }
 
-    .discover-nav-item {
-        color: #94a3b8 !important;
-        border-left: 3px solid transparent !important;
-    }
+        .discover-nav-item {
+            color: #94a3b8 !important;
+            border-left: 3px solid transparent !important;
+        }
 
-    .discover-nav-item:hover {
-        background-color: #1a1a1a !important;
-        color: #e2e8f0 !important;
-    }
+        .discover-nav-item:hover {
+            background-color: #1a1a1a !important;
+            color: #e2e8f0 !important;
+        }
 
-    .discover-nav-item.active {
-        background-color: #1a1a1a !important;
-        color: #d4af37 !important;
-        border-left-color: #d4af37 !important;
-        font-weight: 700 !important;
-    }
+        .discover-nav-item.active {
+            background-color: #1a1a1a !important;
+            color: #d4af37 !important;
+            border-left-color: #d4af37 !important;
+            font-weight: 700 !important;
+        }
 
-    .discover-nav-item.active i {
-        color: #d4af37 !important;
-    }
+        .discover-nav-item.active i {
+            color: #d4af37 !important;
+        }
 
-    /* Main Content Area */
-    .discover-main {
-        background-color: #0b0b0b !important;
-    }
+        /* Main Content Area */
+        .discover-main {
+            background-color: #0b0b0b !important;
+        }
 
-    /* Cards */
-    .discover-card {
-        background-color: #111111 !important;
-        border: 1px solid #262626 !important;
-        box-shadow: none !important;
-        color: #e2e8f0 !important;
-    }
+        /* Cards */
+        .discover-card {
+            background-color: #111111 !important;
+            border: 1px solid #262626 !important;
+            box-shadow: none !important;
+            color: #e2e8f0 !important;
+        }
 
-    /* Header & Titles */
-    .discover-head {
-        border-bottom: 1px solid #262626 !important;
-    }
+        /* Header & Titles */
+        .discover-head {
+            border-bottom: 1px solid #262626 !important;
+        }
 
-    .discover-head div[style*="color: #3b82f6"] {
-        color: #e2e8f0 !important;
-        /* Title Text */
-    }
+        .discover-head div[style*="color: #3b82f6"] {
+            color: #e2e8f0 !important;
+            /* Title Text */
+        }
 
-    .discover-head i[data-lucide] {
-        color: #d4af37 !important;
-        /* Gold Icons in Header */
-    }
+        .discover-head i[data-lucide] {
+            color: #d4af37 !important;
+            /* Gold Icons in Header */
+        }
 
-    /* Action Circles (Refresh/Search) */
-    .refresh-circle,
-    .search-circle {
-        background-color: #1a1a1a !important;
-        border: 1px solid #333 !important;
-        color: #d4af37 !important;
-    }
+        /* Action Circles (Refresh/Search) */
+        .refresh-circle,
+        .search-circle {
+            background-color: #1a1a1a !important;
+            border: 1px solid #333 !important;
+            color: #d4af37 !important;
+        }
 
-    .refresh-circle:hover,
-    .search-circle:hover {
-        background-color: #262626 !important;
-        border-color: #d4af37 !important;
-    }
+        .refresh-circle:hover,
+        .search-circle:hover {
+            background-color: #262626 !important;
+            border-color: #d4af37 !important;
+        }
 
-    /* Tabs (Box Style) */
-    .discover-tabs {
-        border-bottom: 1px solid #262626 !important;
-    }
+        /* Tabs (Box Style) */
+        .discover-tabs {
+            border-bottom: 1px solid #262626 !important;
+        }
 
-    .d-tab {
-        color: #94a3b8 !important;
-        border-bottom: 2px solid transparent !important;
-    }
+        .d-tab {
+            color: #94a3b8 !important;
+            border-bottom: 2px solid transparent !important;
+        }
 
-    .d-tab:hover {
-        color: #e2e8f0 !important;
-    }
+        .d-tab:hover {
+            color: #e2e8f0 !important;
+        }
 
-    .d-tab.active {
-        color: #d4af37 !important;
-        border-bottom-color: #d4af37 !important;
-    }
+        .d-tab.active {
+            color: #d4af37 !important;
+            border-bottom-color: #d4af37 !important;
+        }
 
-    .d-tab.active i {
-        color: #d4af37 !important;
-    }
+        .d-tab.active i {
+            color: #d4af37 !important;
+        }
 
-    /* Tabs (Pill Style - Transactions) */
-    .d-tab-pill {
-        background-color: #1a1a1a !important;
-        color: #94a3b8 !important;
-        border: 1px solid #333 !important;
-    }
+        /* Tabs (Pill Style - Transactions) */
+        .d-tab-pill {
+            background-color: #1a1a1a !important;
+            color: #94a3b8 !important;
+            border: 1px solid #333 !important;
+        }
 
-    .d-tab-pill:hover {
-        border-color: #64748b !important;
-        color: #e2e8f0 !important;
-    }
+        .d-tab-pill:hover {
+            border-color: #64748b !important;
+            color: #e2e8f0 !important;
+        }
 
-    .d-tab-pill.active {
-        background-color: #d4af37 !important;
-        color: #000 !important;
-        border-color: #d4af37 !important;
-        font-weight: 700 !important;
-    }
+        .d-tab-pill.active {
+            background-color: #d4af37 !important;
+            color: #000 !important;
+            border-color: #d4af37 !important;
+            font-weight: 700 !important;
+        }
 
-    /* Transaction List Items */
-    .trans-item {
-        background-color: #111111 !important;
-        border-bottom: 1px solid #262626 !important;
-    }
+        /* Transaction List Items */
+        .trans-item {
+            background-color: #111111 !important;
+            border-bottom: 1px solid #262626 !important;
+        }
 
-    .trans-item:hover {
-        background-color: #161616 !important;
-    }
+        .trans-item:hover {
+            background-color: #161616 !important;
+        }
 
-    .trans-icon-box {
-        background-color: #1a1a1a !important;
-        color: #d4af37 !important;
-    }
+        .trans-icon-box {
+            background-color: #1a1a1a !important;
+            color: #d4af37 !important;
+        }
 
-    .t-name {
-        color: #f8fafc !important;
-    }
+        .t-name {
+            color: #f8fafc !important;
+        }
 
-    .t-date {
-        color: #64748b !important;
-    }
+        .t-date {
+            color: #64748b !important;
+        }
 
-    .t-amount {
-        color: #f8fafc !important;
-    }
+        .t-amount {
+            color: #f8fafc !important;
+        }
 
-    /* Trade List Items */
-    .trade-item {
-        background-color: #111111 !important;
-        border-bottom: 1px solid #262626 !important;
-    }
+        /* Trade List Items */
+        .trade-item {
+            background-color: #111111 !important;
+            border-bottom: 1px solid #262626 !important;
+        }
 
-    .trade-info h4 {
-        color: #f8fafc !important;
-    }
+        .trade-info h4 {
+            color: #f8fafc !important;
+        }
 
-    .trade-info p {
-        color: #94a3b8 !important;
-    }
+        .trade-info p {
+            color: #94a3b8 !important;
+        }
 
-    /* Buttons in lists */
-    .btn-trade-action {
-        background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
-        color: #000 !important;
-    }
+        /* Buttons in lists */
+        .btn-trade-action {
+            background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
+            color: #000 !important;
+        }
 
-    .h-head h3 {
-        color: #f8fafc !important;
-    }
+        .h-head h3 {
+            color: #f8fafc !important;
+        }
 
-    .h-stock-meta {
-        color: #94a3b8 !important;
-    }
+        .h-stock-meta {
+            color: #94a3b8 !important;
+        }
 
-    .h-stat-label {
-        color: #64748b !important;
-    }
+        .h-stat-label {
+            color: #64748b !important;
+        }
 
-    .h-stat-val {
-        color: #f8fafc !important;
-    }
+        .h-stat-val {
+            color: #f8fafc !important;
+        }
 
-    .h-stat-val.green {
-        color: #10b981 !important;
-    }
+        .h-stat-val.green {
+            color: #10b981 !important;
+        }
 
-    .h-stat-val.red {
-        color: #ef4444 !important;
-    }
+        .h-stat-val.red {
+            color: #ef4444 !important;
+        }
 
-    /* View Details Button */
-    .h-btn.view {
-        background: #262626 !important;
-        color: #e2e8f0 !important;
-        border: 1px solid #475569 !important;
-    }
+        /* View Details Button */
+        .h-btn.view {
+            background: #262626 !important;
+            color: #e2e8f0 !important;
+            border: 1px solid #475569 !important;
+        }
 
-    .h-btn.view:hover {
-        border-color: #d4af37 !important;
-        color: #d4af37 !important;
-    }
+        .h-btn.view:hover {
+            border-color: #d4af37 !important;
+            color: #d4af37 !important;
+        }
 
-    /* =========================================
+        /* =========================================
        TRADE MODALS & BUTTONS (Black & Gold)
        ========================================= */
 
-    .t-info-label {
-        color: #64748b !important;
-    }
+        .t-info-label {
+            color: #64748b !important;
+        }
 
-    /* =========================================
+        /* =========================================
        CONFIRMATION MODALS (Black & Gold)
        ========================================= */
 
-    /* Universal Modal Background */
-    #orderConfirmModal .center-popup-content,
-    #purchaseConfirmModal .center-popup-content,
-    #closeOrderModal .center-popup-content,
-    #globalModal .center-popup-content {
-        background-color: #111111 !important;
-        border: 1px solid #333 !important;
-        color: #e2e8f0 !important;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
-    }
+        /* Universal Modal Background */
+        #orderConfirmModal .center-popup-content,
+        #purchaseConfirmModal .center-popup-content,
+        #closeOrderModal .center-popup-content,
+        #globalModal .center-popup-content {
+            background-color: #111111 !important;
+            border: 1px solid #333 !important;
+            color: #e2e8f0 !important;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+        }
 
-    /* Modal Body Overrides */
-    #orderConfirmModal .popup-body,
-    #purchaseConfirmModal .popup-body,
-    #closeOrderModal .popup-body,
-    #globalModal .popup-body {
-        background-color: #111111 !important;
-        color: #e2e8f0 !important;
-    }
+        /* Modal Body Overrides */
+        #orderConfirmModal .popup-body,
+        #purchaseConfirmModal .popup-body,
+        #closeOrderModal .popup-body,
+        #globalModal .popup-body {
+            background-color: #111111 !important;
+            color: #e2e8f0 !important;
+        }
 
-    /* Modal Headers */
-    #orderConfirmModal .center-popup-content>div:first-child,
-    #purchaseConfirmModal .center-popup-content>div:first-child {
-        background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
-    }
+        /* Modal Headers */
+        #orderConfirmModal .center-popup-content>div:first-child,
+        #purchaseConfirmModal .center-popup-content>div:first-child {
+            background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
+        }
 
-    /* Text Colors inside Modals */
-    .center-popup-content h2 {
-        color: #f8fafc !important;
-    }
+        /* Text Colors inside Modals */
+        .center-popup-content h2 {
+            color: #f8fafc !important;
+        }
 
-    #orderConfirmModal h2,
-    #purchaseConfirmModal h2 {
-        color: #000 !important;
-    }
+        #orderConfirmModal h2,
+        #purchaseConfirmModal h2 {
+            color: #000 !important;
+        }
 
-    .center-popup-content p,
-    .center-popup-content span:not([id*="Total"]):not([id*="Net"]):not([style*="color: #d4af37"]) {
-        color: #94a3b8 !important;
-    }
+        .center-popup-content p,
+        .center-popup-content span:not([id*="Total"]):not([id*="Net"]):not([style*="color: #d4af37"]) {
+            color: #94a3b8 !important;
+        }
 
-    /* Inner Card Overrides */
-    .popup-body div[style*="background: #1a1a1a"],
-    .popup-body div[style*="background: #161616"],
-    .popup-body div[style*="background: #f8fafc"],
-    .popup-body div[style*="background: #f1f5f9"] {
-        background-color: #1a1a1a !important;
-        border-color: #333 !important;
-    }
+        /* Inner Card Overrides */
+        .popup-body div[style*="background: #1a1a1a"],
+        .popup-body div[style*="background: #161616"],
+        .popup-body div[style*="background: #f8fafc"],
+        .popup-body div[style*="background: #f1f5f9"] {
+            background-color: #1a1a1a !important;
+            border-color: #333 !important;
+        }
 
-    /* Buttons */
-    #ocConfirmBtn,
-    #cpSubmitBtn,
-    #modalBtn {
-        background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
-        color: #000 !important;
-        font-weight: 800 !important;
-        border: none !important;
-    }
+        /* Buttons */
+        #ocConfirmBtn,
+        #cpSubmitBtn,
+        #modalBtn {
+            background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
+            color: #000 !important;
+            font-weight: 800 !important;
+            border: none !important;
+        }
 
-    #modalBtn {
-        color: #000 !important;
-    }
+        #modalBtn {
+            color: #000 !important;
+        }
 
-    /* Success Icon in Global Modal */
-    #modalIconContainer {
-        background: rgba(212, 175, 55, 0.1) !important;
-        color: #d4af37 !important;
-    }
+        /* Success Icon in Global Modal */
+        #modalIconContainer {
+            background: rgba(212, 175, 55, 0.1) !important;
+            color: #d4af37 !important;
+        }
 
-    /* Stock Detail / Trade Now Page */
-    #stockDetailView {
-        background-color: #0b0b0b !important;
-        color: #e2e8f0 !important;
-    }
+        /* Stock Detail / Trade Now Page */
+        #stockDetailView {
+            background-color: #0b0b0b !important;
+            color: #e2e8f0 !important;
+        }
 
-    #stockDetailView .m-card,
-    #stockDetailView .main-index-view,
-    #stockDetailView .buy-widget {
-        background-color: #111111 !important;
-        border: 1px solid #262626 !important;
-        color: #e2e8f0 !important;
-    }
+        #stockDetailView .m-card,
+        #stockDetailView .main-index-view,
+        #stockDetailView .buy-widget {
+            background-color: #111111 !important;
+            border: 1px solid #262626 !important;
+            color: #e2e8f0 !important;
+        }
 
-    #stockDetailView .stock-full-name {
-        color: #94a3b8 !important;
-    }
+        #stockDetailView .stock-full-name {
+            color: #94a3b8 !important;
+        }
 
-    #stockDetailView .info-label {
-        color: #64748b !important;
-    }
+        #stockDetailView .info-label {
+            color: #64748b !important;
+        }
 
-    #stockDetailView .info-val-text {
-        color: #f8fafc !important;
-    }
+        #stockDetailView .info-val-text {
+            color: #f8fafc !important;
+        }
 
-    #stockDetailView .tf-btn {
-        background: #1a1a1a !important;
-        color: #94a3b8 !important;
-        border-color: #333 !important;
-    }
+        #stockDetailView .tf-btn {
+            background: #1a1a1a !important;
+            color: #94a3b8 !important;
+            border-color: #333 !important;
+        }
 
-    #stockDetailView .tf-btn.active {
-        background: #d4af37 !important;
-        color: #000 !important;
-        border-color: #d4af37 !important;
-    }
+        #stockDetailView .tf-btn.active {
+            background: #d4af37 !important;
+            color: #000 !important;
+            border-color: #d4af37 !important;
+        }
 
-    #stockDetailView .detail-info-table tr td {
-        border-bottom: 1px solid #262626 !important;
-    }
+        #stockDetailView .detail-info-table tr td {
+            border-bottom: 1px solid #262626 !important;
+        }
 
-    #stockDetailView .detail-info-table tr td:last-child {
-        color: #f8fafc !important;
-    }
+        #stockDetailView .detail-info-table tr td:last-child {
+            color: #f8fafc !important;
+        }
 
-    #stockDetailView #detHoldingsList>div {
-        border-bottom: 1px solid #262626 !important;
-        background: #111 !important;
-    }
-</style>
+        #stockDetailView #detHoldingsList>div {
+            border-bottom: 1px solid #262626 !important;
+            background: #111 !important;
+        }
+    </style>
+    <script type="text/javascript">
+        let currentWidget = null;
+        let currentActiveSymbol = 'NIFTY1!';
+        let currentInterval = 'D';
+
+        window.loadWidget = function (symbol) {
+            const container = document.getElementById('tradingview_widget');
+            if (!container) return;
+
+            // Clear container
+            container.innerHTML = '';
+
+            // No more Investing.com Fallback - use TradingView for everything
+
+
+            let targetSymbol = symbol;
+
+            // Handle Index Symbol Mapping for TradingView
+            const indexMap = {
+                'NIFTY1!': 'BSE:SNSX50',
+                'NSE:NIFTY': 'BSE:SNSX50',
+                'NIFTYBANK': 'BSE:BANK',
+                'NSE:NIFTYBANK': 'BSE:BANK',
+                'NSE:BANKNIFTY': 'BSE:BANK',
+                'BSE:SENSEX': 'BSE:SENSEX',
+                'SENSEX': 'BSE:SENSEX',
+                'NSE:INDIAVIX': 'TVC:VIX',
+                'INDIAVIX': 'TVC:VIX',
+                'NSE:MIDCPNIFTY': 'BSE:MID150',
+                'NIFMDCP100': 'BSE:MID150',
+                'NSE:NIFMDCP100': 'BSE:MID150',
+                'NSE:SMLCAP100': 'BSE:SML250',
+                'NIFSMCP100': 'BSE:SML250',
+                'NSE:NIFSMCP100': 'BSE:SML250'
+            };
+
+            if (indexMap[symbol]) {
+                targetSymbol = indexMap[symbol];
+            }
+
+            if (window.TradingView) {
+                new TradingView.widget({
+                    "autosize": true,
+                    "symbol": targetSymbol,
+                    "interval": "D",
+                    "timezone": "Etc/UTC",
+                    "theme": "dark",
+                    "style": "3",
+                    "locale": "en",
+                    "toolbar_bg": "#111111",
+                    "enable_publishing": false,
+                    "allow_symbol_change": true,
+                    "container_id": "tradingview_widget",
+                    "hide_side_toolbar": false,
+                    "withdateranges": true,
+                    "save_image": true,
+                    "details": true,
+                    "hotlist": true,
+                    "calendar": true,
+                    "overrides": {
+                        "paneProperties.background": "#111111",
+                        "paneProperties.vertGridProperties.color": "#1f1f1f",
+                        "paneProperties.horzGridProperties.color": "#1f1f1f",
+                        "scalesProperties.textColor": "#94a3b8",
+                        "mainSeriesProperties.areaStyle.linecolor": "#d4af37",
+                        "mainSeriesProperties.areaStyle.color1": "rgba(212, 175, 55, 0.2)",
+                        "mainSeriesProperties.areaStyle.color2": "rgba(212, 175, 55, 0.05)"
+                    }
+                });
+            }
+        };
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                loadWidget(currentActiveSymbol);
+            }, 100);
+        });
+    </script>
+</body>
+
+</html>

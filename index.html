@@ -16,9 +16,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://s3.tradingview.com/tv.js"></script>
-    <script src="db.js"></script>
-    <script src="db_patch.js"></script>
-    <script src="market_data.js"></script>
+    <script src="db.js?v=1.0.4"></script>
+    <script src="db_patch.js?v=1.0.4"></script>
+    <script src="market_data.js?v=1.0.4"></script>
     <style>
         /* Indices styling */
         .index-mini-card {
@@ -147,6 +147,310 @@
         #homepage-notification-btn:hover {
             transform: scale(1.1);
         }
+
+        /* Carousel, Recommendation & Modal Styles */
+        .breaking-news .card-header {
+            padding: 1.5rem 2rem 1rem;
+            margin-bottom: 0;
+            background: transparent;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .news-carousel-container {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .news-carousel-track {
+            display: flex;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }
+
+        .news-slide-card {
+            min-width: 100%;
+            flex-shrink: 0;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            display: block;
+            height: 320px;
+        }
+
+        .news-slide-card:hover .news-image img {
+            transform: scale(1.05);
+        }
+
+        .news-image {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .news-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s ease;
+        }
+
+        .news-image-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 2.5rem 2rem;
+        }
+
+        .recommendation-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+
+        .recommendation-item:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .rec-thumb {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .rec-content h4 {
+            margin: 0 0 4px 0;
+            font-size: 0.95rem;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .rec-content p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #64748b;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Recommendation Detail Modal */
+        .rec-detail-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .rec-detail-content {
+            background: #111;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .rec-detail-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+
+        .rec-detail-body {
+            padding: 2rem;
+        }
+
+        .rec-detail-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+
+        .rec-detail-desc {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+
+        .rec-detail-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 36px;
+            height: 36px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .rec-detail-close:hover {
+            background: rgba(212, 175, 55, 0.8);
+            color: #000;
+            transform: scale(1.1);
+        }
+
+        .news-badge {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            background: var(--gold-primary, #d4af37);
+            color: #000;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            border-radius: 2px;
+            letter-spacing: 1px;
+            z-index: 5;
+        }
+
+        .news-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.8rem;
+        }
+
+        .news-time {
+            font-size: 0.75rem;
+            color: var(--gold-primary, #d4af37);
+            font-weight: 700;
+        }
+
+        .news-image-overlay h3 {
+            font-size: 1.5rem;
+            color: #fff;
+            margin: 0 0 0.8rem 0;
+            line-height: 1.25;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .news-image-overlay p {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+            margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            color: var(--gold-primary, #d4af37);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s;
+            opacity: 0;
+        }
+
+        .news-carousel-container:hover .nav-arrow {
+            opacity: 1;
+        }
+
+        .nav-arrow:hover {
+            background: var(--gold-primary, #d4af37);
+            color: #000;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .nav-arrow.prev {
+            left: 1rem;
+        }
+
+        .nav-arrow.next {
+            right: 1rem;
+        }
+
+        .news-dots-container {
+            position: absolute;
+            bottom: 1.5rem;
+            right: 2rem;
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .news-dot {
+            width: 8px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .news-dot.active {
+            width: 24px;
+            background: var(--gold-primary, #d4af37);
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .news-slide-card {
+                height: 300px;
+            }
+
+            .news-image-overlay h3 {
+                font-size: 1.2rem;
+            }
+
+            .news-image-overlay p {
+                font-size: 0.85rem;
+            }
+
+            .nav-arrow {
+                width: 36px;
+                height: 36px;
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
@@ -250,29 +554,35 @@
                     <h2>Market Summary</h2>
                 </div>
                 <div class="market-cards-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-                    <div class="stock-card">
-                        <div class="stock-info">
-                            <img src="https://flagcdn.com/w40/in.png" width="20" alt="India" class="flag-icon">
-                            <span class="stock-name">SENSEX</span>
+                    <div class="stock-card"
+                        style="display: flex; justify-content: center; align-items: center; cursor: pointer; padding: 2rem 1rem;"
+                        onclick="window.location.href='market.html?view=market'">
+                        <div class="stock-info"
+                            style="display: flex; justify-content: center; gap: 10px; align-items: center; margin: 0;">
+                            <img src="https://flagcdn.com/w40/in.png" width="24" alt="India" class="flag-icon"
+                                style="margin: 0;">
+                            <span class="stock-name" style="font-size: 1.6rem; font-weight: 700;">SENSEX</span>
                         </div>
-                        <div class="stock-value">83,580.40</div>
-                        <div class="stock-change green">+266.47 (+0.32%)</div>
                     </div>
-                    <div class="stock-card">
-                        <div class="stock-info">
-                            <img src="https://flagcdn.com/w40/in.png" width="20" alt="India" class="flag-icon">
-                            <span class="stock-name">NIFTY 50</span>
+                    <div class="stock-card"
+                        style="display: flex; justify-content: center; align-items: center; cursor: pointer; padding: 2rem 1rem;"
+                        onclick="window.location.href='market.html?view=market'">
+                        <div class="stock-info"
+                            style="display: flex; justify-content: center; gap: 10px; align-items: center; margin: 0;">
+                            <img src="https://flagcdn.com/w40/in.png" width="24" alt="India" class="flag-icon"
+                                style="margin: 0;">
+                            <span class="stock-name" style="font-size: 1.6rem; font-weight: 700;">NIFTY 50</span>
                         </div>
-                        <div class="stock-value">25,627.1</div>
-                        <div class="stock-change negative">-148.9 (-0.58%)</div>
                     </div>
-                    <div class="stock-card">
-                        <div class="stock-info">
-                            <img src="https://flagcdn.com/w40/in.png" width="20" alt="India" class="flag-icon">
-                            <span class="stock-name">NIFTY BANK</span>
+                    <div class="stock-card"
+                        style="display: flex; justify-content: center; align-items: center; cursor: pointer; padding: 2rem 1rem;"
+                        onclick="window.location.href='market.html?view=market'">
+                        <div class="stock-info"
+                            style="display: flex; justify-content: center; gap: 10px; align-items: center; margin: 0;">
+                            <img src="https://flagcdn.com/w40/in.png" width="24" alt="India" class="flag-icon"
+                                style="margin: 0;">
+                            <span class="stock-name" style="font-size: 1.6rem; font-weight: 700;">NIFTY BANK</span>
                         </div>
-                        <div class="stock-value">60,023.4</div>
-                        <div class="stock-change negative">-214.75 (-0.36%)</div>
                     </div>
                 </div>
             </section>
@@ -286,195 +596,42 @@
                 <!-- Breaking News + Recommendation (Right) -->
                 <div style="display: flex; flex-direction: column; gap: 1.5rem;">
                     <section class="card breaking-news" style="padding: 0; overflow: hidden; position: relative;">
-                        <!-- Inline Styles for Carousel Component -->
-                        <style>
-                            .breaking-news .card-header {
-                                padding: 1.5rem 2rem 1rem;
-                                margin-bottom: 0;
-                                background: transparent;
-                                border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-                            }
 
-                            .news-carousel-container {
-                                position: relative;
-                                width: 100%;
-                                overflow: hidden;
-                            }
 
-                            .news-carousel-track {
-                                display: flex;
-                                transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-                                will-change: transform;
-                            }
+                        <!-- TODO:- [x] Fix missing image inside recommendation detail modal (`index.html`)
+    - [x] Add `onerror` fallback to `recDetailImage` element
+    - [x] Align fallback URL with recommendation list items
+- [x] Fix missing recommendation images on Home page
+ (`index.html`)
+    - [x] Update "The Green Energy Revolution" image source
+    - [x] Update "Biotech & Longevity" image source
+    - [x] Add `onerror` handler to recommendation thumbnails
+- [x] Expand Recommendation list to 10 items (`index.html`)
+ -->
+                        <!-- TODO: - [x] Add `recommendationDetailModal` HTML and CSS -->
+                        <!-- TODO: - [x] Update `loadRecommendations()` with article-style cards -->
+                        <!-- TODO: - [/] Implement `openRecommendationDetail(id)` to show modal -->
+                        <!-- TODO: - [x] Remove `MarketEngine` stock rendering from recommendations -->
+                        <!-- TODO: - [/] Verify no redirects occur on click -->
 
-                            .news-slide-card {
-                                min-width: 100%;
-                                flex-shrink: 0;
-                                text-decoration: none;
-                                color: inherit;
-                                position: relative;
-                                display: block;
-                                height: 320px;
-                            }
+                        <!-- Recommendation Detail Modal -->
+                        <div id="recommendationDetailModal" class="rec-detail-modal"
+                            onclick="if(event.target === this) closeRecommendationDetail()">
+                            <div class="rec-detail-content">
+                                <button class="rec-detail-close" onclick="closeRecommendationDetail()"><i
+                                        data-lucide="x" size="20"></i></button>
+                                <img id="recDetailImage" src="" alt="Detail" class="rec-detail-image"
+                                    onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600'">
+                                <div class="rec-detail-body">
+                                    <h2 id="recDetailTitle" class="rec-detail-title">Title</h2>
+                                    <p id="recDetailDesc" class="rec-detail-desc">Description</p>
+                                    <button class="logout-btn"
+                                        style="background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%); color: #000; width: 100%;"
+                                        onclick="closeRecommendationDetail()">Close</button>
+                                </div>
+                            </div>
+                        </div>
 
-                            .news-slide-card:hover .news-image img {
-                                transform: scale(1.05);
-                            }
-
-                            .news-image {
-                                width: 100%;
-                                height: 100%;
-                                position: relative;
-                                overflow: hidden;
-                            }
-
-                            .news-image img {
-                                width: 100%;
-                                height: 100%;
-                                object-fit: cover;
-                                transition: transform 0.8s ease;
-                            }
-
-                            .news-image-overlay {
-                                position: absolute;
-                                inset: 0;
-                                background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
-                                display: flex;
-                                flex-direction: column;
-                                justify-content: flex-end;
-                                padding: 2.5rem 2rem;
-                            }
-
-                            .news-badge {
-                                position: absolute;
-                                top: 1.5rem;
-                                left: 1.5rem;
-                                background: var(--gold-primary, #d4af37);
-                                color: #000;
-                                padding: 0.3rem 0.8rem;
-                                font-size: 0.7rem;
-                                font-weight: 800;
-                                border-radius: 2px;
-                                letter-spacing: 1px;
-                                z-index: 5;
-                            }
-
-                            .news-meta {
-                                display: flex;
-                                align-items: center;
-                                gap: 10px;
-                                margin-bottom: 0.8rem;
-                            }
-
-                            .news-time {
-                                font-size: 0.75rem;
-                                color: var(--gold-primary, #d4af37);
-                                font-weight: 700;
-                            }
-
-                            .news-image-overlay h3 {
-                                font-size: 1.5rem;
-                                color: #fff;
-                                margin: 0 0 0.8rem 0;
-                                line-height: 1.25;
-                                font-weight: 700;
-                                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-                            }
-
-                            .news-image-overlay p {
-                                font-size: 0.95rem;
-                                color: rgba(255, 255, 255, 0.8);
-                                line-height: 1.5;
-                                margin: 0;
-                                display: -webkit-box;
-                                -webkit-line-clamp: 2;
-                                line-clamp: 2;
-                                -webkit-box-orient: vertical;
-                                overflow: hidden;
-                            }
-
-                            .nav-arrow {
-                                position: absolute;
-                                top: 50%;
-                                transform: translateY(-50%);
-                                background: rgba(0, 0, 0, 0.6);
-                                border: 1px solid rgba(212, 175, 55, 0.4);
-                                color: var(--gold-primary, #d4af37);
-                                width: 44px;
-                                height: 44px;
-                                border-radius: 50%;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                cursor: pointer;
-                                z-index: 10;
-                                transition: all 0.3s;
-                                opacity: 0;
-                            }
-
-                            .news-carousel-container:hover .nav-arrow {
-                                opacity: 1;
-                            }
-
-                            .nav-arrow:hover {
-                                background: var(--gold-primary, #d4af37);
-                                color: #000;
-                                box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
-                            }
-
-                            .nav-arrow.prev {
-                                left: 1rem;
-                            }
-
-                            .nav-arrow.next {
-                                right: 1rem;
-                            }
-
-                            .news-dots-container {
-                                position: absolute;
-                                bottom: 1.5rem;
-                                right: 2rem;
-                                display: flex;
-                                gap: 8px;
-                                z-index: 10;
-                            }
-
-                            .news-dot {
-                                width: 8px;
-                                height: 8px;
-                                background: rgba(255, 255, 255, 0.3);
-                                border-radius: 50%;
-                                cursor: pointer;
-                                transition: all 0.3s;
-                            }
-
-                            .news-dot.active {
-                                width: 24px;
-                                background: var(--gold-primary, #d4af37);
-                                border-radius: 4px;
-                                box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-                            }
-
-                            @media (max-width: 768px) {
-                                .news-slide-card {
-                                    height: 300px;
-                                }
-
-                                .news-image-overlay h3 {
-                                    font-size: 1.2rem;
-                                }
-
-                                .news-image-overlay p {
-                                    font-size: 0.85rem;
-                                }
-
-                                .nav-arrow {
-                                    width: 36px;
-                                    height: 36px;
-                                    opacity: 1;
-                                }
-                            }
-                        </style>
 
                         <div class="card-header">
                             <div class="header-icon blue"><i data-lucide="newspaper"></i></div>
@@ -647,96 +804,7 @@
                         </div>
                         <div class="recommendation-list" id="recommendationList"
                             style="display: none; max-height: 0; overflow: hidden;">
-                            <a href="article.html?id=5" class="recommendation-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=200"
-                                    alt="Rec" onerror="this.onerror=null;this.src='images/default-news.jpg';">
-                                <div class="rec-content">
-                                    <h4>2026 Financial Outlook</h4>
-                                    <p>Latest trends and predictions for the upcoming year.</p>
-                                </div>
-                            </a>
-                            <a href="article.html?id=6" class="recommendation-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&q=80&w=200"
-                                    alt="Rec" onerror="this.onerror=null;this.src='images/default-news.jpg';">
-                                <div class="rec-content">
-                                    <h4>Top 5 Dividend Stocks</h4>
-                                    <p>Stable returns and long-term growth options.</p>
-                                </div>
-                            </a>
-                            <a href="article.html?id=7" class="recommendation-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&q=80&w=200"
-                                    alt="Rec" onerror="this.onerror=null;this.src='images/default-news.jpg';">
-                                <div class="rec-content">
-                                    <h4>Green Energy Revolution</h4>
-                                    <p>Sustainable investments for a better future.</p>
-                                </div>
-                            </a>
-                            <a href="article.html?id=8" class="recommendation-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=200"
-                                    alt="Rec" onerror="this.onerror=null;this.src='images/default-news.jpg';">
-                                <div class="rec-content">
-                                    <h4>Tech Giants Analysis</h4>
-                                    <p>Deep dive into valuations and sustainability.</p>
-                                </div>
-                            </a>
-                            <a href="article.html?id=9" class="recommendation-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&q=80&w=200"
-                                    alt="Rec" onerror="this.onerror=null;this.src='images/default-news.jpg';">
-                                <div class="rec-content">
-                                    <h4>Small-cap Gems</h4>
-                                    <p>Under-the-radar companies with massive potential.</p>
-                                </div>
-                            </a>
-                            <a href="article.html?id=10" class="recommendation-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1589758438368-0ad531db3366?auto=format&fit=crop&q=80&w=200"
-                                    alt="Rec" onerror="this.onerror=null;this.src='images/default-news.jpg';">
-                                <div class="rec-content">
-                                    <h4>Gold vs Stocks 2026</h4>
-                                    <p>Hedging strategies for inflationary periods.</p>
-                                </div>
-                            </a>
-                            <a href="article.html?id=11" class="recommendation-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=200"
-                                    alt="Rec" onerror="this.onerror=null;this.src='images/default-news.jpg';">
-                                <div class="rec-content">
-                                    <h4>Real Estate REITs</h4>
-                                    <p>High yields from premium commercial assets.</p>
-                                </div>
-                            </a>
-                            <a href="article.html?id=12" class="recommendation-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&q=80&w=200"
-                                    alt="Rec" onerror="this.onerror=null;this.src='images/default-news.jpg';">
-                                <div class="rec-content">
-                                    <h4>Consumer Goods Surge</h4>
-                                    <p>Rural demand driving market growth.</p>
-                                </div>
-                            </a>
-                            <a href="article.html?id=13" class="recommendation-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&q=80&w=200"
-                                    alt="Rec" onerror="this.onerror=null;this.src='images/default-news.jpg';">
-                                <div class="rec-content">
-                                    <h4>EV Infrastructure</h4>
-                                    <p>The roadmap to a cleaner automobile sector.</p>
-                                </div>
-                            </a>
-                            <a href="article.html?id=14" class="recommendation-item">
-                                <img class="rec-thumb"
-                                    src="https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&q=80&w=200"
-                                    alt="Rec" onerror="this.onerror=null;this.src='images/default-news.jpg';">
-                                <div class="rec-content">
-                                    <h4>Pharma R&D Breaks</h4>
-                                    <p>New breakthroughs in specialized therapy.</p>
-                                </div>
-                            </a>
+                            <!-- Recommendations will be loaded dynamically by loadRecommendations() -->
                         </div>
                         <style>
                             .recommendation-item {
@@ -799,9 +867,12 @@
                         </style>
                         <script>
                             (function () {
-                                if (symbol === 'BSE:SENSEX') document.getElementById('cardSensex').classList.add('active');
-                                else if (symbol === 'NSE:NIFTY' || symbol === 'NIFTY1!') document.getElementById('cardNifty').classList.add('active');
-                                else if (symbol === 'NSE:NIFTYBANK') document.getElementById('cardBankNifty').classList.add('active');
+                                // Use a safe check for symbol to prevent ReferenceError
+                                const currentSymbol = typeof currentActiveSymbol !== 'undefined' ? currentActiveSymbol : 'NIFTY1!';
+
+                                if (currentSymbol === 'BSE:SENSEX') document.getElementById('cardSensex')?.classList.add('active');
+                                else if (currentSymbol === 'NSE:NIFTY' || currentSymbol === 'NIFTY1!') document.getElementById('cardNifty')?.classList.add('active');
+                                else if (currentSymbol === 'NSE:NIFTYBANK') document.getElementById('cardBankNifty')?.classList.add('active');
 
                                 const section = document.getElementById('recommendationSection');
                                 const header = document.getElementById('recommendationHeader');
@@ -814,6 +885,10 @@
                                         list.style.display = 'block';
                                         list.style.maxHeight = '2000px';
                                         sessionStorage.setItem('rec_expanded', 'true');
+                                        // Load content if it's empty
+                                        if (list.children.length === 0 || list.innerHTML.trim() === '') {
+                                            if (typeof loadRecommendations === 'function') loadRecommendations();
+                                        }
                                     } else {
                                         list.style.maxHeight = '0';
                                         setTimeout(() => {
@@ -1506,6 +1581,7 @@
             loadWidget('NIFTY1!');
             switchExchange('gainers', 'NSE');
             switchExchange('losers', 'NSE');
+            loadRecommendations();
         });
 
         // --- MARKET DATA & CHART LOGIC (GLOBAL SCOPE) ---
@@ -1557,73 +1633,46 @@
             if (!container) return;
             container.innerHTML = '';
 
-            // Handle Restricted Symbols with Investing.com Iframe
-            const investingPairs = {
-                'NSE:NIFTY': '17940',
-                'NIFTY1!': '17940',
-                'BSE:SENSEX': '39929',
-                'NSE:BANKNIFTY': '17923',
-                'NSE:NIFTYBANK': '17923',
-                'NIFTYBANK': '17923',
-                'NSE:INDIAVIX': '17942',
-                'NSE:MIDCPNIFTY': '18012',
-                'NSE:NIFTYMIDCAP100': '18012',
-                'NSE:NIFTYMIDCAP': '18012',
-                'NSE:SMLCAP100': '17946',
-                'NSE:NIFTYSMALLCAP100': '17946',
-                'NSE:NIFTYSMLCAP': '17946'
-            };
-
-            if (investingPairs[symbol]) {
-                let pairId = investingPairs[symbol];
-                const wrapper = document.createElement('div');
-                wrapper.style.position = 'relative';
-                wrapper.style.width = '100%';
-                wrapper.style.height = '100%';
-                wrapper.style.overflow = 'hidden';
-
-                const iframe = document.createElement('iframe');
-                let w = container.offsetWidth || 800;
-                let h = container.offsetHeight || 600;
-                iframe.src = `https://ssltvc.investing.com/?pair_ID=${pairId}&height=${h}&width=${w}&interval=300&plotStyle=candles&domain_ID=56&lang_ID=56&timezone_ID=20`;
-                iframe.style.width = '100%';
-                iframe.style.height = '100%';
-                iframe.style.border = 'none';
-                iframe.style.filter = 'invert(1) hue-rotate(180deg) brightness(0.9)'; // Dark Mode Filter
-                iframe.id = 'investing_chart';
-
-                // Mask for the logo (now black to match dark theme)
-                const mask = document.createElement('div');
-                mask.style.position = 'absolute';
-                mask.style.bottom = '42px';
-                mask.style.left = '45px';
-                mask.style.width = '100px';
-                mask.style.height = '25px';
-                mask.style.background = '#000000';
-                mask.style.pointerEvents = 'none';
-                mask.style.zIndex = '10';
-
-                wrapper.appendChild(iframe);
-                wrapper.appendChild(mask);
-                container.appendChild(wrapper);
-                return;
-            }
+            // No more Investing.com Fallback - use TradingView for everything
 
             if (typeof TradingView === 'undefined') return;
 
             let targetSymbol = symbol;
+
+            // Handle Index Symbol Mapping for TradingView
+            const indexMap = {
+                'NIFTY1!': 'BSE:SNSX50',
+                'NSE:NIFTY': 'BSE:SNSX50',
+                'NIFTYBANK': 'BSE:BANK',
+                'NSE:NIFTYBANK': 'BSE:BANK',
+                'NSE:BANKNIFTY': 'BSE:BANK',
+                'BSE:SENSEX': 'BSE:SENSEX',
+                'SENSEX': 'BSE:SENSEX',
+                'NSE:INDIAVIX': 'TVC:VIX',
+                'INDIAVIX': 'TVC:VIX',
+                'NSE:MIDCPNIFTY': 'BSE:MID150',
+                'NIFMDCP100': 'BSE:MID150',
+                'NSE:NIFMDCP100': 'BSE:MID150',
+                'NSE:SMLCAP100': 'BSE:SML250',
+                'NIFSMCP100': 'BSE:SML250',
+                'NSE:NIFSMCP100': 'BSE:SML250'
+            };
+
+            if (indexMap[symbol]) {
+                targetSymbol = indexMap[symbol];
+            }
+
             currentWidget = new TradingView.widget({
                 "autosize": true,
                 "symbol": targetSymbol,
-                "interval": currentInterval,
-                "timezone": "Asia/Kolkata",
+                "interval": "D",
+                "timezone": "Etc/UTC",
                 "theme": "dark",
-                "style": "1",
-                "locale": "in",
-                "toolbar_bg": "#000000",
+                "style": "3",
+                "locale": "en",
+                "toolbar_bg": "#111111",
                 "enable_publishing": false,
-                "allow_symbol_change": false,
-                "hide_top_toolbar": true,
+                "allow_symbol_change": true,
                 "container_id": "tradingview_widget",
                 "hide_side_toolbar": false,
                 "withdateranges": true,
@@ -1632,16 +1681,14 @@
                 "hotlist": true,
                 "calendar": true,
                 "overrides": {
-                    "paneProperties.background": "#000000",
-                    "paneProperties.gridLines": "#1a1a1a",
-                    "mainSeriesProperties.candleStyle.upColor": "#00ff88",
-                    "mainSeriesProperties.candleStyle.downColor": "#ff3b3b",
-                    "mainSeriesProperties.candleStyle.borderUpColor": "#00ff88",
-                    "mainSeriesProperties.candleStyle.borderDownColor": "#ff3b3b",
-                    "mainSeriesProperties.candleStyle.wickUpColor": "#00ff88",
-                    "mainSeriesProperties.candleStyle.wickDownColor": "#ff3b3b"
-                },
-                "disabled_features": []
+                    "paneProperties.background": "#111111",
+                    "paneProperties.vertGridProperties.color": "#1f1f1f",
+                    "paneProperties.horzGridProperties.color": "#1f1f1f",
+                    "scalesProperties.textColor": "#94a3b8",
+                    "mainSeriesProperties.areaStyle.linecolor": "#d4af37",
+                    "mainSeriesProperties.areaStyle.color1": "rgba(212, 175, 55, 0.2)",
+                    "mainSeriesProperties.areaStyle.color2": "rgba(212, 175, 55, 0.05)"
+                }
             });
         }
 
@@ -1701,6 +1748,116 @@
                 </div>
             `).join('');
             if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        /**
+         * Dynamic Recommendations Engine
+         * Fetches article-style recommendations from a curated list
+         */
+        const recommendationArticles = {
+            "5": {
+                title: "2026 Financial Outlook: Trends to Watch",
+                desc: "Explore the latest trends and predictions for the 2026 financial markets, including interest rate projections and sector-specific growth opportunities.",
+                content: "Explore the latest trends and predictions for the 2026 financial markets, including interest rate projections and sector-specific growth opportunities. Experts suggest a shift towards defensive stocks in the latter half of the year, while maintaining exposure to high-growth emerging tech sectors. Institutional capital is increasingly flowing into sustainable infrastructure and AI-driven efficiency gains across the manufacturing base.",
+                img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600"
+            },
+            "6": {
+                title: "Top 5 High-Yield Dividend Stocks",
+                desc: "Discover the most reliable dividend-paying companies in India that provide consistent returns and long-term stability for your portfolio.",
+                content: "Discover the most reliable dividend-paying companies in India that provide consistent returns and long-term stability for your portfolio. This list focuses on companies with a track record of increasing dividends even during market downturns, ensuring a steady stream of income for retail investors. Utilities and consumer staples remain the pillars of this strategy, offering a hedge against broader market volatility.",
+                img: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&q=80&w=600"
+            },
+            "7": {
+                title: "The Green Energy Revolution",
+                desc: "As India pivots to renewable energy, these companies are well-positioned to lead the transition and deliver exceptional market returns.",
+                content: "As India pivots to renewable energy, these companies are well-positioned to lead the transition and deliver exceptional market returns. Massive government subsidies and international environmental commitments are driving unprecedented local investment into wind, solar, and green hydrogen infrastructure. The transition represents one of the largest sectoral shifts in the Indian economy this decade.",
+                img: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&q=80&w=600"
+            },
+            "9": {
+                title: "Small-cap Hidden Gems",
+                desc: "Identify under-the-radar small-cap companies with strong fundamentals and innovative products that could be the next market leaders.",
+                content: "Identify under-the-radar small-cap companies with strong fundamentals and innovative products that could be the next market leaders. These companies operate in niche segments with high entry barriers and are currently trading at significant discounts to their larger peers. Alpha opportunities remain abundant for those willing to do deep fundamental research in overlooked industrial sub-sectors.",
+                img: "https://images.unsplash.com/photo-1543286386-713bdd548da4?auto=format&fit=crop&q=80&w=600"
+            },
+            "10": {
+                title: "AI in Wealth Management",
+                desc: "Learn how artificial intelligence is transforming portfolio management and personal finance for the modern investor.",
+                content: "Artificial intelligence is no longer a futuristic concept but a primary driver of modern wealth management. Algorithms are now capable of processing vast amounts of unstructured data to identify patterns that human analysts might miss. From automated tax-loss harvesting to hyper-personalized risk assessments, AI is democratizing high-end financial strategies for a broader audience.",
+                img: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=600"
+            },
+            "11": {
+                title: "Institutional Crypto Adoption",
+                desc: "Major financial institutions are increasingly integrating digital assets into their core offerings. Here's what it means for you.",
+                content: "The entry of major institutional players into the digital asset space marks a significant turning point for market maturity. With the launch of spot ETFs and institutional-grade custody solutions, the barriers between traditional finance and decentralized assets are dissolving. This trend suggests a move towards a more regulated, stable, and integrated global financial ecosystem.",
+                img: "https://images.unsplash.com/photo-1621761191319-c6fb62004040?auto=format&fit=crop&q=80&w=600"
+            },
+            "12": {
+                title: "Global Supply Chain Logistics",
+                desc: "Investigate the companies streamlining global trade and logistics in a post-pandemic economic environment.",
+                content: "Supply chain resilience has become a top priority for global corporations. Companies specializing in logistical optimization, automated warehousing, and multi-modal transport are seeing unprecedented demand. As global trade routes evolve and near-shoring becomes more prevalent, the backbone of the global economy is undergoing a massive technological and structural overhaul.",
+                img: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=600"
+            },
+            "13": {
+                title: "Biotech & Longevity",
+                desc: "The intersection of biology and technology is creating massive opportunities for life-extension and medical breakthroughs.",
+                content: "The biotechnology sector is experiencing a renaissance, driven by genomics and AI-assisted drug discovery. Focus is shifting towards 'longevity' - the science of extending healthy human lifespan. This emerging field represents a multi-trillion dollar opportunity as the global population ages and the demand for preventative, rather than just reactive, healthcare skyrockets.",
+                img: "https://images.unsplash.com/photo-1576086213369-97a306dca1c5?auto=format&fit=crop&q=80&w=600"
+            },
+            "14": {
+                title: "Critical Minerals Supercycle",
+                desc: "Why lithium, cobalt, and copper are becoming the new oil in the race for global electrification.",
+                content: "The global transition to electric vehicles and renewable energy is creating an insatiable demand for critical minerals. Experts suggest we are entering a long-term 'supercycle' for commodities like lithium, cobalt, and copper. Secured supply chains for these materials have become a matter of national security and economic sovereignty, driving massive investments into mining and refining infrastructure.",
+                img: "https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?auto=format&fit=crop&q=80&w=600"
+            },
+            "15": {
+                title: "Real Estate & REITs",
+                desc: "Diversify your portfolio with real estate investment trusts focusing on data centers and logistics hubs.",
+                content: "Traditional commercial real estate may be facing headwinds, but specialized segments like data centers, cold storage, and logistics hubs are booming. REITs (Real Estate Investment Trusts) offer a liquid way to gain exposure to these high-yield, mission-critical assets. As the digital economy grows, the physical infrastructure supporting it has become an essential component of a diversified institutional portfolio.",
+                img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=600"
+            }
+        };
+
+        function loadRecommendations() {
+            const listContainer = document.getElementById('recommendationList');
+            if (!listContainer) return;
+
+            // Render from curated article list
+            const ids = Object.keys(recommendationArticles);
+            listContainer.innerHTML = ids.map(id => {
+                const item = recommendationArticles[id];
+                return `
+                    <div class="recommendation-item" onclick="openRecommendationDetail('${id}')">
+                        <img src="${item.img}" class="rec-thumb" alt="${item.title}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600'">
+                        <div class="rec-content">
+                            <h4>${item.title}</h4>
+                            <p>${item.desc}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function openRecommendationDetail(id) {
+            const item = recommendationArticles[id];
+            if (!item) return;
+
+            document.getElementById('recDetailImage').src = item.img;
+            document.getElementById('recDetailTitle').textContent = item.title;
+            document.getElementById('recDetailDesc').innerHTML = item.content.replace(/\n/g, '<br><br>');
+
+            const modal = document.getElementById('recommendationDetailModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scroll
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function closeRecommendationDetail() {
+            const modal = document.getElementById('recommendationDetailModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = ''; // Restore scroll
         }
 
         // --- AUTH GUARD FOR HOME PAGE ---
