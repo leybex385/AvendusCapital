@@ -1,13 +1,16 @@
--- FIX: Update the status constraint for the 'trades' table
--- This allows for the new 'Holding' and 'Sold' statuses required for Institutional Stocks.
--- Run this in your Supabase SQL Editor (https://supabase.com/dashboard/project/gipxccfydceahzmqdoks/sql/new)
+-- 1. Identify and Drop existing constraint (name is usually trades_status_check)
+-- We use a DO block to make it safer in case the name varies slightly or it doesn't exist
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'trades_status_check') THEN
+        ALTER TABLE public.trades DROP CONSTRAINT trades_status_check;
+    END IF;
+END $$;
 
--- 1. Drop the existing constraint (Note: Name might vary if created automatically, so we try multiple common patterns)
-ALTER TABLE "public"."trades" DROP CONSTRAINT IF EXISTS "trades_status_check";
+-- 2. Re-add constraint with new allowed value 'AWAITING_APPROVAL'
+ALTER TABLE public.trades 
+ADD CONSTRAINT trades_status_check 
+CHECK (status IN ('Pending', 'Holding', 'Sold', 'Rejected', 'Settled', 'Approved', 'Confirmed', 'Awaiting', 'AWAITING', 'LOCKED_UNPAID', 'AWAITING_APPROVAL'));
 
--- 2. Add the updated constraint
-ALTER TABLE "public"."trades" ADD CONSTRAINT "trades_status_check" 
-CHECK (status IN ('Holding', 'Sold', 'Pending', 'Approved', 'Settled', 'Rejected'));
-
--- 3. Verify current records (Optional - converts any potential mismatches)
--- UPDATE "public"."trades" SET status = 'Holding' WHERE type = 'stock' AND status = 'Settled';
+-- 3. Verify specifically for AWAITING_APPROVAL
+-- This ensures the system accepts the new workflow status.

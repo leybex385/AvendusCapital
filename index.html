@@ -1407,6 +1407,11 @@
             checkAuthState();
             syncUserData();
 
+            // Background Database Price Sync (Auto-Sync official prices)
+            if (window.DB && typeof window.DB.checkAndSyncPrices === 'function') {
+                window.DB.checkAndSyncPrices();
+            }
+
 
             // Persist CS Modal State
             if (localStorage.getItem('avendus_cs_open') === 'true') {
@@ -1660,6 +1665,10 @@
 
             if (indexMap[symbol]) {
                 targetSymbol = indexMap[symbol];
+            } else if (symbol.toUpperCase().endsWith('.NS') || symbol.toUpperCase().endsWith('.BO')) {
+                // TradingView BSE Fix for Indian Stocks (NSE -> BSE feed)
+                const ticker = symbol.split('.')[0];
+                targetSymbol = `BSE:${ticker}`;
             }
 
             currentWidget = new TradingView.widget({
