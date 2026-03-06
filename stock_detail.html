@@ -791,8 +791,14 @@
                 'NSE:NIFSMCP100': 'BSE:SML250'
             };
 
+            if (container) container.innerHTML = ''; // Re-initialize widget correctly
+
             if (indexMap[symbol]) {
                 tvSymbol = indexMap[symbol];
+            } else if (symbol.toUpperCase().endsWith('.NS') || symbol.toUpperCase().endsWith('.BO')) {
+                // TradingView BSE Fix for Indian Stocks (NSE -> BSE feed)
+                const ticker = symbol.split('.')[0];
+                tvSymbol = `BSE:${ticker}`;
             } else if (symbol.includes('.')) {
                 const parts = symbol.split('.');
                 if (parts.length === 2 && !symbol.includes(':')) {
@@ -875,6 +881,80 @@
             const user = window.DB.getCurrentUser();
             if (!user) return;
 
+            if (currentProductType?.toUpperCase() === 'IPO') {
+                const product = window.MarketEngine ? window.MarketEngine.getProduct(currentActiveSymbol) : null;
+                if (!product) {
+                    alert("Product data not found.");
+                    return;
+                }
+
+                // 1. Force Refresh User Data
+                const freshUser = await window.DB.refreshCurrentUser();
+                if (!freshUser) {
+                    alert("Session expired. Please login again.");
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                if (freshUser.trading_frozen) {
+                    showModal('error', 'Service Unavailable', "Trading functions are temporarily unavailable.");
+                    return;
+                }
+
+                const price = product.price || 0;
+                const minInvest = product.min_invest || 15000;
+                let qty = price > 0 ? Math.floor(minInvest / price) : 1;
+                if (qty <= 0) qty = 1;
+
+                const tradeData = {
+                    user_id: freshUser.id,
+                    product_id: product.id,
+                    symbol: currentActiveSymbol,
+                    name: currentStockName,
+                    type: 'ipo',
+                    quantity: qty,
+                    requested_quantity: qty,
+                    price: price,
+                    total_amount: minInvest,
+                    status: 'AWAITING_APPROVAL',
+                    order_status: 'PENDING'
+                };
+
+                const btn = document.getElementById('buyMainBtn'); // Assuming there's a main buy button
+                const originalText = btn ? btn.innerText : "BUY NOW";
+                if (btn) {
+                    btn.innerText = "PROCESSING...";
+                    btn.disabled = true;
+                }
+
+                try {
+                    const result = await window.DB.submitSubscriptionAtomic(tradeData);
+                    if (result.success) {
+                        const isLocked = result.status === 'LOCKED_UNPAID';
+                        if (isLocked) {
+                            showModal('warning', 'Position Locked', `SUBMISSION SUCCESSFUL (RESTRICTED). Your subscription for ${currentStockName} has been recorded. However, due to insufficient balance, this position is currently LOCKED. Please settle the outstanding balance of ₹${(result.outstanding || 0).toLocaleString('en-IN')} in your portfolio to enable trading.`, () => {
+                                if (typeof syncBalance === 'function') syncBalance();
+                            });
+                        } else {
+                            showModal('success', 'Subscription Received', `Your allocation request for ${currentStockName} has been received and is awaiting approval.`);
+                        }
+                        if (typeof syncUserData === 'function') syncUserData();
+                        if (typeof fetchUserTransactions === 'function') fetchUserTransactions();
+                    } else {
+                        alert("Submission failed: " + (result.error?.message || result.error));
+                    }
+                } catch (e) {
+                    console.error("IPO Error:", e);
+                    alert("A technical error occurred.");
+                } finally {
+                    if (btn) {
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                    }
+                }
+                return;
+            }
+
             const qty = parseInt(document.getElementById('bpQuantity').value) || 0;
             if (qty <= 0) { alert("Invalid quantity"); return; }
 
@@ -911,6 +991,8 @@
             if (modal) modal.style.display = 'flex';
             if (window.lucide) window.lucide.createIcons();
         }
+
+        // --- IPO Logic Removed ---
 
         async function executeSellOrder(tradeId) {
             const user = window.DB.getCurrentUser();
@@ -1014,7 +1096,7 @@
                         tax_amount: calc.tax,
                         txn_charge: calc.txnCharge,
                         status: tradeStatus,
-                        order_status: 'OPEN'
+                        order_status: (type === 'ipo' ? 'PENDING' : 'OPEN')
                     };
 
                     let result;
@@ -1243,6 +1325,8 @@
 
 
     </script>
+    <!-- IPO Order Form Modal REMOVED -->
+
     <!-- Premium Order Confirmation Modal -->
     <div id="orderConfirmModal" class="center-popup-modal" onclick="if(event.target == this) closeOrderConfirm()"
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
