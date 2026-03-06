@@ -1091,6 +1091,16 @@ window.loadUserAssets = async function (userId) {
             return;
         }
 
+        // --- Update Local Storage to prevent stale data in other parts of the app ---
+        if (window.DB && window.DB.CURRENT_USER_KEY) {
+            const localUser = localStorage.getItem(window.DB.CURRENT_USER_KEY);
+            if (localUser) {
+                const updatedUser = { ...JSON.parse(localUser), ...dbUser };
+                localStorage.setItem(window.DB.CURRENT_USER_KEY, JSON.stringify(updatedUser));
+                console.log("Local user storage refreshed with fresh asset data.");
+            }
+        }
+
         // --- Data Extraction & Safe Fallbacks ---
         const rawBalance = parseFloat(dbUser.balance) || 0;
         const inv = parseFloat(dbUser.invested) || 0;
@@ -1111,31 +1121,14 @@ window.loadUserAssets = async function (userId) {
         // Fetch User Loans List (My Applications) - Live from DB
         if (window.fetchUserLoans) window.fetchUserLoans(userId);
 
-        // --- Calculate Dynamic Outstanding (Pending Settlement) ---
-        // Requirement: Fetch all user trades/subscriptions with specific statuses and sum their amounts.
-        let dynamicOutstanding = 0;
-        if (window.DB && window.DB.getTradesByUserId) {
-            try {
-                const trades = await window.DB.getTradesByUserId(userId);
-                const pendingTrades = trades.filter(t => {
-                    const s = (t.status || "").toLowerCase();
-                    return s === 'pending' || s === 'wallet_pending' || s === 'settlement_pending';
-                });
-                dynamicOutstanding = pendingTrades.reduce((sum, trade) => {
-                    // Use total_amount (from schema) or amount (from user example)
-                    return sum + Number(trade.total_amount || trade.amount || 0);
-                }, 0);
-                console.log("Calculated Dynamic Outstanding Balance:", dynamicOutstanding);
-            } catch (err) {
-                console.error("Error calculating dynamic outstanding balance:", err);
-            }
-        }
-
-        // Final outstanding value for display
-        let outstanding = (dynamicOutstanding > 0) ? dynamicOutstanding : ((typeof dbUser.outstanding_balance !== 'undefined') ? (parseFloat(dbUser.outstanding_balance) || 0) : (parseFloat(dbUser.outstanding) || 0));
+        // Final outstanding value for display straight from the database truth
+        let outstanding = (typeof dbUser.outstanding_balance !== 'undefined') ? (parseFloat(dbUser.outstanding_balance) || 0) : (parseFloat(dbUser.outstanding) || 0);
 
         // --- DOM Helpers ---
-        const formatCurrency = (val) => '₹' + (val || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const formatCurrency = (val) => {
+            const num = parseFloat(val) || 0;
+            return (num < 0 ? '-' : '') + '₹' + Math.abs(num).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        };
 
         // Safe-fit text (replicated from market.html for consistency)
         const fitText = (el, text) => {
