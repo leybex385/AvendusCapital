@@ -4684,7 +4684,7 @@
                         // OTC UI Rules: Show Qty/Slider, standard labels
                         if (qtySec) qtySec.style.display = 'block';
                         if (sliderSec) sliderSec.style.display = 'block';
-                        if (buyPriceLabel) buyPriceLabel.innerText = 'Price';
+                        if (buyPriceLabel) buyPriceLabel.innerText = 'Subscription Price';
                         if (totalInvestLabel) totalInvestLabel.innerText = 'Total Est. Investment';
                     }
                 } else {
@@ -5407,7 +5407,7 @@
                         <div class="premium-details-grid">
                             <div class="premium-detail-item">
                                 <span class="label">Subscription Price</span>
-                                <span class="value">₹${(s.subscription_price || s.price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                <span class="value">₹${isOTC ? (s.subscription_price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 }) : (s.subscription_price || s.price || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                             </div>
                             <div class="premium-detail-item">
                                 <span class="label">Level Limit</span>
@@ -5418,7 +5418,7 @@
                             data-id="${s.id || s.symbol}" 
                             data-type="${s.type?.toUpperCase()}"
                             data-name="${s.name}"
-                            data-price="${s.subscription_price || s.price || 0}"
+                            data-price="${isOTC ? (s.subscription_price || 0) : (s.subscription_price || s.price || 0)}"
                             data-yield="${s.estimated_profit || s.yield || s.ipo_yield || 0}">
                             ${isLocked ? 'Locked' : 'Subscribe'}
                         </button>
