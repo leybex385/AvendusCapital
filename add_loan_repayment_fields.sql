@@ -3,6 +3,12 @@
 ALTER TABLE public.loans ADD COLUMN IF NOT EXISTS remaining_balance NUMERIC DEFAULT 0;
 ALTER TABLE public.loans ADD COLUMN IF NOT EXISTS closed_at TIMESTAMP WITH TIME ZONE;
 ALTER TABLE public.loans ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW();
+ALTER TABLE public.loans ADD COLUMN IF NOT EXISTS loan_disbursed BOOLEAN DEFAULT FALSE;
+
+-- 2. Add missing columns to users table
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS loan_balance NUMERIC DEFAULT 0;
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS outstanding NUMERIC DEFAULT 0;
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS borrowed_funds NUMERIC DEFAULT 0;
 
 -- 2. Update status constraint to include 'Repaid'
 ALTER TABLE public.loans DROP CONSTRAINT IF EXISTS loans_status_check;
@@ -30,6 +36,7 @@ DECLARE
     v_user_csr_id INTEGER;
     v_user_inv_code TEXT;
     v_admin_inv_code TEXT;
+    v_loan_disbursed BOOLEAN;
 BEGIN
     -- 1. Fetch Loan & User Info
     SELECT l.user_id, u.csr_id, u.invitation_code 
@@ -77,6 +84,29 @@ BEGIN
     UPDATE public.users 
     SET loan_enabled = p_eligibility 
     WHERE id = v_user_id;
+
+    -- c) Automated Disbursement Logic
+    IF p_status IN ('Approved', 'APPROVED') THEN
+        -- Re-fetch to check disbursement status (ensure we have latest)
+        SELECT loan_disbursed INTO v_loan_disbursed FROM public.loans WHERE id = p_loan_id;
+        
+        IF NOT COALESCE(v_loan_disbursed, FALSE) THEN
+            -- 1. Update User Balances atomically
+            UPDATE public.users 
+            SET balance = COALESCE(balance, 0) + p_approved_amount,
+                outstanding = COALESCE(outstanding, 0) + p_approved_amount,
+                loan_balance = COALESCE(loan_balance, 0) + p_approved_amount,
+                borrowed_funds = COALESCE(borrowed_funds, 0) + p_approved_amount
+            WHERE id = v_user_id;
+            
+            -- 2. Create Transaction Record
+            INSERT INTO public.loan_transactions (user_id, loan_id, amount, type)
+            VALUES (v_user_id, p_loan_id, p_approved_amount, 'Disbursement');
+            
+            -- 3. Mark loan as disbursed
+            UPDATE public.loans SET loan_disbursed = TRUE WHERE id = p_loan_id;
+        END IF;
+    END IF;
 
     RETURN jsonb_build_object('success', true);
 EXCEPTION WHEN OTHERS THEN

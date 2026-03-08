@@ -5270,7 +5270,8 @@
                     const isIPO = s.type === 'IPO';
 
                     // Mock additional premium data if missing
-                    const profitRange = (isIPO && s.yield) ? s.yield : (isIPO ? "100% - 300%" : "20% - 60%");
+                    // OTC Profit mapping: Use estimated_profit directly as requested by user
+                    const profitRange = isOTC ? (s.estimated_profit || 0) + '%' : ((isIPO && s.yield) ? s.yield : (isIPO ? "100% - 300%" : "20% - 60%"));
                     const vipLv = (isIPO && s.level) ? s.level : (isIPO ? "Lv ≥ 2" : "Lv ≥ 1");
                     const isLocked = false; // Allow all IPOs to be viewable for now as requested
                     const exchange = s.symbol.includes('NSE') ? 'NSE' : 'BSE';
@@ -5332,7 +5333,11 @@
                                 </div>
                             </div>
                             <button class="premium-subscribe-btn subscribe-btn ${isLocked ? 'locked' : ''}" 
-                                data-id="${s.id || s.symbol}">
+                                data-id="${s.id || s.symbol}"
+                                data-type="${s.type?.toUpperCase()}"
+                                data-name="${s.name}"
+                                data-price="${s.subscription_price || s.price || 0}"
+                                data-yield="${s.estimated_profit || s.yield || s.ipo_yield || 0}">
                                 ${isLocked ? 'Locked' : 'Subscribe'}
                             </button>
                         </div>
@@ -5359,7 +5364,11 @@
                         </div>
                         
                         <button class="h-btn view subscribe-btn" style="width: 100%; border-radius: 12px; height: 44px; background: #1e56a0; font-weight: 700;"
-                            data-id="${s.id || s.symbol}">
+                            data-id="${s.id || s.symbol}"
+                            data-type="${s.type?.toUpperCase()}"
+                            data-name="${s.name}"
+                            data-price="${s.subscription_price || s.price || 0}"
+                            data-yield="${s.estimated_profit || s.yield || s.ipo_yield || 0}">
                             Trade Now
                         </button>
                     </div>
@@ -5523,58 +5532,10 @@
             const exchangeText = document.getElementById('detExchange').innerText.split('•')[0].trim();
 
             if (type === 'ipo') {
-                const product = window.MarketEngine ? window.MarketEngine.getProduct(currentProductId) : null;
-                if (!product) {
-                    alert("Product data not found.");
-                    return;
-                }
-
-                // 1. Force Refresh User Data
-                const freshUser = await window.DB.refreshCurrentUser();
-                if (!freshUser) {
-                    alert("Session expired. Please login again.");
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                const price = product.price || 0;
-                const minInvest = product.min_invest || 15000;
-                let qty = price > 0 ? Math.floor(minInvest / price) : 1;
-                if (qty <= 0) qty = 1;
-
-                const tradeData = {
-                    user_id: freshUser.id,
-                    product_id: currentProductId,
-                    symbol: symbol,
-                    name: stockName,
-                    type: 'IPO',
-                    quantity: qty,
-                    requested_quantity: qty,
-                    price: price,
-                    total_amount: minInvest,
-                    status: 'AWAITING_APPROVAL',
-                    order_status: 'PENDING'
-                };
-
-                const originalText = btn.innerText;
-                btn.innerText = "PROCESSING...";
-                btn.disabled = true;
-
-                try {
-                    const result = await window.DB.submitSubscriptionAtomic(tradeData);
-                    if (result.success) {
-                        showModal('success', 'Subscription Received', `Your allocation request for ${stockName} has been received and is awaiting approval.`);
-                        if (typeof syncUserData === 'function') syncUserData();
-                        if (typeof fetchUserTransactions === 'function') fetchUserTransactions();
-                    } else {
-                        alert("Submission failed: " + (result.error?.message || result.error));
-                    }
-                } catch (e) {
-                    console.error("IPO Error:", e);
-                    alert("A technical error occurred.");
-                } finally {
-                    btn.innerText = originalText;
-                    btn.disabled = false;
+                if (typeof window.openIpoConfirmation === 'function') {
+                    window.openIpoConfirmation(currentProductId);
+                } else {
+                    alert("Subscription system loading...");
                 }
                 return;
             }
@@ -5799,6 +5760,117 @@
             } catch (e) {
                 console.error(e);
                 alert("Error: " + e.message);
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        };
+
+        let currentIpoData = null;
+
+        window.openIpoConfirmation = async function (productId) {
+            console.log("Opening IPO Confirmation for:", productId);
+            const me = window.MarketEngine;
+            if (!me) return;
+
+            const product = me.getProduct(productId);
+            if (!product) {
+                alert("Product data not found.");
+                return;
+            }
+
+            // Sync User Data
+            const freshUser = await window.DB.refreshCurrentUser();
+            if (!freshUser) {
+                alert("Session expired. Please login again.");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const yieldVal = parseFloat(product.yield || product.ipo_yield) || 0;
+            const minInvest = parseFloat(product.min_invest) || 15000;
+
+            const baseAmount = minInvest;
+            const tax = baseAmount * 0.0012;
+            const txn = baseAmount * 0.0003;
+            const total = baseAmount + tax + txn;
+            const estProfit = baseAmount * (yieldVal / 100);
+
+            currentIpoData = {
+                product_id: product.id || product.symbol,
+                symbol: product.symbol || product.id,
+                name: product.name,
+                baseAmount: baseAmount,
+                tax: tax,
+                txn: txn,
+                total: total,
+                estProfit: estProfit,
+                yield: yieldVal + '%',
+                price: product.price
+            };
+
+            const ipoNameEl = document.getElementById('ipoName');
+            const ipoBaseEl = document.getElementById('ipoBaseAmount');
+            const ipoTaxEl = document.getElementById('ipoTax');
+            const ipoTxnEl = document.getElementById('ipoTxn');
+            const ipoProfitEl = document.getElementById('ipoEstProfit');
+
+            if (ipoNameEl) ipoNameEl.innerText = product.name;
+            if (ipoBaseEl) ipoBaseEl.innerText = '₹' + baseAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+            if (ipoTaxEl) ipoTaxEl.innerText = '₹' + tax.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+            if (ipoTxnEl) ipoTxnEl.innerText = '₹' + txn.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+            if (ipoProfitEl) ipoProfitEl.innerText = `+${yieldVal}%`;
+
+            const modal = document.getElementById('ipoConfirmModal');
+            if (modal) modal.style.display = 'flex';
+            if (window.lucide) window.lucide.createIcons();
+        };
+
+        window.closeIpoConfirm = function () {
+            const modal = document.getElementById('ipoConfirmModal');
+            if (modal) modal.style.display = 'none';
+            currentIpoData = null;
+        };
+
+        window.confirmIpoSubscription = async function () {
+            if (!currentIpoData) return;
+            const btn = document.getElementById('ipoSubmitBtn');
+            const originalText = btn.innerText;
+            btn.innerText = "PROCESSING...";
+            btn.disabled = true;
+
+            try {
+                const freshUser = await window.DB.refreshCurrentUser();
+                const qty = currentIpoData.price > 0 ? Math.floor(currentIpoData.baseAmount / currentIpoData.price) : 1;
+
+                const tradeData = {
+                    user_id: freshUser.id,
+                    product_id: currentIpoData.product_id,
+                    symbol: currentIpoData.symbol,
+                    name: currentIpoData.name,
+                    type: 'IPO',
+                    quantity: qty,
+                    requested_quantity: qty,
+                    price: currentIpoData.price,
+                    total_amount: currentIpoData.total,
+                    status: 'AWAITING_APPROVAL',
+                    order_status: 'PENDING',
+                    admin_note: `Yield: ${currentIpoData.yield}`
+                };
+
+                const result = await window.DB.submitSubscriptionAtomic(tradeData);
+                if (result.success) {
+                    showModal('success', 'Subscription Received', `Your application for ${currentIpoData.name} has been received.`);
+                    closeIpoConfirm();
+                    if (typeof syncUserData === 'function') syncUserData();
+                    if (typeof fetchUserTransactions === 'function') fetchUserTransactions();
+                } else {
+                    const errMsg = result.error?.message || result.error || "Unknown error";
+                    alert("Submission failed: " + errMsg);
+                }
+            } catch (e) {
+                console.error("IPO Subscription Error:", e);
+                alert("An error occurred during subscription.");
             } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
@@ -6113,7 +6185,7 @@
                             <div class="premium-details-grid" style="display: flex; flex-direction: column; gap: 14px; align-items: stretch; justify-content: flex-start;">
                                 <div class="premium-detail-item">
                                     <span class="label" style="color: #888 !important;">${infoLabel}</span>
-                                    <span class="value" style="color: #ffffff !important;">${infoValue}</span>
+                                    <span class="value" style="color: #ffffff !important;">0</span>
                                 </div>
                                 <div class="premium-detail-item">
                                     <span class="label" style="color: #888 !important;">Price</span>
@@ -6206,16 +6278,20 @@
 
             try {
                 // Fetch all data in parallel
-                const [depositsRes, withdrawalsRes] = await Promise.all([
+                const [depositsRes, withdrawalsRes, loansRes, generalRes] = await Promise.all([
                     client.from('deposits').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
-                    client.from('withdrawals').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
+                    client.from('withdrawals').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+                    client.from('loan_transactions').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+                    client.from('fund_records').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
                 ]);
 
                 const deposits = (depositsRes && depositsRes.data) || [];
                 const withdrawals = (withdrawalsRes && withdrawalsRes.data) || [];
+                const loans = (loansRes && loansRes.data) || [];
+                const general = (generalRes && generalRes.data) || [];
 
                 // Debug log
-                console.log(`[FundRecords] Found ${deposits.length} deposits, ${withdrawals.length} withdrawals`);
+                console.log(`[FundRecords] Found ${deposits.length} deposits, ${withdrawals.length} withdrawals, ${loans.length} loans, ${general.length} general`);
 
                 let allRecords = [];
 
@@ -6242,6 +6318,32 @@
                         amount: parseFloat(w.amount) || 0,
                         isNegative: true, // Outflow
                         rawStatus: w.status
+                    });
+                });
+
+                // Normalize Loan Transactions
+                loans.forEach(l => {
+                    allRecords.push({
+                        rawDate: new Date(l.created_at),
+                        type: l.type === 'Disbursement' ? 'Loan Fund' : 'Loan Repayment',
+                        ex: 'System',
+                        id: l.id ? String(l.id).substring(0, 8).toUpperCase() : 'N/A',
+                        amount: parseFloat(l.amount) || 0,
+                        isNegative: l.type === 'Repayment', // Repayment is outflow from balance
+                        rawStatus: 'Success'
+                    });
+                });
+
+                // Normalize General Fund Records
+                general.forEach(g => {
+                    allRecords.push({
+                        rawDate: new Date(g.created_at),
+                        type: g.type,
+                        ex: 'Admin',
+                        id: g.id ? String(g.id).substring(0, 8).toUpperCase() : 'N/A',
+                        amount: parseFloat(g.amount) || 0,
+                        isNegative: g.type === 'Loan Repayment', // Repayment from user perspective
+                        rawStatus: g.status
                     });
                 });
 
@@ -6820,8 +6922,15 @@
             }
 
             const me = window.MarketEngine || {};
-            const livePriceData = me.getProduct ? me.getProduct(trade.symbol) : null;
-            const currentPrice = livePriceData ? livePriceData.price : trade.price;
+            const livePriceData = me.getProduct ? me.getProduct(trade.symbol) || me.getProduct(trade.products?.market_symbol) : null;
+            let currentPrice = livePriceData ? livePriceData.price : trade.price;
+
+            const isOTCItem = trade.type?.toLowerCase() === 'otc';
+            if (isOTCItem && trade.products?.market_symbol && me.fetchMarketPrice) {
+                const live = me.livePrices[trade.products.market_symbol];
+                if (live) currentPrice = live;
+                else me.fetchMarketPrice(trade.products.market_symbol);
+            }
 
             document.getElementById('hdStockTitle').innerText = trade.name;
 
@@ -7799,6 +7908,61 @@
                     style="background: #d4af37; width: 100%; border-radius: 12px; height: 56px; font-weight: 800; border:none; color:black; cursor:pointer; font-size: 1rem; transition: all 0.2s;"
                     onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'"
                     id="cpSubmitBtn" onclick="confirmPurchaseSubscription()">SEND SUBSCRIPTION REQUEST</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- IPO Subscription Confirmation Modal -->
+    <div id="ipoConfirmModal" class="center-popup-modal" onclick="if(event.target == this) closeIpoConfirm()">
+        <div class="center-popup-content"
+            style="max-width: 480px; padding: 0; overflow: hidden; border: none; border-radius: 20px; background: #111;">
+            <div style="background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%); padding: 1.5rem; color: black;">
+                <h2 style="font-weight: 800; margin: 0; font-size: 1.25rem; color: black;">IPO Subscription Confirmation
+                </h2>
+                <div id="ipoAssetSub" style="font-size: 0.85rem; opacity: 0.8; margin-top: 4px; color: black;">Review
+                    your subscription request</div>
+            </div>
+            <div class="popup-body" style="padding: 1.5rem;">
+                <div
+                    style="background: #1a1a1a; border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #333;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                        <span style="color: #94a3b8; font-size: 0.9rem;">Product</span>
+                        <span id="ipoName" style="font-weight: 700; color: #f8fafc;">-</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                        <span style="color: #94a3b8; font-size: 0.9rem;">Base Amount</span>
+                        <span id="ipoBaseAmount" style="font-weight: 700; color: #f8fafc;">₹0.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                        <span style="color: #94a3b8; font-size: 0.9rem;">Tax (0.12%)</span>
+                        <span id="ipoTax" style="font-weight: 700; color: #ef4444;">+₹0.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <span style="color: #94a3b8; font-size: 0.9rem;">Transaction Charge (0.03%)</span>
+                        <span id="ipoTxn" style="font-weight: 700; color: #ef4444;">+₹0.00</span>
+                    </div>
+                    <div
+                        style="display: flex; justify-content: space-between; padding-top: 1rem; border-top: 1px solid #333;">
+                        <span style="color: #10b981; font-weight: 800;">EST. PROFIT</span>
+                        <span id="ipoEstProfit"
+                            style="font-weight: 900; color: #10b981; font-size: 1.25rem;">+₹0.00</span>
+                    </div>
+                </div>
+
+                <div
+                    style="margin-bottom: 1.5rem; text-align: center; color: #94a3b8; font-size: 0.85rem; line-height: 1.5; padding: 0 1rem;">
+                    Your subscription request will be sent to our desk for review. Once verified, units will be credited
+                    to your portfolio.
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button
+                        style="flex: 1; background: #262626; color: #94a3b8; border: 1px solid #333; border-radius: 12px; height: 50px; font-weight: 700; cursor: pointer;"
+                        onclick="closeIpoConfirm()">Cancel</button>
+                    <button class="logout-btn"
+                        style="flex: 2; background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%); border-radius: 12px; height: 50px; font-weight: 800; border:none; color:black; cursor:pointer;"
+                        id="ipoSubmitBtn" onclick="confirmIpoSubscription()">CONFIRM SUBSCRIPTION</button>
+                </div>
             </div>
         </div>
     </div>
