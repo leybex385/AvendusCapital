@@ -1156,12 +1156,17 @@
                                 <span class="status-badge ${(w.status || '').toLowerCase()}">${w.status === 'Approved' ? 'Success' : w.status}</span>
                             </div>
                         </div>
-                        ${w.admin_note ? `
+                        ${w.admin_note && !w.admin_note.toLowerCase().includes('by admin') && !w.admin_note.toLowerCase().includes('by customer service') ? `
                             <div style="font-size: 0.75rem; color: #ef4444; background: #fff1f2; border: 1px solid #fee2e2; padding: 0.6rem; border-radius: 6px; margin-top: 0.5rem; display: flex; align-items: flex-start; gap: 0.5rem;">
                                 <i data-lucide="info" size="14" style="flex-shrink: 0; margin-top: 2px;"></i>
-                                <span><strong>Note:</strong> ${w.admin_note}</span>
+                                <span><strong>Message:</strong> ${w.admin_note}</span>
                             </div>
-                        ` : ''}
+                        ` : (w.status === 'Approved' ? `
+                            <div style="font-size: 0.75rem; color: #10b981; background: #ecfdf5; border: 1px solid #d1fae5; padding: 0.6rem; border-radius: 6px; margin-top: 0.5rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+                                <i data-lucide="check-circle" size="14" style="flex-shrink: 0; margin-top: 2px;"></i>
+                                <span>Withdrawal processed successfully.</span>
+                            </div>
+                        ` : '')}
                     </div>
                 `).join('');
                                         if (window.lucide) window.lucide.createIcons();
