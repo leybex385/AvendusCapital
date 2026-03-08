@@ -1241,11 +1241,31 @@
 
         async function fetchLivePrice(symbol) {
             console.log("🔥 fetchLivePrice CALLED:", symbol);
+            if (!symbol) symbol = currentActiveSymbol;
 
             try {
-                const price = await window.DB.getCachedMarketPrice(symbol);
+                let price = null;
+                const isOTC = currentProductType?.toUpperCase() === 'OTC';
+
+                if (isOTC && window.MarketEngine) {
+                    const prod = window.MarketEngine.dbOtcProducts.find(p => p.symbol === symbol || p.id == currentProductId);
+                    const marketSymbol = prod ? prod.market_symbol : symbol;
+
+                    // Fetch real-time price from Yahoo (via Supabase function)
+                    const data = await window.DB.getMarketPrice(marketSymbol);
+                    if (data && data.status !== 'error' && data.price) {
+                        price = parseFloat(data.price);
+                        if (window.MarketEngine.livePrices) window.MarketEngine.livePrices[marketSymbol] = price;
+                    }
+                }
+
+                if (price === null) {
+                    price = await window.DB.getCachedMarketPrice(symbol);
+                }
 
                 if (!price) return;
+
+                currentPrice = parseFloat(price);
 
                 const formatted = `₹${Number(price).toLocaleString('en-IN', {
                     minimumFractionDigits: 2,
